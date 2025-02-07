@@ -31,12 +31,6 @@ Many individuals struggle with keeping track of their groceries, often resulting
 - **Meal Planning**: Users can plan weekly menus and generate grocery lists.
 - **Gamified Recipe Selection**: Interactive and fun ways to choose meals, like a recipe roulette.
 
-### Nice-to-Have Features (Post MVP)
-
-- **Receipt Parsing**: Users can upload a receipt image, and the app will extract purchased food items using OCR.
-- **Household Sharing**: Users can invite others to share a fridge, vote on meals, and track contributions.
-- **AI-Powered Recipe Suggestions**: The app can suggest meals based on moods or preferences.
-
 ## Implementation
 
 ### Tech Stack
@@ -46,7 +40,7 @@ Many individuals struggle with keeping track of their groceries, often resulting
 - **Database:** MySQL
 - **APIs:**
   - **Spoonacular API** (for recipe suggestions based on available ingredients)
-  - **Google Cloud Vision API** (for receipt scanning to automate grocery entry - future scope)
+  - **Google Cloud Vision API** (for receipt scanning to automate grocery entry)
 
 ### APIs
 
@@ -70,6 +64,91 @@ Many individuals struggle with keeping track of their groceries, often resulting
 - **Fridge_Items** (id, household_id, name, quantity, expiry_date, category)
 - **Recipes** (id, name, ingredients, steps, category)
 
+#### Tables (continued)
+
+**Users**
+
+- `id` (Primary Key)
+- `name` (User's name)
+- `email` (User's email)
+- `household_id` (Foreign Key referencing `Households`)
+
+**Households**
+
+- `id` (Primary Key)
+- `name` (Household name or identifier)
+
+**Fridge_Items**
+
+- `id` (Primary Key)
+- `household_id` (Foreign Key referencing `Households`)
+- `name` (Item name, e.g., "Milk")
+- `quantity` (Amount of the item)
+- `expiry_date` (Expiration date of the item)
+- `category` (E.g., dairy, meat, vegetables)
+
+**Recipes**
+
+- `id` (Primary Key)
+- `name` (Recipe name, e.g., "Pasta Carbonara")
+- `ingredients` (List of required ingredients)
+- `steps` (Cooking instructions)
+- `category` (E.g., breakfast, lunch, dinner)
+
+#### Relationships Between Tables
+
+**Users → Households**:
+
+- Each **User** belongs to **one Household**.
+- A **Household** can have multiple **Users**.
+
+**Households → Fridge_Items**:
+
+- Each **Household** has **many Fridge_Items**.
+- Each **Fridge_Item** belongs to **one Household**.
+
+**Fridge_Items → Recipes**:
+
+- Recipes **use Fridge Items** as ingredients.
+- The connection between Fridge Items and Recipes can be managed **either dynamically (via API queries) or a junction table (Post-MVP consideration)**.
+
+#### Visual
+
+```mermaid
+erDiagram
+    USERS ||--o{ HOUSEHOLDS : belongs_to
+    USERS {
+        int id
+        string name
+        string email
+        int household_id
+    }
+
+    HOUSEHOLDS ||--o{ FRIDGE_ITEMS : contains
+    HOUSEHOLDS {
+        int id
+        string name
+    }
+
+    FRIDGE_ITEMS ||--|{ RECIPES : used_in
+    FRIDGE_ITEMS {
+        int id
+        int household_id
+        string name
+        int quantity
+        date expiry_date
+        string category
+    }
+
+    RECIPES {
+        int id
+        string name
+        string ingredients
+        string steps
+        string category
+    }
+```
+
 ### Endpoints
 
 - **GET /fridge** - Retrieve a user’s fridge items.
@@ -88,10 +167,20 @@ Many individuals struggle with keeping track of their groceries, often resulting
 - **Week 2:**
   - Gamification features for recipe selection.
   - UI refinement, bug fixes, and final presentation.
-- **Post MVP:** Integrate Google Cloud Vision API for receipt parsing.
 
-## Future Implementations
+## Future Implementations / Post-MVP
 
-- Enhance AI-based recipe generation.
+- Integrate Google Cloud Vision API for receipt parsing.
+- Enhance with AI-based recipe generation.
 - Expand receipt scanning feature with OCR.
 - Enable household-sharing functionalities.
+
+### Nice-to-Have Features (Post MVP)
+
+- **Receipt Parsing**: Users can upload a receipt image, and the app will extract purchased food items using OCR.
+- **Household Sharing**: Users can invite others to share a fridge, vote on meals, and track contributions.
+- **AI-Powered Recipe Suggestions**: The app can suggest meals based on moods or preferences.
+
+```
+
+```
