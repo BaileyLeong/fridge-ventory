@@ -209,8 +209,8 @@ Keeping track of groceries can be challenging, often leading to food waste and l
 ### Wireframes
 
 <p align="center">
-  <img src="https://monosnap.com/file/c6421P5WbHTqvvx1gurqPwlaps8KZj" alt="Home and Inventory page" width="50%">
-  <img src="https://monosnap.com/file/vUJXD8YvTVTKFjZuu6IeScZNSIHG42" alt="Recipe, game, and ingredients page" width="50%">
+  <img src="https://monosnap.com/image/c6421P5WbHTqvvx1gurqPwlaps8KZj" alt="Home and Inventory page" width="500">
+  <img src="https://monosnap.com/image/vUJXD8YvTVTKFjZuu6IeScZNSIHG42" alt="Recipe, game, and ingredients page" width="500">
 </p>
 
 ### Nice-to-Haves
