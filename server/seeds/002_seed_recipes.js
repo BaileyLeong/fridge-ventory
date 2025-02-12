@@ -10,6 +10,8 @@ export async function seed(knex) {
       ingredients: "Flour, Milk, Eggs, Sugar",
       source_url: "https://example.com/pancakes-recipe",
       steps: "Mix ingredients, cook on pan.",
+      ready_in_minutes: 15,
+      servings: 2,
     },
     {
       id: 2,
@@ -19,6 +21,8 @@ export async function seed(knex) {
       ingredients: "Eggs, Cheese, Onion, Salt",
       source_url: "https://example.com/omelette-recipe",
       steps: "Whisk eggs, cook with toppings.",
+      ready_in_minutes: 10,
+      servings: 1,
     },
   ]);
 
