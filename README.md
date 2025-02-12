@@ -10,8 +10,8 @@ Keeping track of groceries can be challenging, often leading to food waste and l
 
 - Monitors food expiry dates.
 - Suggests recipes based on available ingredients.
-- Helps plan weekly meals and generate grocery lists.
-- Makes the experience fun through interactive, gamified features.
+- Helps plan meals and generate grocery lists.
+- Introduces interactive elements for engaging food management.
 
 ### User Profile
 
@@ -34,13 +34,18 @@ Keeping track of groceries can be challenging, often leading to food waste and l
   As a user, I want the app to highlight items close to expiring so that I can prioritize using them.
 
 - **Recipe Suggestions:**  
-  As a user, I want to receive recipe ideas based on the ingredients I have, assuming I also have basic pantry staples.
+  As a user, I want to plan meals by selecting recipes and seeing how they fit into my schedule.
 
-- **Meal Planning:**  
-  As a user, I want to plan my weekly menu and automatically generate a grocery list based on my selections.
+  As a user, I want to generate a grocery list based on my planned meals so that I can easily shop for missing ingredients.
 
-- **Gamified Recipe Selection:**  
-  As a user, I want an interactive way to explore recipes, such as a recipe roulette, to make meal selection fun.
+- **Meal Planning (Hybrid Approach):**  
+  Users can plan meals manually or let the app auto-update daily to always reflect the next 7 days.
+
+- **Random Recipe Selection:**  
+  An interactive feature that lets users get a random recipe suggestion.
+
+- **Favorites Management:**  
+  As a user, I want to discover recipes using a Random Recipe Selector so that meal planning remains fun and engaging.
 
 ---
 
@@ -86,125 +91,101 @@ Keeping track of groceries can be challenging, often leading to food waste and l
 
 ### Page Layouts
 
-#### **Landing/Welcome Page**
+#### **Landing Page**
 
-- **Main Components:**
-  - If the user is **already logged in**, redirects them straight to the **dashboard**.
-  - Uses **simple animations** for engagement, such as a fridge opening effect.
+- Redirects logged-in users to the dashboard.
+- Uses simple animations for engagement, such as a fridge opening effect.
 
-#### **Home Page (Dashboard)**
+#### **Dashboard (Home Page)**
 
-- **Main Components:**
-  - Overview of fridge inventory (list of food items).
-  - Expiry notifications (highlighting soon-to-expire items).
-  - Quick add/remove buttons for food items.
-  - Suggested recipes based on available ingredients.
+- Overview of fridge inventory.
+- Expiry notifications.
+- Quick add/remove buttons for food items.
+- Suggested recipes based on available ingredients.
 
 #### **Fridge Management Page**
 
-- **Main Components:**
-  - Interface for **adding, editing, and removing food items**.
-  - Categories for easy organization.
-  - Search/filter bar to find items quickly.
+- Interface for adding, editing, and removing food items.
+- Categories for easy organization.
+- Search/filter bar to find items quickly.
 
 #### **Recipe Suggestions Page**
 
-- **Main Components:**
-  - Recipe list fetched based on **available ingredients**.
-  - A **"Surprise Me" gamified option** for random recipes.
+- Recipe list fetched based on available ingredients.
+- **Random Recipe Selection** feature for engaging meal choices.
 
 #### **Meal Planner Page**
 
-- **Main Components:**
+- Hybrid meal planning:
+  - Users can manually set meals or let the app auto-update daily.
+- Recipe selection for each day.
+- Automatic grocery list generation.
 
-  - Weekly meal plans dynamically update to always reflect the most recent 7 days.
-  - Recipe selection for each day.
-  - Automatic **grocery list generation**.
+#### **Favorites Page**
 
-  #### **Favorites Page**
-
-- **Main Components:**
-
-  - Displays a list of the user's saved recipes.
-  - Allows users to remove recipes from favorites.
-  - Provides quick access to recipe details.
-
-- **User Actions:**
-  - View all saved recipes.
-  - Click on a recipe to see details.
-  - Remove a recipe from favorites.
+- Displays a list of the user's saved recipes.
+- Allows users to remove recipes from favorites.
+- Provides quick access to recipe details.
 
 ### Database Schema
 
-#### **Users Table**
+<img src="https://monosnap.com/image/VE2YtzEQp6a96LXUyEVj7EDo6GgA1A" alt="Database schema" width="500"/>
 
-- `id` (Primary Key)
-- `name` (User's name)
-- `email` (User's email)
-- `created_at` (Timestamp)
+---
 
-#### **Fridge_Items Table**
+**Key tables include:**
 
-- `id` (Primary Key)
-- `user_id` (Foreign key linking to Users)
-- `name` (Name of the food item, e.g., "Milk")
-- `quantity` (Amount of the item)
-- `expiry_date` (Expiration date)
-- `category` (Food category, e.g., dairy, meat, vegetables)
-- `added_at` (Timestamp)
-
-#### **Recipes Table**
-
-- `id` (Primary Key)
-- `name` (Recipe name, e.g., "Pasta Carbonara")
-- `ingredients` (List of required ingredients)
-- `steps` (Cooking instructions)
-- `category` (Meal category, e.g., breakfast, lunch, dinner)
-
-#### **Favorite_Recipes Table**
-
-- `id` (Primary Key)
-- `user_id` (Foreign key linking to Users)
-- `recipe_id` (Foreign key linking to Recipes)
-- `saved_at` (Timestamp)
+- **Users** – Stores user details.
+- **Recipes** – Stores recipe data, fetched dynamically from the Spoonacular API.
+- **Fridge Items** – Tracks the user’s food inventory and expiry dates.
+- **Meal Plans** – Allows users to plan meals for the week.
+- **Grocery Lists** – Auto-generates shopping lists based on meal plans.
+- **Favorite Recipes** – Allows users to save and access preferred recipes.
 
 ### Endpoints
 
-**GET /fridge** - Retrieve the list of food items in the user's fridge.
+#### **Fridge Management**
 
-**POST /fridge** - Add a new item to the fridge inventory.
+- `GET /fridge` - Retrieve fridge items.
+- `POST /fridge` - Add a new item.
+- `PUT /fridge/:id` - Update an item.
+- `DELETE /fridge/:id` - Remove an item.
 
-**PUT /fridge/:id** - Update an existing fridge item.
+#### **Recipes & Favorites**
 
-**DELETE /fridge/:id** - Remove a food item from the fridge.
+- `GET /recipes` - Fetch recipe suggestions.
+- `POST /recipes/favorite` - Save a recipe.
+- `GET /recipes/favorites` - Retrieve saved favorite recipes.
 
-**GET /recipes** - Fetch recipe suggestions based on available ingredients.
+#### **Meal Planning**
 
-**POST /recipes/favorite** - Save a recipe to the user's favorite list.
+- `POST /meal-plan` - Create/update a meal plan.
+- `GET /meal-plan` - Retrieve the current meal plan.
+- `PUT /meal-plan/:id` - Modify a planned meal.
+- `DELETE /meal-plan/:id` - Remove a meal.
 
-**GET /recipes/favorites** - Retrieve the user's saved favorite recipes.
+#### **Grocery List**
 
-**POST /meal-plan** - Create a weekly meal plan and generate a corresponding grocery list.
+- `GET /grocery-list` - Retrieve the auto-generated grocery list.
 
-**GET /meal-plan** - Retrieve the current meal plan.
+---
 
-**PUT /meal-plan/:id** - Update a meal in the weekly plan.
-
-**DELETE /meal-plan/:id** - Remove a meal from the weekly plan.
-
-**GET /grocery-list** - Retrieve the auto-generated grocery list based on meal selections.### Roadmap
+## Roadmap
 
 - **Week 1:**
 
   - Set up the project and design the database schema.
-  - Implement basic CRUD operations for fridge items.
+  - Implement CRUD operations for fridge items.
   - Integrate recipe suggestions using the Spoonacular API.
   - Develop initial meal planning functionality.
 
 - **Week 2:**
-  - Introduce gamification features for interactive recipe selection.
+  - Introduce **Random Recipe Selection** as an MVP feature.
+  - Implement hybrid weekly meal planning UX.
   - Refine the UI and fix bugs.
   - Prepare for the final presentation/demo.
+
+---
 
 ### Wireframes
 
@@ -213,15 +194,17 @@ Keeping track of groceries can be challenging, often leading to food waste and l
   <img src="https://monosnap.com/image/vUJXD8YvTVTKFjZuu6IeScZNSIHG42" alt="Recipe, game, and ingredients page" width="500">
 </p>
 
-### Nice-to-Haves
+---
 
-- **[Future Feature] AI-Powered Recipe Suggestions:**  
-  Suggest meals based on user moods or personal preferences.
+## Future Enhancements
 
-- **[Future Feature] Receipt Parsing:**  
-  Allow users to upload a receipt image and automatically extract grocery items via OCR using the Google Cloud Vision API.
+- **AI-Powered Recipe Suggestions:**  
+  Recommend meals based on user moods or preferences.
 
-- **[Future Feature] User Authentication (JWT):**  
-  Implement **JWT-based authentication** for real user accounts and replace the UUID system with proper login/signup functionality.
+- **Receipt Parsing:**  
+  Automatically extract grocery items from receipt images via OCR (Google Cloud Vision API).
+
+- **User Authentication:**  
+  Implement JWT-based authentication for user accounts.
 
 ---
