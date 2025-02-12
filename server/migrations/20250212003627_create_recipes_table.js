@@ -1,22 +1,18 @@
 export function up(knex) {
-  return knex.schema.createTable("favorite_recipes", (table) => {
+  return knex.schema.createTable("recipes", (table) => {
     table.increments("id").primary();
-    table
-      .integer("user_id")
-      .unsigned()
-      .references("id")
-      .inTable("users")
-      .onDelete("CASCADE");
-    table
-      .integer("recipe_id")
-      .unsigned()
-      .references("id")
-      .inTable("recipes")
-      .onDelete("CASCADE");
-    table.timestamp("saved_at").defaultTo(knex.fn.now());
+    table.string("name").notNullable();
+    table.text("ingredients").notNullable();
+    table.text("steps").notNullable();
+    table.string("category");
+    table.string("image_url");
+    table.integer("ready_in_minutes");
+    table.integer("servings");
+    table.string("source_url");
+    table.timestamp("created_at").defaultTo(knex.fn.now());
   });
 }
 
 export function down(knex) {
-  return knex.schema.dropTable("favorite_recipes");
+  return knex.schema.dropTable("recipes");
 }
