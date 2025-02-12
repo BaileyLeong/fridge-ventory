@@ -1,13 +1,16 @@
-// import express from "express";
-// import * as favoriteRecipesController from "../controllers/favoriteRecipesController.js";
+import express from "express";
+import * as favoriteRecipesController from "../controllers/favoriteRecipesController.js";
+import requireUserId from "../middleware/requireUserId.js";
 
-// const router = express.Router();
+const router = express.Router();
 
-// router
-//   .route("/")
-//   .get(favoriteRecipesController.getFavoriteRecipes)
-//   .post(favoriteRecipesController.addFavoriteRecipe);
+router.use(requireUserId);
 
-// router.route("/:id").delete(favoriteRecipesController.removeFavoriteRecipe);
+router
+  .route("/")
+  .get(favoriteRecipesController.getFavoriteRecipes)
+  .post(favoriteRecipesController.addFavoriteRecipe);
 
-// export default router;
+router.route("/:id").delete(favoriteRecipesController.removeFavoriteRecipe);
+
+export default router;
