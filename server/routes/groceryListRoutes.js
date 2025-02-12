@@ -1,13 +1,21 @@
 import express from "express";
 import * as groceryListController from "../controllers/groceryListController.js";
+import requireUserId from "../middleware/requireUserId.js";
 
 const router = express.Router();
 
-router.route("/").get(groceryListController.getGroceryList);
-router.route("/add").post(groceryListController.addItemToGroceryList);
+router.use(requireUserId);
+
 router
-  .route("/remove/:id")
+  .route("/")
+  .get(groceryListController.getGroceryList)
+  .post(groceryListController.addItemToGroceryList);
+
+router
+  .route("/:id")
+  .patch(groceryListController.updateGroceryListItem)
   .delete(groceryListController.removeItemFromGroceryList);
-router.route("/update/:id").patch(groceryListController.groceryItemComplete);
+
+router.route("/:id/complete").patch(groceryListController.groceryItemComplete);
 
 export default router;

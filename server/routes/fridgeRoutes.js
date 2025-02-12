@@ -1,7 +1,10 @@
 import express from "express";
 import * as fridgeController from "../controllers/fridgeController.js";
+import requireUserId from "../middleware/requireUserId.js";
 
 const router = express.Router();
+
+router.use(requireUserId);
 
 router
   .route("/")
@@ -11,7 +14,7 @@ router
 router
   .route("/:id")
   .get(fridgeController.getFridgeItem)
-  .put(fridgeController.updateFridgeItem)
+  .patch(fridgeController.updateFridgeItem)
   .delete(fridgeController.deleteFridgeItem);
 
 export default router;
