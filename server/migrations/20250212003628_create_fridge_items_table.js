@@ -16,5 +16,5 @@ export function up(knex) {
 }
 
 export function down(knex) {
-  return knex.schema.dropTable("fridge_items");
+  return knex.schema.dropTableIfExists("fridge_items");
 }

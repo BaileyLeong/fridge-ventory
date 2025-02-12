@@ -14,5 +14,5 @@ export function up(knex) {
 }
 
 export function down(knex) {
-  return knex.schema.dropTable("grocery_lists");
+  return knex.schema.dropTableIfExists("grocery_lists");
 }

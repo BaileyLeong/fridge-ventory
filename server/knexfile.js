@@ -1,5 +1,11 @@
 import "dotenv/config";
 
+console.log(
+  "DB Connection:",
+  process.env.DB_LOCAL_HOST,
+  process.env.DB_LOCAL_DBNAME
+);
+
 export default {
   client: "mysql2",
   connection: {

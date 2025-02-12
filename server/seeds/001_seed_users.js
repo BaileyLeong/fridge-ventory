@@ -3,8 +3,8 @@ export function seed(knex) {
     .del()
     .then(() => {
       return knex("users").insert([
-        { name: "Bailey", email: "bailey@example.com" },
-        { name: "Joe", email: "joe@example.com" },
+        { id: 1, name: "Bailey", email: "bailey@example.com" },
+        { id: 2, name: "Joe", email: "joe@example.com" },
       ]);
     });
 }

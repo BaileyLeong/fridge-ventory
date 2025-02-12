@@ -8,5 +8,10 @@ export function up(knex) {
 }
 
 export function down(knex) {
-  return knex.schema.dropTable("users");
+  return knex.schema
+    .dropTableIfExists("favorite_recipes")
+    .dropTableIfExists("fridge_items")
+    .dropTableIfExists("meal_plans")
+    .dropTableIfExists("grocery_lists")
+    .dropTableIfExists("users");
 }

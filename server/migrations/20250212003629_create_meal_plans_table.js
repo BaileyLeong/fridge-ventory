@@ -20,5 +20,5 @@ export function up(knex) {
 }
 
 export function down(knex) {
-  return knex.schema.dropTable("meal_plans");
+  return knex.schema.dropTableIfExists("meal_plans");
 }
