@@ -4,7 +4,7 @@ const knex = initKnex(configuration);
 
 export const getMealPlan = async (req, res) => {
   try {
-    const { user_id } = req.query;
+    const user_id = req.user.id;
 
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });
@@ -60,7 +60,13 @@ export const getMealById = async (req, res) => {
 
 export const addMealToPlan = async (req, res) => {
   try {
-    const { user_id, recipe_id, date, meal_type } = req.body;
+    const { recipe_id, meal_type, date } = req.body;
+
+    const user_id = req.user.id;
+
+    if (!user_id || !recipe_id || !meal_type) {
+      return res.status(400).json({ error: "Required fields are missing" });
+    }
 
     const mealDate =
       date && date.trim() !== ""
@@ -70,21 +76,70 @@ export const addMealToPlan = async (req, res) => {
     const [id] = await knex("meal_plans").insert({
       user_id,
       recipe_id,
-      meal_date: mealDate,
       meal_type,
+      meal_date: mealDate,
     });
 
-    res.status(201).json({ id, user_id, recipe_id, date: mealDate });
+    const recipe = await knex("recipes").where({ id: recipe_id }).first();
+    if (!recipe || !recipe.ingredients) {
+      return res
+        .status(404)
+        .json({ error: "Recipe not found or has no ingredients" });
+    }
+
+    const ingredientsList = recipe.ingredients
+      .split(",")
+      .map((item) => item.trim());
+
+    const fridgeItems = await knex("fridge_items")
+      .where({ user_id })
+      .pluck("name");
+    const normalizedFridgeItems = fridgeItems.map((name) =>
+      name.trim().toLowerCase()
+    );
+
+    const groceryItemsToInsert = [];
+    for (const ingredient of ingredientsList) {
+      const normalizedIngredient = ingredient.toLowerCase();
+
+      if (!normalizedFridgeItems.includes(normalizedIngredient)) {
+        const exists = await knex("grocery_lists")
+          .where({ user_id })
+          .andWhere(knex.raw("LOWER(items) = ?", [normalizedIngredient]))
+          .first();
+        if (!exists) {
+          groceryItemsToInsert.push({
+            user_id,
+            items: ingredient,
+            completed: false,
+          });
+        }
+      }
+    }
+
+    if (groceryItemsToInsert.length > 0) {
+      await knex("grocery_lists").insert(groceryItemsToInsert);
+    }
+
+    return res.status(201).json({
+      id,
+      user_id,
+      recipe_id,
+      meal_type,
+      date: mealDate,
+      groceryItemsAdded: groceryItemsToInsert.length,
+    });
   } catch (error) {
     console.error("Error adding meal to plan:", error);
-    res.status(500).json({ error: "Failed to add meal" });
+    return res.status(500).json({ error: "Failed to add meal" });
   }
 };
 
 export const updateMealInPlan = async (req, res) => {
   try {
     const { id } = req.params;
-    const { user_id, date } = req.body;
+    const { date } = req.body;
+    const user_id = req.user.id;
 
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });
@@ -116,7 +171,7 @@ export const updateMealInPlan = async (req, res) => {
 export const deleteMealFromPlan = async (req, res) => {
   try {
     const { id } = req.params;
-    const { user_id } = req.body;
+    const user_id = req.user.id;
 
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });

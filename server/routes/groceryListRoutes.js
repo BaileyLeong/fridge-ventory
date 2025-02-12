@@ -1,13 +1,13 @@
-// import express from "express";
-// import * as groceryListController from "../controllers/groceryListController.js";
+import express from "express";
+import * as groceryListController from "../controllers/groceryListController.js";
 
-// const router = express.Router();
+const router = express.Router();
 
-// router
-//   .route("/")
-//   .get(groceryListController.getGroceryList)
-//   .post(groceryListController.addItemToGroceryList);
+router.route("/").get(groceryListController.getGroceryList);
+router.route("/add").post(groceryListController.addItemToGroceryList);
+router
+  .route("/remove/:id")
+  .delete(groceryListController.removeItemFromGroceryList);
+router.route("/update/:id").patch(groceryListController.groceryItemComplete);
 
-// router.route("/:id").delete(groceryListController.removeItemFromGroceryList);
-
-// export default router;
+export default router;
