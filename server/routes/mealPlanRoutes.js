@@ -1,13 +1,17 @@
-// import express from "express";
-// import * as mealPlanController from "../controllers/mealPlanController.js";
+import express from "express";
+import * as mealPlanController from "../controllers/mealPlanController.js";
 
-// const router = express.Router();
+const router = express.Router();
 
-// router
-//   .route("/")
-//   .get(mealPlanController.getMealPlan)
-//   .post(mealPlanController.addMealToPlan);
+router
+  .route("/")
+  .get(mealPlanController.getMealPlan)
+  .post(mealPlanController.addMealToPlan);
 
-// router.route("/:id").delete(mealPlanController.deleteMealFromPlan);
+router
+  .route("/:id")
+  .get(mealPlanController.getMealById)
+  .put(mealPlanController.updateMealInPlan)
+  .delete(mealPlanController.deleteMealFromPlan);
 
-// export default router;
+export default router;
