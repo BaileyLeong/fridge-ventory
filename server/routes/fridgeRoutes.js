@@ -1,16 +1,17 @@
 import express from "express";
-import {
-  getFridgeItems,
-  addFridgeItem,
-  updateFridgeItem,
-  deleteFridgeItem,
-} from "../controllers/fridgeController";
+import * as fridgeController from "../controllers/fridgeController.js";
 
 const router = express.Router();
 
-router.get("/", getFridgeItems);
-router.post("/", addFridgeItem);
-router.put("/:id", updateFridgeItem);
-router.delete("/:id", deleteFridgeItem);
+router
+  .route("/")
+  .get(fridgeController.getAllFridgeItems)
+  .post(fridgeController.addFridgeItem);
+
+router
+  .route("/:id")
+  .get(fridgeController.getFridgeItem)
+  .put(fridgeController.updateFridgeItem)
+  .delete(fridgeController.deleteFridgeItem);
 
 export default router;
