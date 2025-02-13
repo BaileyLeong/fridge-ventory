@@ -7,7 +7,7 @@ const userId = "1";
 export const fetchFridgeItems = () =>
   axios.get(`${baseUrl}/api/fridge`, { params: { user_id: userId } });
 export const addFridgeItem = (itemData) =>
-  axios.post(`${baseUrl}/api/fridge`, { ...itemData, user_id: userId });
+  axios.post(`${baseUrl}/api/fridge/${id}`, { ...itemData, user_id: userId });
 export const updateFridgeItem = (id, itemData) =>
   axios.patch(`${baseUrl}/api/fridge/${id}`, { ...itemData, user_id: userId });
 export const deleteFridgeItem = (id) =>
