@@ -5,7 +5,7 @@ import fridgeRoutes from "./routes/fridgeRoutes.js";
 import recipesRoutes from "./routes/recipesRoutes.js";
 import mealPlanRoutes from "./routes/mealPlanRoutes.js";
 import groceryListRoutes from "./routes/groceryListRoutes.js";
-// import favoriteRecipesRoutes from "./routes/favoriteRecipesRoutes.js";
+import favoriteRecipesRoutes from "./routes/favoriteRecipesRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8080;
@@ -22,7 +22,7 @@ app.use("/api/fridge", fridgeRoutes);
 app.use("/api/recipes", recipesRoutes);
 app.use("/api/meal-plan", mealPlanRoutes);
 app.use("/api/grocery-list", groceryListRoutes);
-// app.use("/api/favorites", favoriteRecipesRoutes);
+app.use("/api/favorites", favoriteRecipesRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);

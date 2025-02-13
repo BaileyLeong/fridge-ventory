@@ -73,6 +73,15 @@ export const addMealToPlan = async (req, res) => {
         ? date
         : new Date().toISOString().split("T")[0];
 
+    const recipe = await knex("recipes").where("id", recipe_id).first();
+
+    if (!recipe) {
+      console.error(`Error: Recipe ID ${recipe_id} not found.`);
+      return res
+        .status(400)
+        .json({ error: "Recipe does not exist in the database." });
+    }
+
     const [id] = await knex("meal_plans").insert({
       user_id,
       recipe_id,
@@ -80,11 +89,10 @@ export const addMealToPlan = async (req, res) => {
       meal_date: mealDate,
     });
 
-    const recipe = await knex("recipes").where({ id: recipe_id }).first();
-    if (!recipe || !recipe.ingredients) {
+    if (!recipe.ingredients) {
       return res
         .status(404)
-        .json({ error: "Recipe not found or has no ingredients" });
+        .json({ error: "Recipe found, but it has no ingredients." });
     }
 
     const ingredientsList = recipe.ingredients
@@ -94,6 +102,7 @@ export const addMealToPlan = async (req, res) => {
     const fridgeItems = await knex("fridge_items")
       .where({ user_id })
       .pluck("name");
+
     const normalizedFridgeItems = fridgeItems.map((name) =>
       name.trim().toLowerCase()
     );
@@ -137,12 +146,16 @@ export const addMealToPlan = async (req, res) => {
 
 export const updateMealInPlan = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { date } = req.body;
-    const user_id = req.user.id;
+    const { recipe_id, meal_type, date, user_id: requestUserID } = req.body;
+    const user_id = req.user.id || requestUserID;
 
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });
+    }
+
+    const recipe = await knex("recipes").where("id", recipe_id).first();
+    if (!recipe) {
+      return res.status(400).json({ error: "Recipe ID is missing" });
     }
 
     const mealDate =
@@ -150,16 +163,18 @@ export const updateMealInPlan = async (req, res) => {
         ? date
         : new Date().toISOString().split("T")[0];
 
-    const updated = await knex("meal_plans")
-      .where({ id, user_id })
-      .update({ meal_date: mealDate });
+    const [id] = await knex("meal_plans").insert({
+      user_id,
+      recipe_id,
+      meal_type,
+      meal_date: mealDate,
+    });
 
-    if (!updated)
-      return res.status(404).json({ error: "Meal not found or unauthorized" });
-
-    res.status(200).json({
-      message: "Meal date updated successfully",
+    return res.status(200).json({
       id,
+      user_id,
+      recipe_id,
+      meal_type,
       meal_date: mealDate,
     });
   } catch (error) {
