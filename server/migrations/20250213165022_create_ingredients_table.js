@@ -1,15 +1,10 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.up = function(knex) {
-  
+export const up = function (knex) {
+  return knex.schema.createTable("ingredients", function (table) {
+    table.increments("id").primary();
+    table.string("name").unique().notNullable();
+  });
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.down = function(knex) {
-  
+export const down = function (knex) {
+  return knex.schema.dropTable("ingredients");
 };
