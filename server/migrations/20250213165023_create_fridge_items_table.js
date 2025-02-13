@@ -1,15 +1,26 @@
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.up = function(knex) {
-  
+export const up = function (knex) {
+  return knex.schema.createTable("fridge_items", function (table) {
+    table.increments("id").primary();
+    table.integer("user_id").unsigned().notNullable();
+    table.integer("ingredient_id").unsigned().notNullable();
+    table.decimal("quantity", 10, 2).notNullable().defaultTo(0);
+    table.string("unit", 50).notNullable().defaultTo("unit");
+    table.date("expires_at");
+    table.string("image_url", 255).defaultTo("https://placehold.co/100");
+
+    table
+      .foreign("user_id")
+      .references("id")
+      .inTable("users")
+      .onDelete("CASCADE");
+    table
+      .foreign("ingredient_id")
+      .references("id")
+      .inTable("ingredients")
+      .onDelete("CASCADE");
+  });
 };
 
-/**
- * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
- */
-exports.down = function(knex) {
-  
+export const down = function (knex) {
+  return knex.schema.dropTable("fridge_items");
 };
