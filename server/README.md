@@ -1,14 +1,25 @@
-### Database Setup
+## Database Setup
 
-1. Run migrations:
-   ```sh
-   npx knex migrate:latest
-   ```
-2. Seed the database in the following order to avoid dependency issues:
-   ```sh
-   npx knex seed:run --specific=001_seed_users.js
-   npx knex seed:run --specific=002_seed_recipes.js
-   npx knex seed:run --specific=003_seed_favorite_recipes.js
-   npx knex seed:run --specific=seed_fridge_items.js
-   npx knex seed:run --specific=fetch_recipes_from_spoonacular.js
-   ```
+### 1. Install Dependencies
+
+Make sure you have Knex and MySQL installed in your project:
+
+```sh
+npm install knex mysql2
+```
+
+### 2. Run Migrations
+
+Before inserting data, ensure your database schema is set up correctly:
+
+```sh
+npx knex migrate:latest
+```
+
+### 3. Seed the Database
+
+After running migrations, seed the database with:
+
+```sh
+npx knex seed:run
+```

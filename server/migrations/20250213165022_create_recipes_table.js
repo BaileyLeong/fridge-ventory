@@ -6,6 +6,7 @@ export const up = function (knex) {
     table.string("image_url").defaultTo("https://placehold.co/100");
     table.integer("ready_in_minutes");
     table.integer("servings");
+    table.text("steps").notNullable();
     table.string("source_url");
     table.timestamp("created_at").defaultTo(knex.fn.now());
   });
