@@ -1,5 +1,6 @@
 import initKnex from "knex";
 import configuration from "../knexfile.js";
+import axios from "axios";
 const knex = initKnex(configuration);
 
 export const getAllFridgeItems = async (req, res) => {
@@ -24,17 +25,37 @@ export const getFridgeItem = async (req, res) => {
   }
 };
 
+const API_KEY = process.env.SPOONACULAR_API_KEY;
+
 export const addFridgeItem = async (req, res) => {
   try {
     const user_id = req.user.id;
-    const newItem = { ...req.body, user_id };
-    const [id] = await knex("fridge_items").insert(newItem);
-    res.status(201).json({ id, ...newItem });
-  } catch (error) {
-    res.status(500).json({
-      error: "Failed to add fridge item",
-      details: error.message,
+    const { name, quantity, unit, expires_at } = req.body;
+
+    const response = await axios.get(
+      `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${API_KEY}`
+    );
+
+    let image_url = "https://placehold.co/100";
+    if (response.data.results.length > 0) {
+      image_url = `https://spoonacular.com/cdn/ingredients_100x100/${response.data.results[0].image}`;
+    }
+
+    const [id] = await knex("fridge_items").insert({
+      user_id,
+      name,
+      quantity,
+      unit,
+      expires_at,
+      image_url,
     });
+
+    res
+      .status(201)
+      .json({ id, user_id, name, quantity, unit, expires_at, image_url });
+  } catch (error) {
+    console.error("Error adding fridge item:", error);
+    res.status(500).json({ error: "Failed to add fridge item" });
   }
 };
 
