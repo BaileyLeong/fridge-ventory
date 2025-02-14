@@ -99,15 +99,13 @@ Keeping track of groceries can be challenging, often leading to food waste and l
 #### **Dashboard (Home Page)**
 
 - Overview of fridge inventory.
-- Expiry notifications.
+- Expiry management.
 - Quick add/remove buttons for food items.
 - Suggested recipes based on available ingredients.
 
 #### **Fridge Management Page**
 
 - Interface for adding, editing, and removing food items.
-- Categories for easy organization.
-- Search/filter bar to find items quickly.
 
 #### **Recipe Suggestions Page**
 
@@ -117,7 +115,7 @@ Keeping track of groceries can be challenging, often leading to food waste and l
 #### **Meal Planner Page**
 
 - Hybrid meal planning:
-  - Users can manually set meals or let the app auto-update daily.
+  - Users can manually set meals or let the app auto-update.
 - Recipe selection for each day.
 - Automatic grocery list generation.
 
@@ -129,7 +127,7 @@ Keeping track of groceries can be challenging, often leading to food waste and l
 
 ### Database Schema
 
-<img src="https://monosnap.com/image/VE2YtzEQp6a96LXUyEVj7EDo6GgA1A" alt="Database schema" width="500"/>
+<img src="https://monosnap.com/image/pWLfW87TpROLcqWyw88QLW1vaT7Hbu" alt="Database schema" width="500"/>
 
 ---
 
@@ -142,31 +140,95 @@ Keeping track of groceries can be challenging, often leading to food waste and l
 - **Grocery Lists** – Auto-generates shopping lists based on meal plans.
 - **Favorite Recipes** – Allows users to save and access preferred recipes.
 
-### Endpoints
+## Middleware
 
-#### **Fridge Management**
+**`requireUserId` Middleware**
 
-- `GET /fridge` - Retrieve fridge items.
-- `POST /fridge` - Add a new item.
-- `PUT /fridge/:id` - Update an item.
-- `DELETE /fridge/:id` - Remove an item.
+- **Purpose:** Ensures that every request for user‑specific resources includes a valid user ID.
+- **Usage:** Applied to routes like `/api/fridge`, `/api/meal-plan`, `/api/grocery-list`, and `/api/favorites`.
 
-#### **Recipes & Favorites**
+---
 
-- `GET /recipes` - Fetch recipe suggestions.
-- `POST /recipes/favorite` - Save a recipe.
-- `GET /recipes/favorites` - Retrieve saved favorite recipes.
+## Endpoints
 
-#### **Meal Planning**
+### Fridge Management
 
-- `POST /meal-plan` - Create/update a meal plan.
-- `GET /meal-plan` - Retrieve the current meal plan.
-- `PUT /meal-plan/:id` - Modify a planned meal.
-- `DELETE /meal-plan/:id` - Remove a meal.
+All endpoints under `/api/fridge` require a valid user ID.
 
-#### **Grocery List**
+- **GET `/api/fridge`**  
+  Retrieves the current user’s fridge items.
+  
+- **POST `/api/fridge`**  
+  Adds a new fridge item to the user’s inventory.
+  
+- **PATCH `/api/fridge/:id`**  
+  Updates an existing fridge item (e.g., changes in quantity, expiry date, or other details).
+  
+- **DELETE `/api/fridge/:id`**  
+  Removes a fridge item.
 
-- `GET /grocery-list` - Retrieve the auto-generated grocery list.
+### Recipes & Favorites
+
+#### Recipes (Public)
+
+- **GET `/api/recipes`**  
+  Fetches recipe suggestions based on available ingredients.  
+
+- **GET `/api/recipes/:id`**  
+  Retrieves details for a specific recipe.
+
+- **GET `/api/recipes/suggest`**  
+  Provides recipe suggestions based on the user’s fridge items.  
+
+#### Favorite Recipes (User‑Specific)
+
+All favorite recipe endpoints require a valid user ID.
+
+- **GET `/api/favorites`**  
+  Retrieves the user’s favorite recipes.
+  
+- **POST `/api/favorites`**  
+  Adds a recipe to the user’s favorites.
+  
+- **DELETE `/api/favorites/:id`**  
+  Removes a recipe from favorites.
+
+### Meal Planning
+
+All endpoints under `/api/meal-plan` require a valid user ID.
+
+- **GET `/api/meal-plan`**  
+  Retrieves the current meal plan for the user.
+  
+- **POST `/api/meal-plan`**  
+  Creates a new meal plan entry and automatically generates missing grocery items based on the recipe's ingredients.
+  
+- **PUT `/api/meal-plan/:id`**  
+  Updates a specific meal plan entry.
+  
+- **DELETE `/api/meal-plan/:id`**  
+  Deletes a meal plan entry.
+
+### Grocery List
+
+All endpoints under `/api/grocery-list` require a valid user ID.
+
+- **GET `/api/grocery-list`**  
+  Retrieves the user’s grocery list. Each item is flagged as either:
+  - `manual: true` (added manually), or  
+  - `manual: false` (generated automatically via meal planning).
+
+- **POST `/api/grocery-list`**  
+  Adds a new grocery list item (manual addition). 
+  
+- **PATCH `/api/grocery-list/:id`**  
+  Updates an existing grocery list item.
+  
+- **DELETE `/api/grocery-list/:id`**  
+  Removes a grocery list item.
+  
+- **PATCH `/api/grocery-list/:id/complete`**  
+  Toggles the completion status of a grocery list item.
 
 ---
 
@@ -180,7 +242,7 @@ Keeping track of groceries can be challenging, often leading to food waste and l
   - Develop initial meal planning functionality.
 
 - **Week 2:**
-  - Introduce **Random Recipe Selection** as an MVP feature.
+  - Introduce **Random Recipe Selection**/
   - Implement hybrid weekly meal planning UX.
   - Refine the UI and fix bugs.
   - Prepare for the final presentation/demo.
