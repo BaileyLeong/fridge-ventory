@@ -1,58 +1,77 @@
 import initKnex from "knex";
 import configuration from "../knexfile.js";
 import axios from "axios";
+
 const knex = initKnex(configuration);
+const API_KEY = process.env.SPOONACULAR_API_KEY;
 
 export const getAllFridgeItems = async (req, res) => {
   try {
     const user_id = req.user.id;
-    const items = await knex("fridge_items").where({ user_id }).select("*");
+    const items = await knex("fridge_items")
+      .where({ user_id })
+      .select(
+        "id",
+        "ingredient_id",
+        "quantity",
+        "unit",
+        "expires_at",
+        "image_url"
+      );
+
     res.status(200).json(items);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch fridge items" });
   }
 };
 
-export const getFridgeItem = async (req, res) => {
-  try {
-    const user_id = req.user.id;
-    const { id } = req.params;
-    const item = await knex("fridge_items").where({ id, user_id }).first();
-    if (!item) return res.status(404).json({ error: "Item not found" });
-    res.status(200).json(item);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch fridge item" });
-  }
-};
-
-const API_KEY = process.env.SPOONACULAR_API_KEY;
-
 export const addFridgeItem = async (req, res) => {
   try {
     const user_id = req.user.id;
     const { name, quantity, unit, expires_at } = req.body;
 
-    const response = await axios.get(
-      `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${API_KEY}`
-    );
+    let ingredient = await knex("ingredients").where("name", name).first();
 
-    let image_url = "https://placehold.co/100";
-    if (response.data.results.length > 0) {
-      image_url = `https://spoonacular.com/cdn/ingredients_100x100/${response.data.results[0].image}`;
+    if (!ingredient) {
+      const response = await axios.get(
+        `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${API_KEY}`
+      );
+
+      if (response.data.results.length > 0) {
+        const foundIngredient = response.data.results[0];
+
+        const [newIngredientId] = await knex("ingredients")
+          .insert({
+            id: foundIngredient.id,
+            name: foundIngredient.name,
+          })
+          .onConflict("id")
+          .ignore();
+
+        ingredient = { id: newIngredientId || foundIngredient.id };
+      } else {
+        return res.status(400).json({ error: "Ingredient not found" });
+      }
     }
 
     const [id] = await knex("fridge_items").insert({
       user_id,
-      name,
+      ingredient_id: ingredient.id,
       quantity,
       unit,
       expires_at,
-      image_url,
     });
 
     res
       .status(201)
-      .json({ id, user_id, name, quantity, unit, expires_at, image_url });
+      .json({
+        id,
+        user_id,
+        ingredient_id: ingredient.id,
+        quantity,
+        unit,
+        expires_at,
+      });
   } catch (error) {
     console.error("Error adding fridge item:", error);
     res.status(500).json({ error: "Failed to add fridge item" });
@@ -63,9 +82,14 @@ export const updateFridgeItem = async (req, res) => {
   try {
     const user_id = req.user.id;
     const { id } = req.params;
+
+    const { quantity, unit, expires_at } = req.body;
+    const updateData = { quantity, unit, expires_at };
+
     const updated = await knex("fridge_items")
       .where({ id, user_id })
-      .update(req.body);
+      .update(updateData);
+
     if (!updated) return res.status(404).json({ error: "Item not found" });
     res.status(200).json({ message: "Item updated successfully" });
   } catch (error) {
@@ -78,6 +102,7 @@ export const deleteFridgeItem = async (req, res) => {
     const user_id = req.user.id;
     const { id } = req.params;
     const deleted = await knex("fridge_items").where({ id, user_id }).del();
+
     if (!deleted) return res.status(404).json({ error: "Item not found" });
     res.status(200).json({ message: "Item deleted successfully" });
   } catch (error) {
