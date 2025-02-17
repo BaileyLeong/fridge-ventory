@@ -2,51 +2,43 @@ import initKnex from "knex";
 import configuration from "../knexfile.js";
 import axios from "axios";
 const knex = initKnex(configuration);
-
 const API_KEY = process.env.SPOONACULAR_API_KEY;
 
 export const getFavoriteRecipes = async (req, res) => {
   try {
     const user_id = req.user.id;
 
-    // Fetch list of favorite recipe IDs
     const favoriteList = await knex("favorite_recipes")
       .where({ user_id })
-      .select("recipe_id");
+      .pluck("recipe_id");
 
     if (favoriteList.length === 0) {
-      return res.status(200).json([]); // Return an empty array if no favorites
+      return res.status(200).json([]);
     }
 
-    console.log("Favorite Recipe IDs:", favoriteList); // Debugging Log
+    const storedRecipes = await knex("recipes").whereIn("id", favoriteList);
+    const storedRecipeIds = storedRecipes.map((recipe) => recipe.id);
 
-    // Make API requests to fetch full details
-    const recipeRequests = favoriteList.map((fav) =>
-      axios
-        .get(
-          `https://api.spoonacular.com/recipes/${fav.recipe_id}/information?apiKey=${API_KEY}`
-        )
-        .catch((error) => {
-          console.error(
-            `Error fetching recipe ${fav.recipe_id}:`,
-            error.message
-          );
-          return null; // Prevent Promise.all from failing
-        })
+    const missingRecipeIds = favoriteList.filter(
+      (id) => !storedRecipeIds.includes(id)
     );
 
-    const recipeResponses = await Promise.all(recipeRequests);
+    let spoonacularRecipes = [];
+    if (missingRecipeIds.length > 0) {
+      const recipeRequests = missingRecipeIds.map((recipe_id) =>
+        axios.get(
+          `https://api.spoonacular.com/recipes/${recipe_id}/information?apiKey=${API_KEY}`
+        )
+      );
 
-    // Filter out any failed requests
-    const fullRecipes = recipeResponses
-      .filter((response) => response && response.data)
-      .map((response) => response.data);
-
-    if (fullRecipes.length === 0) {
-      return res.status(500).json({ error: "All Spoonacular requests failed" });
+      const recipeResponses = await Promise.allSettled(recipeRequests);
+      spoonacularRecipes = recipeResponses
+        .filter((res) => res.status === "fulfilled" && res.value.data)
+        .map((res) => res.value.data);
     }
 
-    res.status(200).json(fullRecipes);
+    const allRecipes = [...storedRecipes, ...spoonacularRecipes];
+    res.status(200).json(allRecipes);
   } catch (error) {
     console.error("Unexpected error fetching favorite recipes:", error);
     res.status(500).json({ error: "Failed to fetch favorite recipes" });
@@ -56,10 +48,40 @@ export const getFavoriteRecipes = async (req, res) => {
 export const addFavoriteRecipe = async (req, res) => {
   try {
     const user_id = req.user.id;
-    const newFavorite = { ...req.body, user_id };
-    const [id] = await knex("favorite_recipes").insert(newFavorite);
-    res.status(201).json({ id, ...newFavorite });
+    const { recipe_id } = req.body;
+
+    if (!recipe_id) {
+      return res.status(400).json({ error: "Recipe ID is required" });
+    }
+
+    let recipe = await knex("recipes").where({ id: recipe_id }).first();
+
+    if (!recipe) {
+      const response = await axios.get(
+        `https://api.spoonacular.com/recipes/${recipe_id}/information?apiKey=${API_KEY}`
+      );
+      const fetchedRecipe = response.data;
+
+      if (!fetchedRecipe) {
+        return res.status(404).json({ error: "Recipe not found" });
+      }
+
+      await knex("recipes").insert({
+        id: fetchedRecipe.id,
+        name: fetchedRecipe.title,
+        category: fetchedRecipe.dishTypes[0] || "Uncategorized",
+        image_url: fetchedRecipe.image,
+        source_url: fetchedRecipe.sourceUrl,
+        steps: fetchedRecipe.instructions || "No steps provided.",
+        ready_in_minutes: fetchedRecipe.readyInMinutes || null,
+        servings: fetchedRecipe.servings || null,
+      });
+    }
+
+    await knex("favorite_recipes").insert({ user_id, recipe_id });
+    res.status(201).json({ message: "Recipe added to favorites", recipe_id });
   } catch (error) {
+    console.error("Error adding favorite recipe:", error);
     res.status(500).json({ error: "Failed to add favorite recipe" });
   }
 };
@@ -67,13 +89,19 @@ export const addFavoriteRecipe = async (req, res) => {
 export const removeFavoriteRecipe = async (req, res) => {
   try {
     const user_id = req.user.id;
-    const { id } = req.params;
-    const deleted = await knex("favorite_recipes").where({ id, user_id }).del();
+    const { id: recipe_id } = req.params;
+
+    const deleted = await knex("favorite_recipes")
+      .where({ recipe_id, user_id })
+      .del();
+
     if (!deleted) {
       return res.status(404).json({ error: "Favorite not found" });
     }
+
     res.status(200).json({ message: "Recipe removed from favorites" });
   } catch (error) {
+    console.error("Error deleting favorite recipe:", error);
     res.status(500).json({ error: "Failed to delete favorite recipe" });
   }
 };
