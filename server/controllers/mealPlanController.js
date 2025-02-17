@@ -95,6 +95,12 @@ export const updateMealInPlan = async (req, res) => {
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });
     }
+    const existingMeal = await knex("meal_plans")
+      .where({ id, user_id })
+      .first();
+    if (!existingMeal) {
+      return res.status(404).json({ error: "Meal not found or unauthorized" });
+    }
 
     const mealDate =
       date && date.trim() !== ""
@@ -108,7 +114,7 @@ export const updateMealInPlan = async (req, res) => {
     });
 
     if (!updated) {
-      return res.status(404).json({ error: "Meal not found or unauthorized" });
+      return res.status(500).json({ error: "Failed to update meal" });
     }
 
     return res.status(200).json({
@@ -120,6 +126,7 @@ export const updateMealInPlan = async (req, res) => {
       meal_date: mealDate,
     });
   } catch (error) {
-    res.status(500).json({ error: "Failed to update meal date" });
+    console.error("Error updating meal plan:", error);
+    return res.status(500).json({ error: "Failed to update meal date" });
   }
 };

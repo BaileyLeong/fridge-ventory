@@ -72,6 +72,10 @@ export const addItemToGroceryList = async (req, res) => {
       }
     }
 
+    if (!ingredient || !ingredient.id) {
+      return res.status(400).json({ error: "Ingredient ID not found." });
+    }
+
     const existingItem = await knex("grocery_lists")
       .where({ user_id, ingredient_id: ingredient.id })
       .first();

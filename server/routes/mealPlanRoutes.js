@@ -10,10 +10,6 @@ router
   .get(mealPlanController.getMealPlan)
   .post(mealPlanController.addMealToPlan);
 
-router
-  .route("/:id")
-  .get(mealPlanController.getMealById)
-  .put(mealPlanController.updateMealInPlan)
-  .delete(mealPlanController.deleteMealFromPlan);
+router.route("/:id").put(mealPlanController.updateMealInPlan);
 
 export default router;
