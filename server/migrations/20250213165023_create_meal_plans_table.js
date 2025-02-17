@@ -15,6 +15,8 @@ export const up = function (knex) {
       .references("id")
       .inTable("recipes")
       .onDelete("CASCADE");
+
+    table.unique(["user_id", "planned_date"]);
   });
 };
 

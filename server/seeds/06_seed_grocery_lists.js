@@ -4,7 +4,7 @@ export const seed = async function (knex) {
     {
       id: 1,
       user_id: 1,
-      ingredient_id: 5,
+      ingredient_id: 19335,
       quantity: 500,
       unit: "g",
       completed: false,

@@ -15,7 +15,7 @@ export const seed = async function (knex) {
       ingredient_id: 1077,
       quantity: 1,
       unit: "L",
-      expires_at: "2025-02-20",
+      expires_at: "2025-02-22",
     }, // Milk
     {
       id: 3,
@@ -23,7 +23,7 @@ export const seed = async function (knex) {
       ingredient_id: 1123,
       quantity: 6,
       unit: "",
-      expires_at: "2025-02-18",
+      expires_at: "2025-02-25",
     }, // Eggs
     {
       id: 4,

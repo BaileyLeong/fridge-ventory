@@ -1,5 +1,5 @@
 export const seed = async function (knex) {
-  await knex("ingredients").del(); // Clear existing data
+  await knex("ingredients").del();
 
   await knex("ingredients").insert([
     { id: 11241, name: "kohlrabi" },
