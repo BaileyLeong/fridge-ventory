@@ -13,7 +13,6 @@ router
 
 router
   .route("/:id")
-  .get(fridgeController.getFridgeItem)
   .patch(fridgeController.updateFridgeItem)
   .delete(fridgeController.deleteFridgeItem);
 
