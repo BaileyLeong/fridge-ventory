@@ -1,38 +1,37 @@
 import initKnex from "knex";
 import configuration from "../knexfile.js";
+import axios from "axios";
 const knex = initKnex(configuration);
+const API_KEY = process.env.SPOONACULAR_API_KEY;
 
 export const getGroceryList = async (req, res) => {
   try {
     const user_id = req.user.id;
+
     const groceryItems = await knex("grocery_lists")
       .where({ user_id })
-      .select("id", "items as name", "completed", "created_at");
+      .select("id", "ingredient_id", "completed", "created_at");
 
     const mealPlans = await knex("meal_plans")
       .where({ user_id })
       .select("recipe_id");
+
     const recipeIds = mealPlans.map((mp) => mp.recipe_id);
+
     let mealPlanIngredients = [];
     if (recipeIds.length) {
-      const recipes = await knex("recipes")
-        .whereIn("id", recipeIds)
-        .select("ingredients");
-      recipes.forEach((recipe) => {
-        if (recipe.ingredients) {
-          const ingredients = recipe.ingredients
-            .split(",")
-            .map((ing) => ing.trim().toLowerCase());
-          mealPlanIngredients.push(...ingredients);
-        }
-      });
+      mealPlanIngredients = await knex("recipe_ingredients")
+        .whereIn("recipe_id", recipeIds)
+        .pluck("ingredient_id");
     }
+
     mealPlanIngredients = [...new Set(mealPlanIngredients)];
+
     const groceryListWithFlag = groceryItems.map((item) => {
-      const itemName = item.name.trim().toLowerCase();
-      const isMealPlanItem = mealPlanIngredients.includes(itemName);
+      const isMealPlanItem = mealPlanIngredients.includes(item.ingredient_id);
       return { ...item, manual: !isMealPlanItem };
     });
+
     return res.status(200).json(groceryListWithFlag);
   } catch (error) {
     console.error("Error generating grocery list:", error);
@@ -43,52 +42,56 @@ export const getGroceryList = async (req, res) => {
 export const addItemToGroceryList = async (req, res) => {
   try {
     const user_id = req.user.id;
-    const { items, completed = false } = req.body;
-    if (!items) {
-      return res.status(400).json({ error: "Items field is required" });
+    const { name, completed = false } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ error: "Ingredient name is required" });
     }
-    const normalizedItem = items.trim().toLowerCase();
+
+    let ingredient = await knex("ingredients").where("name", name).first();
+
+    if (!ingredient) {
+      const response = await axios.get(
+        `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${API_KEY}`
+      );
+
+      if (response.data.results.length > 0) {
+        const foundIngredient = response.data.results[0];
+
+        const [newIngredientId] = await knex("ingredients")
+          .insert({
+            id: foundIngredient.id,
+            name: foundIngredient.name,
+          })
+          .onConflict("id")
+          .ignore();
+
+        ingredient = { id: newIngredientId || foundIngredient.id };
+      } else {
+        return res.status(400).json({ error: "Ingredient not found" });
+      }
+    }
+
     const existingItem = await knex("grocery_lists")
-      .where({ user_id })
-      .andWhere(knex.raw("LOWER(items) = ?", [normalizedItem]))
+      .where({ user_id, ingredient_id: ingredient.id })
       .first();
+
     if (existingItem) {
       return res.status(409).json({ error: "Item already exists" });
     }
+
     const [id] = await knex("grocery_lists").insert({
       user_id,
-      items,
+      ingredient_id: ingredient.id,
       completed,
     });
-    return res.status(201).json({ id, user_id, items, completed });
+
+    return res
+      .status(201)
+      .json({ id, user_id, ingredient_id: ingredient.id, completed });
   } catch (error) {
     console.error("Error adding grocery item:", error);
     return res.status(500).json({ error: "Failed to add item" });
-  }
-};
-
-export const updateGroceryListItem = async (req, res) => {
-  try {
-    const user_id = req.user.id;
-    const { id } = req.params;
-    const { items, completed } = req.body;
-    const existingItem = await knex("grocery_lists")
-      .where({ id, user_id })
-      .first();
-    if (!existingItem) {
-      return res.status(404).json({ error: "Item not found" });
-    }
-    const updateData = {};
-    if (items) updateData.items = items;
-    if (completed !== undefined) updateData.completed = completed;
-    await knex("grocery_lists").where({ id, user_id }).update(updateData);
-    const updatedItem = await knex("grocery_lists")
-      .where({ id, user_id })
-      .first();
-    return res.status(200).json({ message: "Item updated", item: updatedItem });
-  } catch (error) {
-    console.error("Error updating grocery item:", error);
-    return res.status(500).json({ error: "Failed to update item" });
   }
 };
 
@@ -96,10 +99,13 @@ export const removeItemFromGroceryList = async (req, res) => {
   try {
     const user_id = req.user.id;
     const { id } = req.params;
+
     const deleted = await knex("grocery_lists").where({ id, user_id }).del();
+
     if (!deleted) {
       return res.status(404).json({ error: "Item not found or unauthorized" });
     }
+
     return res.status(200).json({ message: "Item removed successfully" });
   } catch (error) {
     console.error("Error deleting grocery item:", error);
@@ -112,12 +118,15 @@ export const groceryItemComplete = async (req, res) => {
     const user_id = req.user.id;
     const { id } = req.params;
     const { completed } = req.body;
+
     const updated = await knex("grocery_lists")
       .where({ id, user_id })
       .update({ completed });
+
     if (!updated) {
       return res.status(404).json({ error: "Item not found or unauthorized" });
     }
+
     return res.status(200).json({
       message: `Item marked as ${completed ? "complete" : "incomplete"}`,
     });
