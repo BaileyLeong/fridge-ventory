@@ -25,5 +25,8 @@ export const seed = async function (knex) {
     { id: 1022020, name: "garlic powder" },
     { id: 1062047, name: "garlic salt" },
     { id: 4669, name: "vegetable oil" },
+    { id: 20081, name: "flour" },
+    { id: 1077, name: "milk" },
+    { id: 1123, name: "eggs" },
   ]);
 };
