@@ -1,6 +1,6 @@
 export const up = function (knex) {
   return knex.schema.createTable("ingredients", function (table) {
-    table.increments("id").primary();
+    table.integer("id").primary();
     table.string("name").unique().notNullable();
   });
 };
