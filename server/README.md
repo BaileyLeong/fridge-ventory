@@ -23,3 +23,15 @@ After running migrations, seed the database with:
 ```sh
 npx knex seed:run
 ```
+
+### 4. Import Spoonacular Ingredients
+
+Spoonacular provides a list of the top 1,000 most common ingredients, which can be inserted into the database.
+
+The ingredient data is stored in: `/data/top-1k-ingredients.csv`
+
+To import ingredients into the database, run:
+
+```sh
+node scripts/importIngredients.js
+```
