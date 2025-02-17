@@ -1,9 +1,11 @@
 const requireUserId = (req, res, next) => {
-  const userId = req.query.user_id || req.body.user_id;
-  if (!userId) {
-    return res.status(400).json({ error: "User ID is required." });
+  const userId = req.headers["user-id"];
+
+  if (!userId || isNaN(parseInt(userId, 10))) {
+    return res.status(401).json({ error: "Invalid or missing User ID." });
   }
-  req.user = { id: userId };
+
+  req.user = { id: parseInt(userId, 10) };
   next();
 };
 
