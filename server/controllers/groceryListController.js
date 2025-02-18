@@ -9,8 +9,16 @@ export const getGroceryList = async (req, res) => {
     const user_id = req.user.id;
 
     const groceryItems = await knex("grocery_lists")
+      .join("ingredients", "grocery_lists.ingredient_id", "ingredients.id")
       .where({ user_id })
-      .select("id", "ingredient_id", "quantity", "completed", "created_at");
+      .select(
+        "grocery_lists.id",
+        "grocery_lists.ingredient_id",
+        "ingredients.name as ingredient_name",
+        "grocery_lists.quantity",
+        "grocery_lists.completed",
+        "grocery_lists.created_at"
+      );
 
     const mealPlans = await knex("meal_plans")
       .where({ user_id })
