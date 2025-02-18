@@ -6,6 +6,7 @@ import {
   deleteFridgeItem,
 } from "../../api/apiClient";
 import "./FridgeManagement.scss";
+import { formatDateForDisplay } from "../../utils/utils.js";
 
 const FridgeManagement = () => {
   const [fridgeItems, setFridgeItems] = useState([]);
@@ -86,8 +87,8 @@ const FridgeManagement = () => {
       <ul>
         {fridgeItems.map((item) => (
           <li key={item.id}>
-            {item.name} (Expires: {item.expires_at || "No expiry set"}) | Qty:{" "}
-            {item.quantity}
+            {item.name} (Expires: {formatDateForDisplay(item.expires_at)}) |
+            Qty: {item.quantity}
             <input
               type="number"
               placeholder="New Quantity"
