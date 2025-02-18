@@ -12,25 +12,31 @@ const Recipes = () => {
   }, []);
 
   return (
-    <div>
-      <h1>Recipes</h1>
+    <div className="recipes">
+      <h1 className="recipes__title">Recipes</h1>
+
       {recipes.length === 0 ? (
-        <p>No recipes found. Try adding some!</p>
+        <p className="recipes__message">No recipes found. Try adding some!</p>
       ) : (
-        <ul>
+        <ul className="recipes__list">
           {recipes.map((recipe) => (
-            <li key={recipe.id}>
-              <h3>{recipe.name}</h3>
+            <li key={recipe.id} className="recipes__item">
+              <h3 className="recipes__item-title">{recipe.name}</h3>
               <img
+                className="recipes__item-image"
                 src={recipe.image_url || "https://via.placeholder.com/150"}
                 alt={recipe.name}
               />
-              <p>Ready in {recipe.ready_in_minutes} minutes</p>
-              <button>
+              <p className="recipes__item-time">
+                Ready in {recipe.ready_in_minutes} minutes
+              </p>
+
+              <button className="recipes__button recipes__button--view">
                 <a
                   href={recipe.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="recipes__link"
                 >
                   View Full Recipe
                 </a>
