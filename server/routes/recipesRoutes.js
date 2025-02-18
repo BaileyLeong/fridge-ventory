@@ -3,6 +3,7 @@ import * as recipesController from "../controllers/recipesController.js";
 
 const router = express.Router();
 
+router.use(requireUserId);
 router.route("/suggest").get(recipesController.suggestRecipes);
 router
   .route("/")
