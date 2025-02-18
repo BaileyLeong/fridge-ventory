@@ -1,5 +1,6 @@
 import express from "express";
 import * as recipesController from "../controllers/recipesController.js";
+import requireUserId from "../middleware/requireUserId.js";
 
 const router = express.Router();
 
