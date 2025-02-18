@@ -14,6 +14,7 @@ export const searchIngredients = async (req, res) => {
       .limit(10);
 
     res.status(200).json({ results });
+    console.log({ results });
   } catch (error) {
     console.error("Error searching ingredients:", error);
     res.status(500).json({ error: "Failed to search ingredients" });
