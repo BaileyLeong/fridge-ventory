@@ -6,40 +6,57 @@ const Navbar = () => {
 
   return (
     <nav className="navbar">
-      <ul>
+      <ul className="navbar__list">
         {location.pathname !== "/" && (
-          <li>
-            <NavLink to="/">Dashboard</NavLink>
+          <li className="navbar__item">
+            <NavLink className="navbar__link" to="/">
+              Dashboard
+            </NavLink>
           </li>
         )}
         {location.pathname !== "/fridge" && (
-          <li>
-            <NavLink to="/fridge">Fridge</NavLink>
+          <li className="navbar__item">
+            <NavLink className="navbar__link" to="/fridge">
+              Fridge
+            </NavLink>
           </li>
         )}
         {location.pathname !== "/recipes" && (
-          <li>
-            <NavLink to="/recipes">Recipes</NavLink>
+          <li className="navbar__item">
+            <NavLink className="navbar__link" to="/recipes">
+              Recipes
+            </NavLink>
           </li>
         )}
         {location.pathname !== "/meal-planner" && (
-          <li>
-            <NavLink to="/meal-planner">Meal Planner</NavLink>
+          <li className="navbar__item">
+            <NavLink className="navbar__link" to="/meal-planner">
+              Meal Planner
+            </NavLink>
           </li>
         )}
         {location.pathname !== "/grocery-list" && (
-          <li>
-            <NavLink to="/grocery-list">Grocery List</NavLink>
+          <li className="navbar__item">
+            <NavLink className="navbar__link" to="/grocery-list">
+              Grocery List
+            </NavLink>
           </li>
         )}
         {location.pathname !== "/favorites" && (
-          <li>
-            <NavLink to="/favorites">Favorites</NavLink>
+          <li className="navbar__item">
+            <NavLink className="navbar__link" to="/favorites">
+              Favorites
+            </NavLink>
           </li>
         )}
         {location.pathname !== "/surprise-me" && (
-          <li>
-            <NavLink to="/surprise-me">I'm Bored!</NavLink>
+          <li className="navbar__item">
+            <NavLink
+              className="navbar__link navbar__link--special"
+              to="/surprise-me"
+            >
+              I'm Bored!
+            </NavLink>
           </li>
         )}
       </ul>
