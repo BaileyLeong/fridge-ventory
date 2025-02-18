@@ -1,6 +1,6 @@
-import axios from "axios";
-
-const API_KEY = process.env.SPOONACULAR_API_KEY;
+import initKnex from "knex";
+import configuration from "../knexfile.js";
+const knex = initKnex(configuration);
 
 export const searchIngredients = async (req, res) => {
   try {
@@ -9,18 +9,11 @@ export const searchIngredients = async (req, res) => {
       return res.status(400).json({ error: "Query parameter is required" });
     }
 
-    const response = await axios.get(
-      `https://api.spoonacular.com/food/ingredients/search`,
-      {
-        params: {
-          query,
-          number: 10,
-          apiKey: API_KEY,
-        },
-      }
-    );
+    const results = await knex("ingredients")
+      .where("name", "like", `%${query}%`)
+      .limit(10);
 
-    res.status(200).json(response.data);
+    res.status(200).json({ results });
   } catch (error) {
     console.error("Error searching ingredients:", error);
     res.status(500).json({ error: "Failed to search ingredients" });
