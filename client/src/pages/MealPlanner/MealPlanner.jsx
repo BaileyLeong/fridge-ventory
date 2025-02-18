@@ -7,7 +7,7 @@ import {
   addFavoriteRecipe,
 } from "../../api/apiClient";
 import "./MealPlanner.scss";
-import formatDateDisplay from "../../utils/utils.js";
+import formatDateForDisplay from "../../utils/utils.js";
 
 const MealPlanner = () => {
   const [mealPlan, setMealPlan] = useState([]);
@@ -86,7 +86,9 @@ const MealPlanner = () => {
                 <p>{meal.name}</p>
                 <p className="meal-date">
                   Planned for:{" "}
-                  {formatDateDisplay(selectedDates[meal.id] || meal.meal_date)}
+                  {formatDateForDisplay(
+                    selectedDates[meal.id] || meal.meal_date
+                  )}
                 </p>
                 <select
                   value={selectedDates[meal.id] || meal.meal_date}
@@ -101,7 +103,7 @@ const MealPlanner = () => {
                 >
                   {availableDates.map((date) => (
                     <option key={date} value={date}>
-                      {formatDateDisplay(date)}
+                      {formatDateForDisplay(date)}
                     </option>
                   ))}
                 </select>

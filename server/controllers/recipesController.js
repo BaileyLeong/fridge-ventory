@@ -72,44 +72,79 @@ export const getRecipeById = async (req, res) => {
 
 export const suggestRecipes = async (req, res) => {
   try {
+    console.log("Received request at /recipes/suggest");
+
     const user_id = req.user.id;
+    console.log("User ID:", user_id);
 
-    const fridgeItems = await knex("fridge_items")
-      .where({ user_id })
-      .pluck("ingredient_id");
+    const ingredientNames = await knex("fridge_items")
+      .join("ingredients", "fridge_items.ingredient_id", "ingredients.id")
+      .where("fridge_items.user_id", user_id)
+      .pluck("ingredients.name");
 
-    if (fridgeItems.length === 0) {
+    console.log("Ingredient Names:", ingredientNames);
+
+    if (ingredientNames.length === 0) {
+      console.warn("No ingredients found in fridge.");
       return res.status(400).json({ error: "No ingredients found in fridge." });
     }
 
-    const ingredientList = fridgeItems.join(",");
+    const ingredientList = ingredientNames.join(",");
+    console.log("Querying Spoonacular with ingredients:", ingredientList);
 
     const response = await axios.get(
-      `https://api.spoonacular.com/recipes/findByIngredients`,
+      `https://api.spoonacular.com/recipes/complexSearch`,
       {
         params: {
-          ingredients: ingredientList,
+          includeIngredients: ingredientList,
           number: 5,
-          apiKey: API_KEY,
+          addRecipeInformation: true,
+          addRecipeInstructions: true,
+          fillIngredients: true,
+          sort: "max-used-ingredients",
+          apiKey: process.env.SPOONACULAR_API_KEY,
         },
       }
     );
 
-    if (!response.data || response.data.length === 0) {
+    console.log("Spoonacular Response:", response.data);
+
+    if (!response.data || response.data.results.length === 0) {
+      console.warn("No recipes found.");
       return res.status(404).json({ error: "No recipes found." });
     }
 
-    const suggestedRecipeIds = response.data.map((recipe) => recipe.id);
+    const formattedRecipes = response.data.results.map((recipe) => ({
+      id: recipe.id,
+      title: recipe.title,
+      image: recipe.image,
+      sourceUrl: recipe.sourceUrl,
+      readyInMinutes: recipe.readyInMinutes,
+      servings: recipe.servings,
+      likes: recipe.aggregateLikes || 0,
+      usedIngredients:
+        recipe.usedIngredients?.map((ing) => ({
+          id: ing.id,
+          name: ing.name,
+          image: ing.image || null,
+          original: ing.original,
+          amount: ing.amount,
+          unit: ing.unit,
+        })) || [],
+      missedIngredients:
+        recipe.missedIngredients?.map((ing) => ({
+          id: ing.id,
+          name: ing.name,
+          image: ing.image || null,
+          original: ing.original,
+          amount: ing.amount,
+          unit: ing.unit,
+        })) || [],
+    }));
 
-    const existingRecipes = await knex("recipes")
-      .whereIn("id", suggestedRecipeIds)
-      .pluck("id");
+    console.log("Formatted Recipes:", formattedRecipes);
 
-    const newRecipes = response.data.filter(
-      (recipe) => !existingRecipes.includes(recipe.id)
-    );
-
-    res.status(200).json(newRecipes);
+    res.status(200).json(formattedRecipes);
   } catch (error) {
     console.error("Error fetching suggested recipes:", error);
     res.status(500).json({ error: "Failed to fetch recipe suggestions." });

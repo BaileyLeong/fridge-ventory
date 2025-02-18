@@ -6,12 +6,12 @@ const router = express.Router();
 
 router.use(requireUserId);
 
+router.route("/suggest").get(recipesController.suggestRecipes);
 router
   .route("/")
   .get(recipesController.getAllRecipes)
   .post(recipesController.addRecipe);
 
 router.route("/:id").get(recipesController.getRecipeById);
-router.route("/suggest").get(recipesController.suggestRecipes);
 
 export default router;
