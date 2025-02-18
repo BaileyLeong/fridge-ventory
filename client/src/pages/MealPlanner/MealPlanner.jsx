@@ -40,8 +40,12 @@ const MealPlanner = () => {
     });
   };
 
-  const handleUpdateMealDate = (id, newDate) => {
-    updateMealInPlan(id, { meal_date: newDate })
+  const handleUpdateMealDate = (id, newDate, recipeId, mealType) => {
+    updateMealInPlan(id, {
+      recipe_id: recipeId,
+      meal_type: mealType,
+      date: newDate,
+    })
       .then(() =>
         fetchMealPlan().then((response) => setMealPlan(response.data))
       )
@@ -54,6 +58,12 @@ const MealPlanner = () => {
         fetchMealPlan().then((response) => setMealPlan(response.data))
       )
       .catch((error) => console.error("Error deleting meal:", error));
+  };
+
+  const handleAddToFavorites = (recipeId) => {
+    addFavoriteRecipe(recipeId).catch((error) =>
+      console.error("Error adding to favorites:", error)
+    );
   };
 
   return (
@@ -74,7 +84,12 @@ const MealPlanner = () => {
                 <select
                   value={meal.meal_date}
                   onChange={(e) =>
-                    handleUpdateMealDate(meal.id, e.target.value)
+                    handleUpdateMealDate(
+                      meal.id,
+                      e.target.value,
+                      meal.recipe_id,
+                      meal.meal_type
+                    )
                   }
                 >
                   {availableDates.map((date) => (
@@ -84,11 +99,7 @@ const MealPlanner = () => {
                   ))}
                 </select>
 
-                <button
-                  onClick={() =>
-                    addFavoriteRecipe({ recipe_id: meal.recipe_id })
-                  }
-                >
+                <button onClick={() => handleAddToFavorites(meal.recipe_id)}>
                   Add to Favorites
                 </button>
                 <button onClick={() => handleDeleteMeal(meal.id)}>
