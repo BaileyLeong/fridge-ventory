@@ -99,10 +99,11 @@ const FridgeManagement = () => {
   };
 
   return (
-    <div>
-      <h1>Fridge Management</h1>
+    <div className="fridge">
+      <h1 className="fridge__title">Fridge Management</h1>
 
       <input
+        className="fridge__input fridge__input--text"
         type="text"
         placeholder="Search for an ingredient"
         value={newItem.name}
@@ -114,9 +115,13 @@ const FridgeManagement = () => {
       />
 
       {showSuggestions && ingredientSuggestions.length > 0 && (
-        <ul className="suggestions-dropdown">
+        <ul className="fridge__suggestions">
           {ingredientSuggestions.map((ing) => (
-            <li key={ing.id} onClick={() => handleSelectIngredient(ing)}>
+            <li
+              key={ing.id}
+              className="fridge__suggestions-item"
+              onClick={() => handleSelectIngredient(ing)}
+            >
               {ing.name}
             </li>
           ))}
@@ -124,6 +129,7 @@ const FridgeManagement = () => {
       )}
 
       <input
+        className="fridge__input fridge__input--quantity"
         type="number"
         placeholder="Quantity"
         value={newItem.quantity}
@@ -133,6 +139,7 @@ const FridgeManagement = () => {
       />
 
       <input
+        className="fridge__input fridge__input--date"
         type="date"
         value={newItem.expires_at || ""}
         onChange={(e) =>
@@ -143,19 +150,28 @@ const FridgeManagement = () => {
         }
       />
 
-      <button onClick={handleAddItem}>Add Item</button>
+      <button
+        className="fridge__button fridge__button--add"
+        onClick={handleAddItem}
+      >
+        Add Item
+      </button>
 
-      <ul>
+      <ul className="fridge__list">
         {fridgeItems.map((item) => (
-          <li key={item.id}>
+          <li key={item.id} className="fridge__item">
             <img
+              className="fridge__item-photo"
               src={item.image_url || "https://placehold.co/100"}
               alt={item.ingredient_name}
-              style={{ width: "50px", height: "50px", marginRight: "10px" }}
             />
-            <strong>{item.ingredient_name}</strong> (Expires:{" "}
-            {formatDateForDisplay(item.expires_at)}) | Qty: {item.quantity}
+            <strong className="fridge__item-name">
+              {item.ingredient_name}
+            </strong>
+            (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
+            {item.quantity}
             <input
+              className="fridge__input fridge__input--quantity"
               type="number"
               placeholder="New Quantity"
               value={updateValues[item.id]?.quantity || ""}
@@ -169,10 +185,14 @@ const FridgeManagement = () => {
                 })
               }
             />
-            <button onClick={() => handleUpdateQuantity(item.id)}>
+            <button
+              className="fridge__button fridge__button--update"
+              onClick={() => handleUpdateQuantity(item.id)}
+            >
               Update Quantity
             </button>
             <input
+              className="fridge__input fridge__input--date"
               type="date"
               value={updateValues[item.id]?.expires_at || ""}
               onChange={(e) =>
@@ -185,10 +205,18 @@ const FridgeManagement = () => {
                 })
               }
             />
-            <button onClick={() => handleUpdateExpiry(item.id)}>
+            <button
+              className="fridge__button fridge__button--update"
+              onClick={() => handleUpdateExpiry(item.id)}
+            >
               Update Expiry
             </button>
-            <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
+            <button
+              className="fridge__button fridge__button--delete"
+              onClick={() => handleDeleteItem(item.id)}
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>
