@@ -3,78 +3,50 @@ import axios from "axios";
 const baseUrl = import.meta.env.VITE_API_URL;
 const userId = "1";
 
+const apiClient = axios.create({
+  baseURL: baseUrl,
+  headers: { "user-id": userId },
+});
+
 // Fridge API
-export const fetchFridgeItems = () =>
-  axios.get(`${baseUrl}/api/fridge`, { params: { user_id: userId } });
-export const addFridgeItem = (itemData) =>
-  axios.post(`${baseUrl}/api/fridge/${id}`, { ...itemData, user_id: userId });
-export const updateFridgeItem = (id, itemData) =>
-  axios.patch(`${baseUrl}/api/fridge/${id}`, { ...itemData, user_id: userId });
-export const deleteFridgeItem = (id) =>
-  axios.delete(`${baseUrl}/api/fridge/${id}`, { data: { user_id: userId } });
-
-// Recipes API
-export const fetchRecipes = () => {
-  return axios.get(`${baseUrl}/api/recipes`, { params: { user_id: userId } });
-};
-export const fetchSuggestedRecipes = () =>
-  axios.get(`${baseUrl}/api/recipes/suggest`, { params: { user_id: userId } });
-export const addRecipe = (recipeData) => {
-  return axios.post(`${baseUrl}/api/recipes`, {
-    ...recipeData,
-    user_id: userId,
-  });
-};
-
-// Meal Plan API
-export const fetchMealPlan = () =>
-  axios.get(`${baseUrl}/api/meal-plan`, { params: { user_id: userId } });
-export const addMealToPlan = (mealData) => {
-  return axios.post(`${baseUrl}/api/meal-plan`, {
-    ...mealData,
-    user_id: userId,
-  });
-};
-export const updateMealInPlan = (id, mealData) =>
-  axios.put(`${baseUrl}/api/meal-plan/${id}`, { ...mealData, user_id: userId });
-export const deleteMealFromPlan = (id) =>
-  axios.delete(`${baseUrl}/api/meal-plan/${id}`, { data: { user_id: userId } });
+export const fetchFridgeItems = () => apiClient.get("/fridge");
+export const addFridgeItem = (item) => apiClient.post("/fridge", item);
+export const updateFridgeItem = (id, updates) =>
+  apiClient.patch(`/fridge/${id}`, updates);
+export const deleteFridgeItem = (id) => apiClient.delete(`/fridge/${id}`);
+export const moveGroceryToFridge = (id) => apiClient.post(`/fridge/move/${id}`);
+export const useMealIngredients = (id) =>
+  apiClient.post(`/fridge/use-meal/${id}`);
 
 // Grocery List API
-export const fetchGroceryList = () => {
-  return axios.get(`${baseUrl}/api/grocery-list`, {
-    params: { user_id: userId },
-  });
-};
-export const addItemToGroceryList = (itemData) =>
-  axios.post(`${baseUrl}/api/grocery-list`, { ...itemData, user_id: userId });
-export const updateGroceryListItem = (id, itemData) =>
-  axios.patch(`${baseUrl}/api/grocery-list/${id}`, {
-    ...itemData,
-    user_id: userId,
-  });
-export const deleteGroceryListItem = (id) =>
-  axios.delete(`${baseUrl}/api/grocery-list/${id}`, {
-    data: { user_id: userId },
-  });
+export const fetchGroceryList = () => apiClient.get("/grocery");
+export const addGroceryItem = (item) => apiClient.post("/grocery", item);
+export const removeGroceryItem = (id) => apiClient.delete(`/grocery/${id}`);
+export const markGroceryItemComplete = (id, completed) =>
+  apiClient.patch(`/grocery/${id}`, { completed });
+
+// Meal Plan API
+export const fetchMealPlan = () => apiClient.get("/meal-plan");
+export const addMealToPlan = (meal) => apiClient.post("/meal-plan", meal);
+export const updateMealInPlan = (id, mealUpdates) =>
+  apiClient.put(`/meal-plan/${id}`, mealUpdates);
+export const deleteMealFromPlan = (id) => apiClient.delete(`/meal-plan/${id}`);
+
+// Recipes API
+export const fetchRecipes = () => apiClient.get("/recipes");
+export const fetchRecipeById = (id) => apiClient.get(`/recipes/${id}`);
+export const suggestRecipes = () => apiClient.get("/recipes/suggest");
+export const addRecipe = (recipe) => apiClient.post("/recipes", recipe);
 
 // Favorites API
-export const fetchFavoriteRecipes = async () => {
-  try {
-    const response = await axios.get(`${baseUrl}/api/favorites`, {
-      params: { user_id: userId },
-    });
-
-    console.log("Fetched favorite recipes:", response.data); // Debugging log
-
-    return response.data; // Directly return full recipe details
-  } catch (error) {
-    console.error("Error fetching favorite recipes:", error);
-    return [];
-  }
-};
-
-export const addFavoriteRecipe = (recipeData) =>
-  axios.post(`${baseUrl}/api/favorites`, { ...recipeData, user_id: userId });
+export const fetchFavoriteRecipes = () => apiClient.get("/favorites");
+export const addFavoriteRecipe = (recipeId) =>
+  apiClient.post("/favorites", { recipe_id: recipeId });
 export const removeFavoriteRecipe = (id) =>
-  axios.delete(`${baseUrl}/api/favorites/${id}`, { data: { user_id: userId } });
+  apiClient.delete(`/favorites/${id}`);
+
+// Ingredient Search API
+export const searchIngredients = (query) =>
+  apiClient.get("/ingredients/search", { params: { query } });
+
+export default apiClient;
