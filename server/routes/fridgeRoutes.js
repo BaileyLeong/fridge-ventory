@@ -6,7 +6,10 @@ const router = express.Router();
 
 router.use(requireUserId);
 
-router.route("/").get(fridgeController.getAllFridgeItems);
+router
+  .route("/")
+  .get(fridgeController.getAllFridgeItems)
+  .post(fridgeController.addFridgeItem);
 
 router
   .route("/:id")

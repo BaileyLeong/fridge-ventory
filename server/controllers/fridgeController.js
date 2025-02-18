@@ -42,6 +42,7 @@ export const addFridgeItem = async (req, res) => {
     const user_id = req.user.id;
     let { ingredient_id, name, quantity, unit, expires_at } = req.body;
 
+    expires_at = expires_at || null;
     let ingredient;
     let image_url;
 
@@ -63,7 +64,7 @@ export const addFridgeItem = async (req, res) => {
       const foundIngredient = response.data.results[0];
 
       image_url = foundIngredient.image
-        ? `https://spoonacular.com/cdn/ingredients_100x100/${foundIngredient.image}`
+        ? `https://img.spoonacular.com/ingredients_100x100/${foundIngredient.image}`
         : "https://placehold.co/100";
 
       await knex("ingredients")
@@ -84,7 +85,7 @@ export const addFridgeItem = async (req, res) => {
         );
 
         image_url = response.data.image
-          ? response.data.image
+          ? `https://img.spoonacular.com/ingredients_100x100/${response.data.image}`
           : "https://placehold.co/100";
       }
     }
@@ -93,7 +94,7 @@ export const addFridgeItem = async (req, res) => {
       user_id,
       ingredient_id,
       quantity,
-      unit,
+      unit: unit || null,
       expires_at,
       image_url,
     });
