@@ -10,17 +10,38 @@ export const getAllRecipes = async (req, res) => {
     const recipes = await knex("recipes").select(
       "id",
       "name",
-      "ingredients",
-      "steps",
       "category",
       "image_url",
       "ready_in_minutes",
       "servings",
+      "steps",
       "source_url"
     );
 
-    res.status(200).json(recipes);
+    const recipesWithIngredients = await Promise.all(
+      recipes.map(async (recipe) => {
+        const ingredients = await knex("recipe_ingredients")
+          .join(
+            "ingredients",
+            "recipe_ingredients.ingredient_id",
+            "ingredients.id"
+          )
+          .where("recipe_ingredients.recipe_id", recipe.id)
+          .select(
+            "ingredients.id as ingredient_id",
+            "ingredients.name",
+            "recipe_ingredients.amount_us",
+            "recipe_ingredients.unit_us",
+            "recipe_ingredients.amount_metric",
+            "recipe_ingredients.unit_metric"
+          );
+        return { ...recipe, ingredients };
+      })
+    );
+
+    res.status(200).json(recipesWithIngredients);
   } catch (error) {
+    console.error("Error fetching recipes:", error);
     res.status(500).json({ error: "Failed to fetch recipes" });
   }
 };

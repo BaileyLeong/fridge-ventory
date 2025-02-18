@@ -4,7 +4,7 @@ export const up = function (knex) {
     table.integer("user_id").unsigned().notNullable();
     table.integer("ingredient_id").unsigned().notNullable();
     table.decimal("quantity", 10, 4).notNullable().defaultTo(0);
-    table.string("unit", 50).notNullable().defaultTo("unit");
+    table.string("unit", 50).nullable();
     table.boolean("completed").defaultTo(false);
     table.timestamps(true, true);
 
