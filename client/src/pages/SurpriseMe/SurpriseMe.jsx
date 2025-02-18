@@ -134,76 +134,109 @@ const SurpriseMe = () => {
   const selectedRecipe = recipes[currentRecipeIndex];
 
   return (
-    <div>
-      <h1>Surprise Me!</h1>
+    <div className="surprise">
+      <h1 className="surprise__title">Surprise Me!</h1>
+
       {selectedRecipe ? (
-        <div>
-          <h2>{selectedRecipe.title}</h2>
+        <div className="surprise__card">
           <img
+            className="surprise__image"
             src={selectedRecipe.image || "https://via.placeholder.com/150"}
             alt={selectedRecipe.title}
           />
-          <p>Likes: {selectedRecipe.likes || 0}</p>
-          <h3>Used Ingredients:</h3>
-          <ul>
-            {selectedRecipe.usedIngredients &&
-              selectedRecipe.usedIngredients.map((ingredient) => {
+          <div className="surprise__content">
+            <h2 className="surprise__recipe-title">{selectedRecipe.title}</h2>
+            <p className="surprise__likes">
+              ❤️ Likes: {selectedRecipe.likes || 0}
+            </p>
+            <h3 className="surprise__subheading">Used Ingredients:</h3>
+            <ul className="surprise__ingredient-list">
+              {selectedRecipe.usedIngredients?.map((ingredient) => {
                 const imageUrl = ingredient.image
                   ? ingredient.image.startsWith("http")
                     ? ingredient.image
                     : `${BASE_IMAGE_URL}${ingredient.image}`
                   : null;
-
                 return (
-                  <li key={ingredient.id}>
-                    {imageUrl && <img src={imageUrl} alt={ingredient.name} />}
-                    <p>
+                  <li key={ingredient.id} className="surprise__ingredient">
+                    {imageUrl && (
+                      <img
+                        className="surprise__ingredient-image"
+                        src={imageUrl}
+                        alt={ingredient.name}
+                      />
+                    )}
+                    <p className="surprise__ingredient-text">
                       {ingredient.original} ({ingredient.amount}{" "}
                       {ingredient.unit})
                     </p>
                   </li>
                 );
               })}
-          </ul>
-
-          <h3>Missed Ingredients:</h3>
-          <ul>
-            {selectedRecipe.missedIngredients?.length > 0 ? (
-              selectedRecipe.missedIngredients.map((ingredient) => (
-                <li key={ingredient.id}>
-                  <img src={ingredient.image} alt={ingredient.name} />
-                  {ingredient.original}
-                </li>
-              ))
-            ) : (
-              <p>No missed ingredients found.</p>
-            )}
-          </ul>
-          <label>Select a date:</label>
-          <select
-            value={
-              selectedDates[selectedRecipe.id] ||
-              new Date().toISOString().split("T")[0]
-            }
-            onChange={(e) =>
-              setSelectedDates({
-                ...selectedDates,
-                [selectedRecipe.id]: e.target.value,
-              })
-            }
-          >
-            {availableDates.map((date) => (
-              <option key={date} value={date}>
-                {formatDateForDisplay(date)}
-              </option>
-            ))}
-          </select>
-
-          <button onClick={handleAddToMealPlan}>Add to Meal Plan</button>
-          <button onClick={handleSkipRecipe}>Skip</button>
+            </ul>
+            <h3 className="surprise__subheading">Missed Ingredients:</h3>
+            <ul className="surprise__ingredient-list">
+              {selectedRecipe.missedIngredients?.length > 0 ? (
+                selectedRecipe.missedIngredients.map((ingredient) => (
+                  <li key={ingredient.id} className="surprise__ingredient">
+                    <img
+                      className="surprise__ingredient-image"
+                      src={ingredient.image}
+                      alt={ingredient.name}
+                    />
+                    <p className="surprise__ingredient-text">
+                      {ingredient.original}
+                    </p>
+                  </li>
+                ))
+              ) : (
+                <p className="surprise__message">
+                  No missed ingredients found.
+                </p>
+              )}
+            </ul>
+            <div className="surprise__date">
+              <label className="surprise__label">Select a date:</label>
+              <select
+                className="surprise__select"
+                value={
+                  selectedDates[selectedRecipe.id] ||
+                  new Date().toISOString().split("T")[0]
+                }
+                onChange={(e) =>
+                  setSelectedDates({
+                    ...selectedDates,
+                    [selectedRecipe.id]: e.target.value,
+                  })
+                }
+              >
+                {availableDates.map((date) => (
+                  <option key={date} value={date}>
+                    {formatDateForDisplay(date)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="surprise__buttons">
+            <button
+              className="surprise__button surprise__button--add"
+              onClick={handleAddToMealPlan}
+            >
+              Add to Meal Plan
+            </button>
+            <button
+              className="surprise__button surprise__button--skip"
+              onClick={handleSkipRecipe}
+            >
+              Skip
+            </button>
+          </div>
         </div>
       ) : (
-        <p>Loading recipes or no recipes found...</p>
+        <p className="surprise__message">
+          Loading recipes or no recipes found...
+        </p>
       )}
     </div>
   );
