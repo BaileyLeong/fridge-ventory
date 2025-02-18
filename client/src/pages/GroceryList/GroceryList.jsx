@@ -51,27 +51,44 @@ const GroceryList = () => {
   };
 
   return (
-    <div>
-      <h1>Grocery List</h1>
-      <input
-        type="text"
-        placeholder="Add grocery item"
-        value={newItem}
-        onChange={(e) => setNewItem(e.target.value)}
-      />
-      <button onClick={handleAddItem}>Add</button>
-      <ul>
+    <div className="grocery">
+      <h1 className="grocery__title">Grocery List</h1>
+      <div className="grocery__input-container">
+        <input
+          className="grocery__input"
+          type="text"
+          placeholder="Add grocery item"
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+        />
+        <button
+          className="grocery__button grocery__button--add"
+          onClick={handleAddItem}
+        >
+          Add
+        </button>
+      </div>
+      <ul className="grocery__list">
         {groceryList.map((item) => (
-          <li key={item.id}>
-            {item.ingredient_name || "Unknown Item"}
-            <input
-              type="checkbox"
-              checked={false}
-              onChange={() => handleCompleteItem(item.id)}
-            />
-            <label>Mark as Purchased</label>
-
-            <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
+          <li key={item.id} className="grocery__item">
+            <span className="grocery__item-name">
+              {item.ingredient_name || "Unknown Item"}
+            </span>
+            <div className="grocery__checkbox-container">
+              <input
+                className="grocery__checkbox"
+                type="checkbox"
+                checked={false}
+                onChange={() => handleCompleteItem(item.id)}
+              />
+              <label className="grocery__label">Mark as Purchased</label>
+            </div>
+            <button
+              className="grocery__button grocery__button--delete"
+              onClick={() => handleDeleteItem(item.id)}
+            >
+              Delete
+            </button>
           </li>
         ))}
       </ul>
