@@ -9,6 +9,19 @@ import {
 import "./FridgeManagement.scss";
 import { formatDateForDisplay } from "../../utils/utils.js";
 
+const UNIT_OPTIONS = [
+  "g",
+  "kg",
+  "ml",
+  "L",
+  "oz",
+  "lb",
+  "cup",
+  "tsp",
+  "tbsp",
+  null,
+];
+
 const FridgeManagement = () => {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [newItem, setNewItem] = useState({
@@ -16,19 +29,24 @@ const FridgeManagement = () => {
     ingredient_id: null,
     expires_at: "",
     quantity: 1,
+    unit: null,
   });
   const [updateValues, setUpdateValues] = useState({});
   const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
-  useEffect(() => {
+  const refreshFridgeItems = () => {
     fetchFridgeItems()
       .then((response) => setFridgeItems(response.data))
       .catch((error) => console.error("Error fetching fridge items:", error));
+  };
+
+  useEffect(() => {
+    refreshFridgeItems();
   }, []);
 
   const handleIngredientSearch = async (query) => {
-    if (!query) {
+    if (!query || query.length < 2) {
       setIngredientSuggestions([]);
       setShowSuggestions(false);
       return;
@@ -54,7 +72,6 @@ const FridgeManagement = () => {
     setShowSuggestions(false);
   };
 
-  // Add item to fridge
   const handleAddItem = () => {
     if (!newItem.ingredient_id) {
       alert("Please select a valid ingredient from the suggestions.");
@@ -62,20 +79,16 @@ const FridgeManagement = () => {
     }
 
     addFridgeItem(newItem)
-      .then(() =>
-        fetchFridgeItems().then((response) => setFridgeItems(response.data))
-      )
+      .then(refreshFridgeItems)
       .catch((error) => console.error("Error adding item:", error));
   };
 
   const handleUpdateQuantity = (id) => {
     const newQuantity = updateValues[id]?.quantity;
-    if (!newQuantity) return;
+    if (newQuantity === null || newQuantity === undefined) return;
 
     updateFridgeItem(id, { quantity: Number(newQuantity) })
-      .then(() =>
-        fetchFridgeItems().then((response) => setFridgeItems(response.data))
-      )
+      .then(refreshFridgeItems)
       .catch((error) => console.error("Error updating quantity:", error));
   };
 
@@ -84,17 +97,13 @@ const FridgeManagement = () => {
     if (!newExpiry) return;
 
     updateFridgeItem(id, { expires_at: newExpiry })
-      .then(() =>
-        fetchFridgeItems().then((response) => setFridgeItems(response.data))
-      )
+      .then(refreshFridgeItems)
       .catch((error) => console.error("Error updating expiry date:", error));
   };
 
   const handleDeleteItem = (id) => {
     deleteFridgeItem(id)
-      .then(() =>
-        fetchFridgeItems().then((response) => setFridgeItems(response.data))
-      )
+      .then(refreshFridgeItems)
       .catch((error) => console.error("Error deleting item:", error));
   };
 
@@ -108,8 +117,10 @@ const FridgeManagement = () => {
         placeholder="Search for an ingredient"
         value={newItem.name}
         onChange={(e) => {
-          setNewItem({ ...newItem, name: e.target.value, ingredient_id: null });
-          handleIngredientSearch(e.target.value);
+          if (!newItem.ingredient_id) {
+            setNewItem({ ...newItem, name: e.target.value });
+            handleIngredientSearch(e.target.value);
+          }
         }}
         onFocus={() => setShowSuggestions(true)}
       />
@@ -138,15 +149,26 @@ const FridgeManagement = () => {
         }
       />
 
+      <select
+        className="fridge__input fridge__input--unit"
+        value={newItem.unit || ""}
+        onChange={(e) =>
+          setNewItem({ ...newItem, unit: e.target.value || null })
+        }
+      >
+        {UNIT_OPTIONS.map((unit) => (
+          <option key={unit || "no-unit"} value={unit}>
+            {unit || "No Unit"}
+          </option>
+        ))}
+      </select>
+
       <input
         className="fridge__input fridge__input--date"
         type="date"
         value={newItem.expires_at || ""}
         onChange={(e) =>
-          setNewItem({
-            ...newItem,
-            expires_at: e.target.value.trim() !== "" ? e.target.value : null,
-          })
+          setNewItem({ ...newItem, expires_at: e.target.value || null })
         }
       />
 
@@ -162,14 +184,14 @@ const FridgeManagement = () => {
           <li key={item.id} className="fridge__item">
             <img
               className="fridge__item-photo"
-              src={item.image_url || "https://placehold.co/100"}
+              src={item.image_url || "https://placehold.co/500"}
               alt={item.ingredient_name}
             />
             <strong className="fridge__item-name">
               {item.ingredient_name}
             </strong>
             (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
-            {item.quantity}
+            {item.quantity} {item.unit || ""}
             <input
               className="fridge__input fridge__input--quantity"
               type="number"
