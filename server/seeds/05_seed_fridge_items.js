@@ -7,6 +7,7 @@ export const seed = async function (knex) {
       quantity: 500,
       unit: "g",
       expires_at: "2025-03-01",
+      image_url: "https://spoonacular.com/cdn/ingredients_500x500/flour.jpg",
     }, // Flour
     {
       user_id: 1,
@@ -14,6 +15,7 @@ export const seed = async function (knex) {
       quantity: 1,
       unit: "L",
       expires_at: "2025-02-22",
+      image_url: "https://spoonacular.com/cdn/ingredients_500x500/milk.jpg",
     }, // Milk
     {
       user_id: 1,
@@ -21,6 +23,7 @@ export const seed = async function (knex) {
       quantity: 6,
       unit: null,
       expires_at: "2025-02-25",
+      image_url: "https://spoonacular.com/cdn/ingredients_500x500/egg.jpg",
     }, // Eggs
     {
       user_id: 1,
@@ -28,6 +31,7 @@ export const seed = async function (knex) {
       quantity: 200,
       unit: "g",
       expires_at: "2025-04-10",
+      image_url: "https://spoonacular.com/cdn/ingredients_500x500/butter.jpg",
     }, // Butter
   ]);
 };
