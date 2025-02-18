@@ -6,6 +6,7 @@ export const up = function (knex) {
     table.decimal("quantity", 10, 4).notNullable().defaultTo(0);
     table.string("unit", 50).notNullable().defaultTo("unit");
     table.boolean("completed").defaultTo(false);
+    table.timestamps(true, true);
 
     table
       .foreign("user_id")

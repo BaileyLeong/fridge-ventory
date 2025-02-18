@@ -8,7 +8,7 @@ export const up = function (knex) {
     table.integer("servings");
     table.text("steps").notNullable();
     table.text("source_url");
-    table.timestamp("created_at").defaultTo(knex.fn.now());
+    table.timestamps(true, true);
   });
 };
 

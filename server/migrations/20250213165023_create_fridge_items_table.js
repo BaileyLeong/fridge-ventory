@@ -7,6 +7,7 @@ export const up = function (knex) {
     table.string("unit", 50).nullable().defaultTo(null);
     table.date("expires_at");
     table.string("image_url", 255).defaultTo("https://placehold.co/100");
+    table.timestamps(true, true);
 
     table
       .foreign("user_id")

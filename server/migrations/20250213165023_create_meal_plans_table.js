@@ -3,7 +3,9 @@ export const up = function (knex) {
     table.increments("id").primary();
     table.integer("user_id").unsigned().notNullable();
     table.integer("recipe_id").unsigned().notNullable();
-    table.date("planned_date").notNullable();
+    table.date("meal_date").notNullable();
+    table.string("meal_type").notNullable();
+    table.timestamps(true, true);
 
     table
       .foreign("user_id")
@@ -16,7 +18,7 @@ export const up = function (knex) {
       .inTable("recipes")
       .onDelete("CASCADE");
 
-    table.unique(["user_id", "planned_date"]);
+    table.unique(["user_id", "meal_date", "meal_type"]);
   });
 };
 
