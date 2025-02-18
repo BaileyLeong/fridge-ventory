@@ -5,11 +5,14 @@ import requireUserId from "../middleware/requireUserId.js";
 const router = express.Router();
 
 router.use(requireUserId);
+
 router
   .route("/")
   .get(mealPlanController.getMealPlan)
   .post(mealPlanController.addMealToPlan);
 
-router.route("/:id").put(mealPlanController.updateMealInPlan);
-
+router
+  .route("/:id")
+  .put(mealPlanController.updateMealInPlan)
+  .delete(mealPlanController.deleteMealFromPlan);
 export default router;

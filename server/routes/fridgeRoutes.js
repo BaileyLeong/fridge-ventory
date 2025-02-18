@@ -6,14 +6,15 @@ const router = express.Router();
 
 router.use(requireUserId);
 
-router
-  .route("/")
-  .get(fridgeController.getAllFridgeItems)
-  .post(fridgeController.addFridgeItem);
+router.route("/").get(fridgeController.getAllFridgeItems);
 
 router
   .route("/:id")
   .patch(fridgeController.updateFridgeItem)
   .delete(fridgeController.deleteFridgeItem);
+
+router.route("/move/:id").post(fridgeController.moveGroceryToFridge);
+
+router.route("/use-meal/:id").post(fridgeController.useMealIngredients);
 
 export default router;

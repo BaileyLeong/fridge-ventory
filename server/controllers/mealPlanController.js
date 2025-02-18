@@ -38,8 +38,8 @@ export const addMealToPlan = async (req, res) => {
       date && date.trim() !== ""
         ? date
         : new Date().toISOString().split("T")[0];
-    const recipe = await knex("recipes").where("id", recipe_id).first();
 
+    const recipe = await knex("recipes").where("id", recipe_id).first();
     if (!recipe) {
       return res
         .status(400)
@@ -55,22 +55,28 @@ export const addMealToPlan = async (req, res) => {
 
     const requiredIngredients = await knex("recipe_ingredients")
       .where("recipe_id", recipe_id)
-      .select("ingredient_id");
+      .select("ingredient_id", "amount_metric", "unit_metric");
 
-    const fridgeItems = await knex("fridge_items")
-      .where({ user_id })
-      .pluck("ingredient_id");
+    let groceryItemsAdded = 0;
+    for (const ingredient of requiredIngredients) {
+      const existingGroceryItem = await knex("grocery_lists")
+        .where({ user_id, ingredient_id: ingredient.ingredient_id })
+        .first();
 
-    const groceryItemsToInsert = requiredIngredients
-      .filter((ingredient) => !fridgeItems.includes(ingredient.ingredient_id))
-      .map((ingredient) => ({
-        user_id,
-        ingredient_id: ingredient.ingredient_id,
-        completed: false,
-      }));
-
-    if (groceryItemsToInsert.length > 0) {
-      await knex("grocery_lists").insert(groceryItemsToInsert);
+      if (existingGroceryItem) {
+        await knex("grocery_lists")
+          .where({ user_id, ingredient_id: ingredient.ingredient_id })
+          .increment("quantity", ingredient.amount_metric || 1);
+      } else {
+        await knex("grocery_lists").insert({
+          user_id,
+          ingredient_id: ingredient.ingredient_id,
+          quantity: ingredient.amount_metric || 1,
+          unit: ingredient.unit_metric || null,
+          completed: false,
+        });
+        groceryItemsAdded++;
+      }
     }
 
     return res.status(201).json({
@@ -79,9 +85,10 @@ export const addMealToPlan = async (req, res) => {
       recipe_id,
       meal_type,
       date: mealDate,
-      groceryItemsAdded: groceryItemsToInsert.length,
+      groceryItemsAdded,
     });
   } catch (error) {
+    console.error("Error adding meal:", error);
     res.status(500).json({ error: "Failed to add meal" });
   }
 };
@@ -95,6 +102,7 @@ export const updateMealInPlan = async (req, res) => {
     if (!user_id) {
       return res.status(400).json({ error: "User ID is required" });
     }
+
     const existingMeal = await knex("meal_plans")
       .where({ id, user_id })
       .first();
@@ -117,6 +125,54 @@ export const updateMealInPlan = async (req, res) => {
       return res.status(500).json({ error: "Failed to update meal" });
     }
 
+    const newRequiredIngredients = await knex("recipe_ingredients")
+      .where("recipe_id", recipe_id)
+      .select("ingredient_id", "amount_metric", "unit_metric");
+
+    const oldRequiredIngredients = await knex("recipe_ingredients")
+      .where("recipe_id", existingMeal.recipe_id)
+      .pluck("ingredient_id");
+
+    const existingGroceryItems = await knex("grocery_lists")
+      .where({ user_id })
+      .pluck("ingredient_id");
+
+    const ingredientsToRemove = oldRequiredIngredients.filter(
+      (ingredient_id) =>
+        !newRequiredIngredients.some(
+          (ing) => ing.ingredient_id === ingredient_id
+        )
+    );
+
+    if (ingredientsToRemove.length > 0) {
+      await knex("grocery_lists")
+        .where({ user_id })
+        .whereIn("ingredient_id", ingredientsToRemove)
+        .del();
+    }
+
+    let groceryItemsAdded = 0;
+    for (const ingredient of newRequiredIngredients) {
+      const existingGroceryItem = await knex("grocery_lists")
+        .where({ user_id, ingredient_id: ingredient.ingredient_id })
+        .first();
+
+      if (existingGroceryItem) {
+        await knex("grocery_lists")
+          .where({ user_id, ingredient_id: ingredient.ingredient_id })
+          .increment("quantity", ingredient.amount_metric || 1);
+      } else {
+        await knex("grocery_lists").insert({
+          user_id,
+          ingredient_id: ingredient.ingredient_id,
+          quantity: ingredient.amount_metric || 1,
+          unit: ingredient.unit_metric || null,
+          completed: false,
+        });
+        groceryItemsAdded++;
+      }
+    }
+
     return res.status(200).json({
       message: "Meal updated successfully",
       id,
@@ -124,9 +180,29 @@ export const updateMealInPlan = async (req, res) => {
       recipe_id,
       meal_type,
       meal_date: mealDate,
+      groceryItemsAdded,
+      groceryItemsRemoved: ingredientsToRemove.length,
     });
   } catch (error) {
     console.error("Error updating meal plan:", error);
-    return res.status(500).json({ error: "Failed to update meal date" });
+    return res.status(500).json({ error: "Failed to update meal plan" });
+  }
+};
+
+export const deleteMealFromPlan = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const { id } = req.params;
+
+    const deleted = await knex("meal_plans").where({ id, user_id }).del();
+
+    if (!deleted) {
+      return res.status(404).json({ error: "Meal plan not found" });
+    }
+
+    res.status(200).json({ message: "Meal removed from plan" });
+  } catch (error) {
+    console.error("Error deleting meal plan:", error);
+    res.status(500).json({ error: "Failed to delete meal plan" });
   }
 };

@@ -99,7 +99,17 @@ export const suggestRecipes = async (req, res) => {
       return res.status(404).json({ error: "No recipes found." });
     }
 
-    res.status(200).json(response.data);
+    const suggestedRecipeIds = response.data.map((recipe) => recipe.id);
+
+    const existingRecipes = await knex("recipes")
+      .whereIn("id", suggestedRecipeIds)
+      .pluck("id");
+
+    const newRecipes = response.data.filter(
+      (recipe) => !existingRecipes.includes(recipe.id)
+    );
+
+    res.status(200).json(newRecipes);
   } catch (error) {
     console.error("Error fetching suggested recipes:", error);
     res.status(500).json({ error: "Failed to fetch recipe suggestions." });
@@ -124,9 +134,19 @@ export const addRecipe = async (req, res) => {
       return res.status(400).json({ error: "Recipe must have an id and name" });
     }
 
-    const existingRecipe = await knex("recipes").where({ id }).first();
-    if (existingRecipe) {
-      return res.status(409).json({ error: "Recipe already exists" });
+    const existingRecipeById = await knex("recipes").where({ id }).first();
+    if (existingRecipeById) {
+      return res.status(409).json({ error: "Recipe already exists by ID" });
+    }
+
+    const existingRecipeByName = await knex("recipes")
+      .whereRaw("LOWER(name) = ?", [name.toLowerCase()])
+      .first();
+
+    if (existingRecipeByName) {
+      return res
+        .status(409)
+        .json({ error: "Recipe with this name already exists" });
     }
 
     await knex("recipes").insert({
@@ -141,6 +161,24 @@ export const addRecipe = async (req, res) => {
     });
 
     if (ingredients && Array.isArray(ingredients)) {
+      const ingredientIds = ingredients.map((ing) => ing.id);
+      const existingIngredients = await knex("ingredients")
+        .whereIn("id", ingredientIds)
+        .pluck("id");
+
+      const missingIngredients = ingredients.filter(
+        (ing) => !existingIngredients.includes(ing.id)
+      );
+
+      if (missingIngredients.length > 0) {
+        await knex("ingredients").insert(
+          missingIngredients.map((ing) => ({
+            id: ing.id,
+            name: ing.name,
+          }))
+        );
+      }
+
       const recipeIngredientsData = ingredients.map((ingredient) => ({
         recipe_id: id,
         ingredient_id: ingredient.id,

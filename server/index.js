@@ -1,29 +1,32 @@
 import express from "express";
-import "dotenv/config";
 import cors from "cors";
-import fridgeRoutes from "./routes/fridgeRoutes.js";
+import dotenv from "dotenv";
 import recipesRoutes from "./routes/recipesRoutes.js";
+import favoriteRecipesRoutes from "./routes/favoriteRecipesRoutes.js";
 import mealPlanRoutes from "./routes/mealPlanRoutes.js";
 import groceryListRoutes from "./routes/groceryListRoutes.js";
-import favoriteRecipesRoutes from "./routes/favoriteRecipesRoutes.js";
+import fridgeRoutes from "./routes/fridgeRoutes.js";
+import ingredientSearchRoutes from "./routes/ingredientSearchRoutes.js";
+
+dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(express.json());
 
-app.use((req, res, next) => {
-  console.log("Incoming Request:", req.method, req.url, req.body);
-  next();
+app.use("/recipes", recipesRoutes);
+app.use("/favorites", favoriteRecipesRoutes);
+app.use("/meal-plan", mealPlanRoutes);
+app.use("/grocery", groceryListRoutes);
+app.use("/fridge", fridgeRoutes);
+app.use("/ingredients", ingredientSearchRoutes);
+
+app.get("/", (req, res) => {
+  res.send("Fridge-Ventory API is running!");
 });
 
-app.use("/api/fridge", fridgeRoutes);
-app.use("/api/recipes", recipesRoutes);
-app.use("/api/meal-plan", mealPlanRoutes);
-app.use("/api/grocery-list", groceryListRoutes);
-app.use("/api/favorites", favoriteRecipesRoutes);
-
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

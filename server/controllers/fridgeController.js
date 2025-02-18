@@ -8,18 +8,27 @@ const API_KEY = process.env.SPOONACULAR_API_KEY;
 export const getAllFridgeItems = async (req, res) => {
   try {
     const user_id = req.user.id;
+
+    console.log(`Fetching fridge items for user: ${user_id}`);
+
     const items = await knex("fridge_items")
-      .join("ingredients", "fridge_items.ingredient_id", "ingredients.id")
+      .leftJoin("ingredients", "fridge_items.ingredient_id", "ingredients.id")
       .where("fridge_items.user_id", user_id)
       .select(
         "fridge_items.id",
-        "ingredients.id as ingredient_id",
-        "ingredients.name as ingredient_name",
+        "fridge_items.ingredient_id",
         "fridge_items.quantity",
         "fridge_items.unit",
         "fridge_items.expires_at",
-        "fridge_items.image_url"
+        "fridge_items.image_url",
+        "ingredients.name as ingredient_name"
       );
+
+    console.log("Fetched fridge items:", items);
+
+    if (!items || items.length === 0) {
+      return res.status(200).json([]);
+    }
 
     res.status(200).json(items);
   } catch (error) {
@@ -31,47 +40,73 @@ export const getAllFridgeItems = async (req, res) => {
 export const addFridgeItem = async (req, res) => {
   try {
     const user_id = req.user.id;
-    const { name, quantity, unit, expires_at } = req.body;
+    let { ingredient_id, name, quantity, unit, expires_at } = req.body;
 
-    let ingredient = await knex("ingredients").where("name", name).first();
+    let ingredient;
+    let image_url;
+
+    if (ingredient_id) {
+      ingredient = await knex("ingredients").where("id", ingredient_id).first();
+    } else {
+      ingredient = await knex("ingredients").where("name", name).first();
+    }
 
     if (!ingredient) {
       const response = await axios.get(
         `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${API_KEY}`
       );
 
-      if (response.data.results.length > 0) {
-        const foundIngredient = response.data.results[0];
-
-        const [newIngredientId] = await knex("ingredients")
-          .insert({
-            id: foundIngredient.id,
-            name: foundIngredient.name,
-          })
-          .onConflict("id")
-          .ignore();
-
-        ingredient = { id: newIngredientId || foundIngredient.id };
-      } else {
+      if (response.data.results.length === 0) {
         return res.status(400).json({ error: "Ingredient not found" });
+      }
+
+      const foundIngredient = response.data.results[0];
+
+      image_url = foundIngredient.image
+        ? `https://spoonacular.com/cdn/ingredients_100x100/${foundIngredient.image}`
+        : "https://placehold.co/100";
+
+      await knex("ingredients")
+        .insert({
+          id: foundIngredient.id,
+          name: foundIngredient.name,
+        })
+        .onConflict("id")
+        .ignore();
+
+      ingredient_id = foundIngredient.id;
+    } else {
+      ingredient_id = ingredient.id;
+
+      if (!image_url) {
+        const response = await axios.get(
+          `https://api.spoonacular.com/food/ingredients/${ingredient_id}/information?apiKey=${API_KEY}`
+        );
+
+        image_url = response.data.image
+          ? response.data.image
+          : "https://placehold.co/100";
       }
     }
 
     const [id] = await knex("fridge_items").insert({
       user_id,
-      ingredient_id: ingredient.id,
+      ingredient_id,
       quantity,
       unit,
       expires_at,
+      image_url,
     });
 
     res.status(201).json({
       id,
       user_id,
-      ingredient_id: ingredient.id,
+      ingredient_id,
+      ingredient_name: ingredient.name,
       quantity,
       unit,
       expires_at,
+      image_url,
     });
   } catch (error) {
     console.error("Error adding fridge item:", error);
@@ -83,17 +118,38 @@ export const updateFridgeItem = async (req, res) => {
   try {
     const user_id = req.user.id;
     const { id } = req.params;
-    const { quantity, unit, expires_at } = req.body;
-    const updateData = { quantity, unit, expires_at };
+    const { quantity, expires_at } = req.body;
+
+    if (quantity === undefined && expires_at === undefined) {
+      return res.status(400).json({ error: "No update values provided." });
+    }
+
+    if (expires_at && isNaN(Date.parse(expires_at))) {
+      return res.status(400).json({ error: "Invalid expiration date format." });
+    }
+
+    let updateData = {};
+    if (quantity !== undefined) updateData.quantity = quantity;
+    if (expires_at !== undefined) updateData.expires_at = expires_at;
 
     const updated = await knex("fridge_items")
       .where({ id, user_id })
       .update(updateData);
 
-    if (!updated) return res.status(404).json({ error: "Item not found" });
-    res.status(200).json({ message: "Item updated successfully" });
+    if (!updated) {
+      return res
+        .status(404)
+        .json({ error: "Fridge item not found or unauthorized." });
+    }
+
+    return res.status(200).json({
+      message: "Fridge item updated successfully",
+      id,
+      updated_fields: updateData,
+    });
   } catch (error) {
-    res.status(500).json({ error: "Failed to update fridge item" });
+    console.error("Error updating fridge item:", error);
+    return res.status(500).json({ error: "Failed to update fridge item." });
   }
 };
 
@@ -106,6 +162,123 @@ export const deleteFridgeItem = async (req, res) => {
     if (!deleted) return res.status(404).json({ error: "Item not found" });
     res.status(200).json({ message: "Item deleted successfully" });
   } catch (error) {
+    console.error("Error deleting fridge item:", error);
     res.status(500).json({ error: "Failed to delete fridge item" });
+  }
+};
+
+export const moveGroceryToFridge = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const { id } = req.params;
+
+    const groceryItem = await knex("grocery_lists")
+      .where({ id, user_id, completed: true })
+      .first();
+
+    if (!groceryItem) {
+      return res
+        .status(400)
+        .json({ error: "Item not found or not marked as complete." });
+    }
+
+    const existingFridgeItem = await knex("fridge_items")
+      .where({ user_id, ingredient_id: groceryItem.ingredient_id })
+      .first();
+
+    if (existingFridgeItem) {
+      await knex("fridge_items")
+        .where({ user_id, ingredient_id: groceryItem.ingredient_id })
+        .increment("quantity", groceryItem.quantity);
+    } else {
+      await knex("fridge_items").insert({
+        user_id,
+        ingredient_id: groceryItem.ingredient_id,
+        quantity: groceryItem.quantity,
+        unit: groceryItem.unit || null,
+        expires_at: null,
+      });
+    }
+
+    await knex("grocery_lists").where({ id, user_id }).del();
+
+    return res.status(200).json({
+      message: "Item moved to fridge successfully",
+      ingredient_id: groceryItem.ingredient_id,
+      added_quantity: groceryItem.quantity,
+    });
+  } catch (error) {
+    console.error("Error moving item to fridge:", error);
+    return res.status(500).json({ error: "Failed to move item to fridge" });
+  }
+};
+
+export const useMealIngredients = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const { id } = req.params;
+
+    const meal = await knex("meal_plans").where({ id, user_id }).first();
+
+    if (!meal) {
+      return res.status(404).json({ error: "Meal not found or unauthorized." });
+    }
+
+    const recipeIngredients = await knex("recipe_ingredients")
+      .where({ recipe_id: meal.recipe_id })
+      .select("ingredient_id", "amount_metric", "unit_metric");
+
+    if (recipeIngredients.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No ingredients found for this recipe." });
+    }
+
+    const fridgeItems = await knex("fridge_items")
+      .where({ user_id })
+      .select("ingredient_id", "quantity");
+
+    let deductions = [];
+    for (const ingredient of recipeIngredients) {
+      const fridgeItem = fridgeItems.find(
+        (item) => item.ingredient_id === ingredient.ingredient_id
+      );
+
+      if (fridgeItem) {
+        const newQuantity = fridgeItem.quantity - ingredient.amount_metric;
+
+        if (newQuantity > 0) {
+          await knex("fridge_items")
+            .where({ user_id, ingredient_id: ingredient.ingredient_id })
+            .update({ quantity: newQuantity });
+
+          deductions.push({
+            ingredient_id: ingredient.ingredient_id,
+            deducted: ingredient.amount_metric,
+          });
+        } else {
+          await knex("fridge_items")
+            .where({ user_id, ingredient_id: ingredient.ingredient_id })
+            .del();
+
+          deductions.push({
+            ingredient_id: ingredient.ingredient_id,
+            deducted: fridgeItem.quantity,
+            removed: true,
+          });
+        }
+      }
+    }
+
+    await knex("meal_plans").where({ id, user_id }).del();
+
+    return res.status(200).json({
+      message: "Ingredients deducted from fridge.",
+      meal_id: id,
+      deductions,
+    });
+  } catch (error) {
+    console.error("Error using meal ingredients:", error);
+    return res.status(500).json({ error: "Failed to use meal ingredients." });
   }
 };
