@@ -4,6 +4,7 @@ import {
   fetchRecipes,
   addGroceryItem,
   removeGroceryItem,
+  moveGroceryToFridge,
 } from "../../api/apiClient";
 import "./GroceryList.scss";
 
@@ -41,6 +42,14 @@ const GroceryList = () => {
       .catch((error) => console.error("Error deleting item:", error));
   };
 
+  const handleCompleteItem = (id) => {
+    moveGroceryToFridge(id)
+      .then(() =>
+        fetchGroceryList().then((response) => setGroceryList(response.data))
+      )
+      .catch((error) => console.error("Error moving item to fridge:", error));
+  };
+
   return (
     <div>
       <h1>Grocery List</h1>
@@ -55,6 +64,13 @@ const GroceryList = () => {
         {groceryList.map((item) => (
           <li key={item.id}>
             {item.ingredient_name || "Unknown Item"}
+            <input
+              type="checkbox"
+              checked={false}
+              onChange={() => handleCompleteItem(item.id)}
+            />
+            <label>Mark as Purchased</label>
+
             <button onClick={() => handleDeleteItem(item.id)}>Delete</button>
           </li>
         ))}
