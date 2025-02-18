@@ -11,8 +11,8 @@ const Favorites = () => {
   useEffect(() => {
     fetchFavoriteRecipes()
       .then((response) => {
-        console.log("Fetched favorite recipes:", response);
-        setFavorites(response);
+        console.log("Fetched favorite recipes:", response.data);
+        setFavorites(response.data);
       })
       .catch((error) => console.error("Error fetching favorites:", error));
   }, []);
@@ -20,7 +20,7 @@ const Favorites = () => {
   const handleRemoveFavorite = (id) => {
     removeFavoriteRecipe(id)
       .then(() =>
-        fetchFavoriteRecipes().then((response) => setFavorites(response))
+        fetchFavoriteRecipes().then((response) => setFavorites(response.data))
       )
       .catch((error) => console.error("Error removing favorite:", error));
   };
@@ -28,28 +28,32 @@ const Favorites = () => {
   return (
     <div>
       <h1>Favorite Recipes</h1>
-      <ul>
-        {favorites.map((recipe) => (
-          <li key={recipe.id}>
-            <h2>{recipe.title}</h2>
-            <img src={recipe.image} alt={recipe.title} />{" "}
-            <p>Ready in {recipe.readyInMinutes} minutes</p>
-            <p>Servings: {recipe.servings}</p>
-            <button>
-              <a
-                href={recipe.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                View Full Recipe
-              </a>
-            </button>
-            <button onClick={() => handleRemoveFavorite(recipe.id)}>
-              Remove
-            </button>
-          </li>
-        ))}
-      </ul>
+      {favorites.length === 0 ? (
+        <p>You haven't favorited any recipes yet.</p>
+      ) : (
+        <ul>
+          {favorites.map((recipe) => (
+            <li key={recipe.id}>
+              <h2>{recipe.name}</h2>
+              <img src={recipe.image_url} alt={recipe.name} />
+              <p>Ready in {recipe.ready_in_minutes} minutes</p>
+              <p>Servings: {recipe.servings}</p>
+              <button>
+                <a
+                  href={recipe.source_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View Full Recipe
+                </a>
+              </button>
+              <button onClick={() => handleRemoveFavorite(recipe.id)}>
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 };
