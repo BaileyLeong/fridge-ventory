@@ -26,28 +26,45 @@ const Favorites = () => {
   };
 
   return (
-    <div>
-      <h1>Favorite Recipes</h1>
+    <div className="favorites">
+      <h1 className="favorites__title">Favorite Recipes</h1>
+
       {favorites.length === 0 ? (
-        <p>You haven't favorited any recipes yet.</p>
+        <p className="favorites__message">
+          You haven't favorited any recipes yet.
+        </p>
       ) : (
-        <ul>
+        <ul className="favorites__list">
           {favorites.map((recipe) => (
-            <li key={recipe.id}>
-              <h2>{recipe.name}</h2>
-              <img src={recipe.image_url} alt={recipe.name} />
-              <p>Ready in {recipe.ready_in_minutes} minutes</p>
-              <p>Servings: {recipe.servings}</p>
-              <button>
+            <li key={recipe.id} className="favorites__item">
+              <h2 className="favorites__item-title">{recipe.name}</h2>
+              <img
+                className="favorites__item-image"
+                src={recipe.image_url}
+                alt={recipe.name}
+              />
+              <p className="favorites__item-time">
+                Ready in {recipe.ready_in_minutes} minutes
+              </p>
+              <p className="favorites__item-servings">
+                Servings: {recipe.servings}
+              </p>
+
+              <button className="favorites__button favorites__button--view">
                 <a
                   href={recipe.source_url}
                   target="_blank"
                   rel="noopener noreferrer"
+                  className="favorites__link"
                 >
                   View Full Recipe
                 </a>
               </button>
-              <button onClick={() => handleRemoveFavorite(recipe.id)}>
+
+              <button
+                className="favorites__button favorites__button--remove"
+                onClick={() => handleRemoveFavorite(recipe.id)}
+              >
                 Remove
               </button>
             </li>
