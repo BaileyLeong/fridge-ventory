@@ -9,18 +9,21 @@ export const getAllFridgeItems = async (req, res) => {
   try {
     const user_id = req.user.id;
     const items = await knex("fridge_items")
-      .where({ user_id })
+      .join("ingredients", "fridge_items.ingredient_id", "ingredients.id")
+      .where("fridge_items.user_id", user_id)
       .select(
-        "id",
-        "ingredient_id",
-        "quantity",
-        "unit",
-        "expires_at",
-        "image_url"
+        "fridge_items.id",
+        "ingredients.id as ingredient_id",
+        "ingredients.name as ingredient_name",
+        "fridge_items.quantity",
+        "fridge_items.unit",
+        "fridge_items.expires_at",
+        "fridge_items.image_url"
       );
 
     res.status(200).json(items);
   } catch (error) {
+    console.error("Error fetching fridge items:", error);
     res.status(500).json({ error: "Failed to fetch fridge items" });
   }
 };
@@ -62,16 +65,14 @@ export const addFridgeItem = async (req, res) => {
       expires_at,
     });
 
-    res
-      .status(201)
-      .json({
-        id,
-        user_id,
-        ingredient_id: ingredient.id,
-        quantity,
-        unit,
-        expires_at,
-      });
+    res.status(201).json({
+      id,
+      user_id,
+      ingredient_id: ingredient.id,
+      quantity,
+      unit,
+      expires_at,
+    });
   } catch (error) {
     console.error("Error adding fridge item:", error);
     res.status(500).json({ error: "Failed to add fridge item" });
@@ -82,7 +83,6 @@ export const updateFridgeItem = async (req, res) => {
   try {
     const user_id = req.user.id;
     const { id } = req.params;
-
     const { quantity, unit, expires_at } = req.body;
     const updateData = { quantity, unit, expires_at };
 
