@@ -71,26 +71,27 @@ const MealPlanner = () => {
   };
 
   return (
-    <div>
-      <h1>Meal Planner</h1>
-      <ul className="meal-list">
+    <div className="meal-planner">
+      <h1 className="meal-planner__title">Meal Planner</h1>
+      <ul className="meal-planner__list">
         {mealPlan.map((meal) => (
-          <li key={meal.id} className="meal-item">
-            <div className="meal-info">
+          <li key={meal.id} className="meal-planner__item">
+            <div className="meal-planner__info">
               <img
+                className="meal-planner__image"
                 src={meal.image_url || "https://via.placeholder.com/150"}
                 alt={meal.name}
-                className="meal-image"
               />
-              <div className="meal-details">
-                <p>{meal.name}</p>
-                <p className="meal-date">
+              <div className="meal-planner__details">
+                <p className="meal-planner__name">{meal.name}</p>
+                <p className="meal-planner__date">
                   Planned for:{" "}
                   {formatDateForDisplay(
                     selectedDates[meal.id] || meal.meal_date
                   )}
                 </p>
                 <select
+                  className="meal-planner__select"
                   value={selectedDates[meal.id] || meal.meal_date}
                   onChange={(e) =>
                     handleUpdateMealDate(
@@ -107,10 +108,16 @@ const MealPlanner = () => {
                     </option>
                   ))}
                 </select>
-                <button onClick={() => handleAddToFavorites(meal.recipe_id)}>
+                <button
+                  className="meal-planner__button meal-planner__button--favorite"
+                  onClick={() => handleAddToFavorites(meal.recipe_id)}
+                >
                   Add to Favorites
                 </button>
-                <button onClick={() => handleDeleteMeal(meal.id)}>
+                <button
+                  className="meal-planner__button meal-planner__button--delete"
+                  onClick={() => handleDeleteMeal(meal.id)}
+                >
                   Delete
                 </button>
               </div>
