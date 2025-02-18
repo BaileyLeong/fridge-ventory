@@ -6,3 +6,5 @@ export const formatDateForDisplay = (dateString) => {
     year: "numeric",
   });
 };
+
+export default formatDateForDisplay;

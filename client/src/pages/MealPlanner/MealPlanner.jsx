@@ -7,15 +7,24 @@ import {
   addFavoriteRecipe,
 } from "../../api/apiClient";
 import "./MealPlanner.scss";
+import formatDateDisplay from "../../utils/utils.js";
 
 const MealPlanner = () => {
   const [mealPlan, setMealPlan] = useState([]);
   const [availableRecipes, setAvailableRecipes] = useState([]);
   const [availableDates, setAvailableDates] = useState([]);
+  const [selectedDates, setSelectedDates] = useState({});
 
   useEffect(() => {
     fetchMealPlan()
-      .then((response) => setMealPlan(response.data))
+      .then((response) => {
+        setMealPlan(response.data);
+        const initialDates = response.data.reduce((acc, meal) => {
+          acc[meal.id] = meal.meal_date;
+          return acc;
+        }, {});
+        setSelectedDates(initialDates);
+      })
       .catch((error) => console.error("Error fetching meal plan:", error));
 
     fetchRecipes()
@@ -33,22 +42,17 @@ const MealPlanner = () => {
     setAvailableDates(dates);
   }, []);
 
-  const formatDateDisplay = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      weekday: "long",
-    });
-  };
-
   const handleUpdateMealDate = (id, newDate, recipeId, mealType) => {
     updateMealInPlan(id, {
       recipe_id: recipeId,
       meal_type: mealType,
       date: newDate,
     })
-      .then(() =>
-        fetchMealPlan().then((response) => setMealPlan(response.data))
-      )
+      .then(() => {
+        setSelectedDates((prev) => ({ ...prev, [id]: newDate }));
+        return fetchMealPlan();
+      })
+      .then((response) => setMealPlan(response.data))
       .catch((error) => console.error("Error updating meal date:", error));
   };
 
@@ -80,9 +84,12 @@ const MealPlanner = () => {
               />
               <div className="meal-details">
                 <p>{meal.name}</p>
-
+                <p className="meal-date">
+                  Planned for:{" "}
+                  {formatDateDisplay(selectedDates[meal.id] || meal.meal_date)}
+                </p>
                 <select
-                  value={meal.meal_date}
+                  value={selectedDates[meal.id] || meal.meal_date}
                   onChange={(e) =>
                     handleUpdateMealDate(
                       meal.id,
@@ -98,7 +105,6 @@ const MealPlanner = () => {
                     </option>
                   ))}
                 </select>
-
                 <button onClick={() => handleAddToFavorites(meal.recipe_id)}>
                   Add to Favorites
                 </button>
