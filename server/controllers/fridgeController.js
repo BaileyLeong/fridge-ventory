@@ -64,8 +64,8 @@ export const addFridgeItem = async (req, res) => {
       const foundIngredient = response.data.results[0];
 
       image_url = foundIngredient.image
-        ? `https://img.spoonacular.com/ingredients_100x100/${foundIngredient.image}`
-        : "https://placehold.co/100";
+        ? `https://img.spoonacular.com/ingredients_500x500/${foundIngredient.image}`
+        : "https://placehold.co/500";
 
       await knex("ingredients")
         .insert({
@@ -85,8 +85,8 @@ export const addFridgeItem = async (req, res) => {
         );
 
         image_url = response.data.image
-          ? `https://img.spoonacular.com/ingredients_100x100/${response.data.image}`
-          : "https://placehold.co/100";
+          ? `https://img.spoonacular.com/ingredients_500x500/${response.data.image}`
+          : "https://placehold.co/500";
       }
     }
 
