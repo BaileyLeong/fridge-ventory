@@ -41,47 +41,64 @@ const Dashboard = () => {
   };
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <h2>Fridge Inventory</h2>
-      {fridgeItems.length === 0 ? (
-        <p>No items in your fridge yet.</p>
-      ) : (
-        <div className="fridge-items">
-          {fridgeItems.map((item) => (
-            <div key={item.id} className="fridge-item">
-              <img src={item.image_url} alt={item.name} />
-              <p>{item.name}</p>
-            </div>
-          ))}
-        </div>
-      )}
-      <h3>Expiring Soon</h3>
-      <ul>
-        {expiringSoon.map((item) => (
-          <li key={item.id}>
-            {item.name} (Expires: {formatDate(item.expires_at)})
-          </li>
-        ))}
-      </ul>
+    <div className="dashboard">
+      <h1 className="dashboard__title">Dashboard</h1>
 
-      <h2>Recently Added Recipes</h2>
-      <ul>
-        {recipes.slice(0, 5).map((recipe) => (
-          <li key={recipe.id}>
-            <h3>{recipe.name}</h3>
-            <img src={recipe.image || recipe.image_url} alt={recipe.name} />
-          </li>
-        ))}
-      </ul>
-      <h2>Meal Plan Highlights</h2>
-      <ul>
-        {mealPlan.slice(0, 5).map((meal) => (
-          <li key={meal.id}>
-            {meal.name} on {meal.meal_date}
-          </li>
-        ))}
-      </ul>
+      <section className="dashboard__section dashboard__section--fridge">
+        <h2 className="dashboard__heading">Fridge Inventory</h2>
+        {fridgeItems.length === 0 ? (
+          <p className="dashboard__message">No items in your fridge yet.</p>
+        ) : (
+          <div className="fridge-items">
+            {fridgeItems.map((item) => (
+              <div key={item.id} className="fridge-items__item">
+                <img
+                  className="fridge-items__image"
+                  src={item.image_url}
+                  alt={item.name}
+                />
+                <p className="fridge-items__name">{item.name}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <h3 className="dashboard__subheading">Expiring Soon</h3>
+        <ul className="dashboard__list dashboard__list--expiring">
+          {expiringSoon.map((item) => (
+            <li key={item.id} className="dashboard__list-item">
+              {item.name} (Expires: {formatDate(item.expires_at)})
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="dashboard__section dashboard__section--recipes">
+        <h2 className="dashboard__heading">Recently Added Recipes</h2>
+        <ul className="dashboard__list dashboard__list--recipes">
+          {recipes.slice(0, 5).map((recipe) => (
+            <li key={recipe.id} className="dashboard__list-item">
+              <h3 className="dashboard__recipe-name">{recipe.name}</h3>
+              <img
+                className="dashboard__recipe-image"
+                src={recipe.image || recipe.image_url}
+                alt={recipe.name}
+              />
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      <section className="dashboard__section dashboard__section--meal-plan">
+        <h2 className="dashboard__heading">Meal Plan Highlights</h2>
+        <ul className="dashboard__list dashboard__list--meal-plan">
+          {mealPlan.slice(0, 5).map((meal) => (
+            <li key={meal.id} className="dashboard__list-item">
+              {meal.name} on {meal.meal_date}
+            </li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 };
