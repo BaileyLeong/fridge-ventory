@@ -32,26 +32,39 @@ const Dashboard = () => {
     return diffInDays <= 3;
   });
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
   return (
     <div>
       <h1>Dashboard</h1>
       <h2>Fridge Inventory</h2>
-      <div className="fridge-items">
-        {fridgeItems.map((item) => (
-          <div key={item.id} className="fridge-item">
-            <img src={item.image_url} alt={item.name} />
-            <p>{item.name}</p>
-          </div>
-        ))}
-      </div>
+      {fridgeItems.length === 0 ? (
+        <p>No items in your fridge yet.</p>
+      ) : (
+        <div className="fridge-items">
+          {fridgeItems.map((item) => (
+            <div key={item.id} className="fridge-item">
+              <img src={item.image_url} alt={item.name} />
+              <p>{item.name}</p>
+            </div>
+          ))}
+        </div>
+      )}
       <h3>Expiring Soon</h3>
       <ul>
         {expiringSoon.map((item) => (
           <li key={item.id}>
-            {item.name} (Expires: {item.expires_at})
+            {item.name} (Expires: {formatDate(item.expires_at)})
           </li>
         ))}
       </ul>
+
       <h2>Recently Added Recipes</h2>
       <ul>
         {recipes.slice(0, 5).map((recipe) => (
