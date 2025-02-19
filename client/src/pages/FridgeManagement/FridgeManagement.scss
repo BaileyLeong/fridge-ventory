@@ -119,18 +119,23 @@
       flex: 1 1 calc((100% - 2rem) / 3);
     }
 
-    &-photo {
-      max-width: 90%;
-      max-height: 90%;
-      aspect-ratio: 1 / 1;
-      object-fit: contain;
-      border-radius: 6px;
-      background-color: white;
+    &--expiring-soon {
+      background-color: #ffebcc;
+      border: 1px solid #ff9800;
     }
+  }
 
-    &-name {
-      flex: 1;
-    }
+  &__item-photo {
+    max-width: 90%;
+    max-height: 90%;
+    aspect-ratio: 1 / 1;
+    object-fit: contain;
+    border-radius: 6px;
+    background-color: white;
+  }
+
+  &__item-name {
+    flex: 1;
   }
 
   &__item-photo-container {
@@ -144,6 +149,11 @@
     box-shadow: inset 0 0 0 20px #fafafa;
     background-color: #fafafa;
     // DON'T FORGET: the key here is that it matches the photo card so we can hide weird photo shapes 👍🏻
+
+    &--expiring-soon {
+      background-color: #ffebcc;
+      box-shadow: inset 0 0 0 20px #ffebcc;
+    }
   }
 
   &__item--spacer {
