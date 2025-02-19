@@ -7,7 +7,10 @@ import {
   searchIngredients,
 } from "../../api/apiClient";
 import "./FridgeManagement.scss";
-import { formatDateForDisplay } from "../../utils/utils.js";
+import {
+  formatDateForDisplay,
+  capitalizeFirstLetter,
+} from "../../utils/utils.js";
 
 const UNIT_OPTIONS = [
   "g",

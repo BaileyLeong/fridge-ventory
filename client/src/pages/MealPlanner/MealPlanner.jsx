@@ -7,7 +7,7 @@ import {
   addFavoriteRecipe,
 } from "../../api/apiClient";
 import "./MealPlanner.scss";
-import formatDateForDisplay from "../../utils/utils.js";
+import { formatDateForDisplay } from "../../utils/utils.js";
 
 const MealPlanner = () => {
   const [mealPlan, setMealPlan] = useState([]);

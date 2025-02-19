@@ -9,7 +9,7 @@ import {
   addGroceryItem,
 } from "../../api/apiClient";
 import "./SurpriseMe.scss";
-import formatDateForDisplay from "../../utils/utils.js";
+import { formatDateForDisplay } from "../../utils/utils.js";
 
 const SurpriseMe = () => {
   const [recipes, setRecipes] = useState([]);
