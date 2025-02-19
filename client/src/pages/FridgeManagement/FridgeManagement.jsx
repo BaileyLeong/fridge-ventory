@@ -222,11 +222,13 @@ const FridgeManagement = () => {
       <ul className="fridge__list">
         {fridgeItems.map((item) => (
           <li key={item.id} className="fridge__item">
-            <img
-              className="fridge__item-photo"
-              src={item.image_url || "https://placehold.co/500"}
-              alt={item.ingredient_name}
-            />
+            <div className="fridge__item-photo-container">
+              <img
+                className="fridge__item-photo"
+                src={item.image_url || "https://placehold.co/500"}
+                alt={item.ingredient_name}
+              />
+            </div>
             <strong className="fridge__item-name">
               {capitalizeFirstLetter(item.ingredient_name)}
             </strong>
