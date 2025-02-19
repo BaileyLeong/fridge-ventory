@@ -46,7 +46,7 @@ const FridgeManagement = () => {
   }, []);
 
   const handleIngredientSearch = async (query) => {
-    if (!query || query.length < 2) {
+    if (!query || query.length < 3) {
       setIngredientSuggestions([]);
       setShowSuggestions(false);
       return;
@@ -117,10 +117,9 @@ const FridgeManagement = () => {
         placeholder="Search for an ingredient"
         value={newItem.name}
         onChange={(e) => {
-          if (!newItem.ingredient_id) {
-            setNewItem({ ...newItem, name: e.target.value });
-            handleIngredientSearch(e.target.value);
-          }
+          const newName = e.target.value;
+          setNewItem({ ...newItem, name: newName, ingredient_id: null });
+          handleIngredientSearch(newName);
         }}
         onFocus={() => setShowSuggestions(true)}
       />
@@ -153,11 +152,14 @@ const FridgeManagement = () => {
         className="fridge__input fridge__input--unit"
         value={newItem.unit || ""}
         onChange={(e) =>
-          setNewItem({ ...newItem, unit: e.target.value || null })
+          setNewItem({
+            ...newItem,
+            unit: e.target.value === "" ? null : e.target.value,
+          })
         }
       >
         {UNIT_OPTIONS.map((unit) => (
-          <option key={unit || "no-unit"} value={unit}>
+          <option key={unit || "no-unit"} value={unit === null ? "" : unit}>
             {unit || "No Unit"}
           </option>
         ))}
