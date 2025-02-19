@@ -1,64 +1,62 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { useState } from "react";
 import "./Navbar.scss";
+import menuIcon from "../../assets/icons/menu-icon.svg";
 
 const Navbar = () => {
   const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const toggleMenu = () => {
+    setMenuOpen((prev) => !prev);
+  };
 
   return (
     <nav className="navbar">
-      <ul className="navbar__list">
-        {location.pathname !== "/" && (
-          <li className="navbar__item">
-            <NavLink className="navbar__link" to="/">
-              Dashboard
-            </NavLink>
-          </li>
-        )}
-        {location.pathname !== "/fridge" && (
-          <li className="navbar__item">
-            <NavLink className="navbar__link" to="/fridge">
-              Fridge
-            </NavLink>
-          </li>
-        )}
-        {location.pathname !== "/recipes" && (
-          <li className="navbar__item">
-            <NavLink className="navbar__link" to="/recipes">
-              Recipes
-            </NavLink>
-          </li>
-        )}
-        {location.pathname !== "/meal-planner" && (
-          <li className="navbar__item">
-            <NavLink className="navbar__link" to="/meal-planner">
-              Meal Planner
-            </NavLink>
-          </li>
-        )}
-        {location.pathname !== "/grocery-list" && (
-          <li className="navbar__item">
-            <NavLink className="navbar__link" to="/grocery-list">
-              Grocery List
-            </NavLink>
-          </li>
-        )}
-        {location.pathname !== "/favorites" && (
-          <li className="navbar__item">
-            <NavLink className="navbar__link" to="/favorites">
-              Favorites
-            </NavLink>
-          </li>
-        )}
-        {location.pathname !== "/surprise-me" && (
-          <li className="navbar__item">
-            <NavLink
-              className="navbar__link navbar__link--special"
-              to="/surprise-me"
-            >
-              I'm Bored!
-            </NavLink>
-          </li>
-        )}
+      <button className="navbar__toggle" onClick={toggleMenu}>
+        <img src={menuIcon} alt="menu icon" />
+      </button>
+      <h1 className="navbar__title">Fridge-Ventory</h1>
+
+      <ul className={`navbar__list ${menuOpen ? "navbar__list--open" : ""}`}>
+        <li className="navbar__item">
+          <NavLink to="/" className="navbar__link">
+            Dashboard
+          </NavLink>
+        </li>
+        <li className="navbar__item">
+          <NavLink to="/fridge" className="navbar__link">
+            Fridge
+          </NavLink>
+        </li>
+        <li className="navbar__item">
+          <NavLink to="/recipes" className="navbar__link">
+            Recipes
+          </NavLink>
+        </li>
+        <li className="navbar__item">
+          <NavLink to="/meal-planner" className="navbar__link">
+            Meal Planner
+          </NavLink>
+        </li>
+        <li className="navbar__item">
+          <NavLink to="/grocery-list" className="navbar__link">
+            Grocery List
+          </NavLink>
+        </li>
+        <li className="navbar__item">
+          <NavLink to="/favorites" className="navbar__link">
+            Favorites
+          </NavLink>
+        </li>
+        <li className="navbar__item">
+          <NavLink
+            to="/surprise-me"
+            className="navbar__link navbar__link--special"
+          >
+            I'm Bored!
+          </NavLink>
+        </li>
       </ul>
     </nav>
   );
