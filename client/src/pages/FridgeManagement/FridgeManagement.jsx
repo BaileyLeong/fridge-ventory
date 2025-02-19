@@ -98,7 +98,16 @@ const FridgeManagement = () => {
     if (newQuantity === null || newQuantity === undefined) return;
 
     updateFridgeItem(id, { quantity: Number(newQuantity) })
-      .then(refreshFridgeItems)
+      .then(() => {
+        refreshFridgeItems();
+        setUpdateValues((prev) => ({
+          ...prev,
+          [id]: {
+            ...(prev[id] || {}),
+            quantity: "",
+          },
+        }));
+      })
       .catch((error) => console.error("Error updating quantity:", error));
   };
 
