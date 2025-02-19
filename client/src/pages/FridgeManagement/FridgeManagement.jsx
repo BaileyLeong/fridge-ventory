@@ -193,7 +193,7 @@ const FridgeManagement = () => {
               alt={item.ingredient_name}
             />
             <strong className="fridge__item-name">
-              {item.ingredient_name}
+              {capitalizeFirstLetter(item.ingredient_name)}
             </strong>
             (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
             {item.quantity} {item.unit || ""}
