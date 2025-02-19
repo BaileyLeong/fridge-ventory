@@ -26,15 +26,17 @@ const UNIT_OPTIONS = [
   null,
 ];
 
+const initialFormState = {
+  name: "",
+  ingredient_id: null,
+  expires_at: "",
+  quantity: 1,
+  unit: null,
+};
+
 const FridgeManagement = () => {
   const [fridgeItems, setFridgeItems] = useState([]);
-  const [newItem, setNewItem] = useState({
-    name: "",
-    ingredient_id: null,
-    expires_at: "",
-    quantity: 1,
-    unit: null,
-  });
+  const [newItem, setNewItem] = useState(initialFormState);
   const [updateValues, setUpdateValues] = useState({});
   const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -83,7 +85,11 @@ const FridgeManagement = () => {
     }
 
     addFridgeItem(newItem)
-      .then(refreshFridgeItems)
+      .then(() => {
+        refreshFridgeItems();
+
+        setNewItem({ ...initialFormState });
+      })
       .catch((error) => console.error("Error adding item:", error));
   };
 
@@ -122,7 +128,11 @@ const FridgeManagement = () => {
         value={newItem.name}
         onChange={(e) => {
           const newName = e.target.value;
-          setNewItem({ ...newItem, name: newName, ingredient_id: null });
+          setNewItem({
+            ...newItem,
+            name: newName,
+            ingredient_id: null,
+          });
           handleIngredientSearch(newName);
         }}
         onFocus={() => setShowSuggestions(true)}
@@ -148,7 +158,10 @@ const FridgeManagement = () => {
         placeholder="Quantity"
         value={newItem.quantity}
         onChange={(e) =>
-          setNewItem({ ...newItem, quantity: Number(e.target.value) })
+          setNewItem({
+            ...newItem,
+            quantity: Number(e.target.value),
+          })
         }
       />
 
@@ -174,7 +187,10 @@ const FridgeManagement = () => {
         type="date"
         value={newItem.expires_at || ""}
         onChange={(e) =>
-          setNewItem({ ...newItem, expires_at: e.target.value || null })
+          setNewItem({
+            ...newItem,
+            expires_at: e.target.value || null,
+          })
         }
       />
 
