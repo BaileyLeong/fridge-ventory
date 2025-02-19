@@ -283,6 +283,14 @@ const FridgeManagement = () => {
             </button>
           </li>
         ))}
+        {Array.from({ length: (3 - (fridgeItems.length % 3)) % 3 }).map(
+          (_, index) => (
+            <li
+              key={`spacer-${index}`}
+              className="fridge__item fridge__item--spacer"
+            />
+          )
+        )}
       </ul>
     </div>
   );

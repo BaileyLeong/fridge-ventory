@@ -137,4 +137,9 @@
     background-color: #fafafa;
     // DON'T FORGET: the key here is that it matches the photo card so we can hide weird photo shapes 👍🏻
   }
+
+  &__item--spacer {
+    visibility: hidden;
+    height: 0;
+  }
 }
