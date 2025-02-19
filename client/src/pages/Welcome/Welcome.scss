@@ -7,6 +7,8 @@
   align-items: center;
   height: 100vh;
   background: #f0f0f0;
+  max-width: 1280px;
+  margin: 0 auto;
 
   &--focus {
     transition: background-color 2s ease-in-out;
@@ -20,7 +22,7 @@
     width: 88%;
     opacity: 1;
     transition: opacity 2sease-in-out;
-    max-width: 1280px;
+    max-width: 468px;
     flex-direction: column;
     justify-content: center;
     padding: 4rem 0;
@@ -29,6 +31,10 @@
 
     &--focus {
       opacity: 0.2;
+    }
+
+    @include tablet {
+      width: 66%;
     }
   }
 
