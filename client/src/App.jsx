@@ -10,14 +10,14 @@ import Navbar from "./components/NavBar/NavBar";
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 import "./App.scss";
 import SurpriseMe from "./pages/SurpriseMe/SurpriseMe";
-import EnterFridge from "./components/EnterFridge/EnterFridge";
+import Welcome from "./pages/Welcome/Welcome";
 
 function App() {
   const [showNavbar, setShowNavbar] = useState(true);
 
   useEffect(() => {
     const handleRouteChange = () => {
-      setShowNavbar(window.location.pathname !== "/");
+      setShowNavbar(location.pathname !== "/");
     };
 
     window.addEventListener("popstate", handleRouteChange);
@@ -30,7 +30,7 @@ function App() {
     <BrowserRouter>
       {showNavbar && <Navbar />}
       <Routes>
-        <Route path="/" element={<EnterFridge />} />
+        <Route path="/" element={<Welcome />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/fridge" element={<FridgeManagement />} />
         <Route path="/recipes" element={<Recipes />} />
