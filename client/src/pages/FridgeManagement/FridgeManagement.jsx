@@ -138,86 +138,87 @@ const FridgeManagement = () => {
   return (
     <div className="fridge">
       <h1 className="fridge__title">Fridge Management</h1>
+      <div className="fridge__input-container">
+        <input
+          className="fridge__input fridge__input--text"
+          type="text"
+          placeholder="Search for an ingredient"
+          value={newItem.name}
+          onChange={(e) => {
+            const newName = e.target.value;
+            setNewItem({
+              ...newItem,
+              name: newName,
+              ingredient_id: null,
+            });
+            handleIngredientSearch(newName);
+          }}
+          onFocus={() => setShowSuggestions(true)}
+        />
 
-      <input
-        className="fridge__input fridge__input--text"
-        type="text"
-        placeholder="Search for an ingredient"
-        value={newItem.name}
-        onChange={(e) => {
-          const newName = e.target.value;
-          setNewItem({
-            ...newItem,
-            name: newName,
-            ingredient_id: null,
-          });
-          handleIngredientSearch(newName);
-        }}
-        onFocus={() => setShowSuggestions(true)}
-      />
+        {showSuggestions && ingredientSuggestions.length > 0 && (
+          <ul className="fridge__suggestions">
+            {ingredientSuggestions.map((ing) => (
+              <li
+                key={ing.id}
+                className="fridge__suggestions-item"
+                onClick={() => handleSelectIngredient(ing)}
+              >
+                {ing.name}
+              </li>
+            ))}
+          </ul>
+        )}
 
-      {showSuggestions && ingredientSuggestions.length > 0 && (
-        <ul className="fridge__suggestions">
-          {ingredientSuggestions.map((ing) => (
-            <li
-              key={ing.id}
-              className="fridge__suggestions-item"
-              onClick={() => handleSelectIngredient(ing)}
-            >
-              {ing.name}
-            </li>
+        <input
+          className="fridge__input fridge__input--quantity"
+          type="number"
+          placeholder="Quantity"
+          value={newItem.quantity}
+          onChange={(e) =>
+            setNewItem({
+              ...newItem,
+              quantity: Number(e.target.value),
+            })
+          }
+        />
+
+        <select
+          className="fridge__input fridge__input--unit"
+          value={newItem.unit || ""}
+          onChange={(e) =>
+            setNewItem({
+              ...newItem,
+              unit: e.target.value === "" ? null : e.target.value,
+            })
+          }
+        >
+          {UNIT_OPTIONS.map((unit) => (
+            <option key={unit || "no-unit"} value={unit === null ? "" : unit}>
+              {unit || "No Unit"}
+            </option>
           ))}
-        </ul>
-      )}
+        </select>
 
-      <input
-        className="fridge__input fridge__input--quantity"
-        type="number"
-        placeholder="Quantity"
-        value={newItem.quantity}
-        onChange={(e) =>
-          setNewItem({
-            ...newItem,
-            quantity: Number(e.target.value),
-          })
-        }
-      />
+        <input
+          className="fridge__input fridge__input--date"
+          type="date"
+          value={newItem.expires_at || ""}
+          onChange={(e) =>
+            setNewItem({
+              ...newItem,
+              expires_at: e.target.value || null,
+            })
+          }
+        />
 
-      <select
-        className="fridge__input fridge__input--unit"
-        value={newItem.unit || ""}
-        onChange={(e) =>
-          setNewItem({
-            ...newItem,
-            unit: e.target.value === "" ? null : e.target.value,
-          })
-        }
-      >
-        {UNIT_OPTIONS.map((unit) => (
-          <option key={unit || "no-unit"} value={unit === null ? "" : unit}>
-            {unit || "No Unit"}
-          </option>
-        ))}
-      </select>
-
-      <input
-        className="fridge__input fridge__input--date"
-        type="date"
-        value={newItem.expires_at || ""}
-        onChange={(e) =>
-          setNewItem({
-            ...newItem,
-            expires_at: e.target.value || null,
-          })
-        }
-      />
-
-      <button
-        className="fridge__button fridge__button--add"
-        onClick={handleAddItem}
-      >
-        Add Item
-      </button>
+        <button
+          className="fridge__button fridge__button--add"
+          onClick={handleAddItem}
+        >
+          Add Item
+        </button>
+      </div>
 
       <ul className="fridge__list">
         {fridgeItems.map((item) => (

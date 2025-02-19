@@ -5,6 +5,7 @@
 .fridge {
   margin: 0 auto;
   padding: 1.25rem;
+  max-width: 1280px;
 
   &__title {
     font-size: 1.8rem;
@@ -24,6 +25,13 @@
     &--date {
       max-width: 200px;
     }
+  }
+
+  &__input-container {
+    padding: 1rem;
+    border: 1px solid;
+    border-radius: 8px;
+    margin: 0 auto;
   }
 
   &__button {
@@ -88,7 +96,7 @@
     align-items: stretch;
     flex-wrap: wrap;
     justify-content: space-around;
-    width: 90%;
+    width: 100%;
     gap: 1rem;
   }
 
