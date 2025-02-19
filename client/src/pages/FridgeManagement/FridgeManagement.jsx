@@ -116,7 +116,16 @@ const FridgeManagement = () => {
     if (!newExpiry) return;
 
     updateFridgeItem(id, { expires_at: newExpiry })
-      .then(refreshFridgeItems)
+      .then(() => {
+        refreshFridgeItems();
+        setUpdateValues((prev) => ({
+          ...prev,
+          [id]: {
+            ...(prev[id] || {}),
+            expires_at: "",
+          },
+        }));
+      })
       .catch((error) => console.error("Error updating expiry date:", error));
   };
 
