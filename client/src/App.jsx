@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { useState, useEffect } from "react";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import FridgeManagement from "./pages/FridgeManagement/FridgeManagement";
 import Recipes from "./pages/Recipes/Recipes";
@@ -9,13 +10,28 @@ import Navbar from "./components/NavBar/NavBar";
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
 import "./App.scss";
 import SurpriseMe from "./pages/SurpriseMe/SurpriseMe";
+import EnterFridge from "./components/EnterFridge/EnterFridge";
 
-const App = () => {
+function App() {
+  const [showNavbar, setShowNavbar] = useState(true);
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      setShowNavbar(window.location.pathname !== "/");
+    };
+
+    window.addEventListener("popstate", handleRouteChange);
+    handleRouteChange();
+
+    return () => window.removeEventListener("popstate", handleRouteChange);
+  }, []);
+
   return (
     <BrowserRouter>
-      <Navbar />
+      {showNavbar && <Navbar />}
       <Routes>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<EnterFridge />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/fridge" element={<FridgeManagement />} />
         <Route path="/recipes" element={<Recipes />} />
         <Route path="/meal-planner" element={<MealPlanner />} />
@@ -26,6 +42,6 @@ const App = () => {
       </Routes>
     </BrowserRouter>
   );
-};
+}
 
 export default App;

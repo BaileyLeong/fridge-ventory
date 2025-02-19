@@ -20,7 +20,7 @@ const Navbar = () => {
 
       <ul className={`navbar__list ${menuOpen ? "navbar__list--open" : ""}`}>
         <li className="navbar__item">
-          <NavLink to="/" className="navbar__link">
+          <NavLink to="/dashboard" className="navbar__link">
             Dashboard
           </NavLink>
         </li>
