@@ -10,6 +10,7 @@ import "./FridgeManagement.scss";
 import {
   formatDateForDisplay,
   capitalizeFirstLetter,
+  formatQuantity,
 } from "../../utils/utils.js";
 
 const UNIT_OPTIONS = [
@@ -196,7 +197,7 @@ const FridgeManagement = () => {
               {capitalizeFirstLetter(item.ingredient_name)}
             </strong>
             (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
-            {item.quantity} {item.unit || ""}
+            {formatQuantity(item.quantity)} {item.unit || ""}
             <input
               className="fridge__input fridge__input--quantity"
               type="number"
