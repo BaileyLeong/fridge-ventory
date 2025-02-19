@@ -1,2 +1,78 @@
 @use "../../styles/partials/mixins" as *;
 @use "../../styles/partials/variables" as *;
+
+.welcome {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #f0f0f0;
+
+  &--focus {
+    transition: background-color 2s ease-in-out;
+    background-color: rgba(0, 0, 0, 0.3);
+  }
+
+  &__content {
+    background-color: #f0f0f0;
+    display: flex;
+    margin: 0 auto;
+    width: 88%;
+    opacity: 1;
+    transition: opacity 2sease-in-out;
+    max-width: 1280px;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem 0;
+    align-self: stretch;
+    gap: 10rem;
+
+    &--focus {
+      opacity: 0.2;
+    }
+  }
+
+  &__hero {
+    background: white;
+    padding: 1.25rem;
+    border: 2px solid black;
+    width: 100%;
+    border-radius: 5px;
+  }
+
+  &__hero-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+
+  &__hero-description {
+    font-style: italic;
+  }
+
+  &__nav {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  &__button {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.2rem;
+    text-align: center;
+    background: white;
+    border: 2px solid black;
+    border-radius: 8px;
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: #ddd;
+    }
+  }
+}
