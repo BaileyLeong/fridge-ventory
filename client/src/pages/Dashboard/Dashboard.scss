@@ -96,4 +96,15 @@
     object-fit: cover;
     border-radius: 6px;
   }
+
+  // update food item color for JUST dashboard page
+  .food-item--expiring-soon {
+    border: 1px solid #ddd;
+    background: #fafafa;
+  }
+
+  .food-item__photo-container--expiring-soon {
+    background-color: #ffebcc;
+    box-shadow: inset 0 0 0 20px #fafafa;
+  }
 }
