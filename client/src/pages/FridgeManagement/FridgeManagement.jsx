@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import {
   fetchFridgeItems,
   addFridgeItem,
@@ -39,6 +40,7 @@ const FridgeManagement = () => {
   const [showAddForm, setShowAddForm] = useState(false);
   const [itemsPerRow, setItemsPerRow] = useState(3);
   const [sortBy, setSortBy] = useState("default");
+  const location = useLocation();
 
   useEffect(() => {
     const updateItemsPerRow = () => {
@@ -65,6 +67,14 @@ const FridgeManagement = () => {
   useEffect(() => {
     refreshFridgeItems();
   }, []);
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const defaultSort = queryParams.get("sort");
+    if (defaultSort) {
+      setSortBy(defaultSort);
+    }
+  }, [location.search]);
 
   const handleIngredientSearch = async (query) => {
     if (!query || query.length < 3) {

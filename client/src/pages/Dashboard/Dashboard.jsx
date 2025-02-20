@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import {
   fetchFridgeItems,
   fetchRecipes,
@@ -12,6 +13,7 @@ const Dashboard = () => {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [mealPlan, setMealPlan] = useState([]);
+  const maxItems = 5;
 
   useEffect(() => {
     fetchFridgeItems()
@@ -43,20 +45,27 @@ const Dashboard = () => {
         {fridgeItems.length === 0 ? (
           <p className="dashboard__message">No items in your fridge yet.</p>
         ) : (
-          <ul className="dashboard__list dashboard__list--fridge">
-            {fridgeItems.map((item) => (
-              <FoodItem
-                key={item.id}
-                item={item}
-                readOnly={true}
-                updateValues={{}}
-                setUpdateValues={() => {}}
-                onUpdateQuantity={() => {}}
-                onUpdateExpiry={() => {}}
-                onDeleteItem={() => {}}
-              />
-            ))}
-          </ul>
+          <>
+            <ul className="dashboard__grid">
+              {fridgeItems.slice(0, maxItems).map((item) => (
+                <FoodItem
+                  key={item.id}
+                  item={item}
+                  readOnly={true}
+                  updateValues={{}}
+                  setUpdateValues={() => {}}
+                  onUpdateQuantity={() => {}}
+                  onUpdateExpiry={() => {}}
+                  onDeleteItem={() => {}}
+                />
+              ))}
+            </ul>
+            {fridgeItems.length > maxItems && (
+              <Link to="/fridge" className="dashboard__view-more">
+                View More
+              </Link>
+            )}
+          </>
         )}
       </section>
 
@@ -65,37 +74,28 @@ const Dashboard = () => {
         {expiringSoonItems.length === 0 ? (
           <p className="dashboard__message">No items expiring soon.</p>
         ) : (
-          <ul className="dashboard__list dashboard__list--expiring">
-            {expiringSoonItems.map((item) => (
-              <FoodItem
-                key={item.id}
-                item={item}
-                readOnly={true}
-                updateValues={{}}
-                setUpdateValues={() => {}}
-                onUpdateQuantity={() => {}}
-                onUpdateExpiry={() => {}}
-                onDeleteItem={() => {}}
-              />
-            ))}
-          </ul>
+          <>
+            <ul className="dashboard__grid">
+              {expiringSoonItems.slice(0, maxItems).map((item) => (
+                <FoodItem
+                  key={item.id}
+                  item={item}
+                  readOnly={true}
+                  updateValues={{}}
+                  setUpdateValues={() => {}}
+                  onUpdateQuantity={() => {}}
+                  onUpdateExpiry={() => {}}
+                  onDeleteItem={() => {}}
+                />
+              ))}
+            </ul>
+            {expiringSoonItems.length > maxItems && (
+              <Link to="/fridge?sort=expiring" className="dashboard__view-more">
+                View More
+              </Link>
+            )}
+          </>
         )}
-      </section>
-
-      <section className="dashboard__section dashboard__section--recipes">
-        <h2 className="dashboard__heading">Recently Added Recipes</h2>
-        <ul className="dashboard__list dashboard__list--recipes">
-          {recipes.slice(0, 5).map((recipe) => (
-            <li key={recipe.id} className="dashboard__list-item">
-              <h3 className="dashboard__recipe-name">{recipe.name}</h3>
-              <img
-                className="dashboard__recipe-image"
-                src={recipe.image || recipe.image_url}
-                alt={recipe.name}
-              />
-            </li>
-          ))}
-        </ul>
       </section>
 
       <section className="dashboard__section dashboard__section--meal-plan">
