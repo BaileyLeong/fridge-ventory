@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   fetchFridgeItems,
   addFridgeItem,
@@ -7,11 +7,7 @@ import {
   searchIngredients,
 } from "../../api/apiClient";
 import "./FridgeManagement.scss";
-import {
-  formatDateForDisplay,
-  capitalizeFirstLetter,
-  formatQuantity,
-} from "../../utils/utils.js";
+import FoodItem from "../../components/FoodItem/FoodItem.jsx";
 
 const UNIT_OPTIONS = [
   "g",
@@ -106,7 +102,6 @@ const FridgeManagement = () => {
     addFridgeItem(newItem)
       .then(() => {
         refreshFridgeItems();
-
         setNewItem({ ...initialFormState });
       })
       .catch((error) => console.error("Error adding item:", error));
@@ -168,8 +163,6 @@ const FridgeManagement = () => {
     }
     return 0;
   });
-
-  console.log("sorted:", sortedFridgeItems);
 
   return (
     <div className="fridge">
@@ -283,90 +276,18 @@ const FridgeManagement = () => {
       </select>
 
       <ul className="fridge__list">
-        {sortedFridgeItems.map((item) => {
-          const expiresAt = item.expires_at ? new Date(item.expires_at) : null;
-          const today = new Date();
-          const fiveDaysFromNow = new Date();
-          fiveDaysFromNow.setDate(today.getDate() + 5);
+        {sortedFridgeItems.map((item) => (
+          <FoodItem
+            key={item.id}
+            item={item}
+            updateValues={updateValues}
+            setUpdateValues={setUpdateValues}
+            onUpdateQuantity={handleUpdateQuantity}
+            onUpdateExpiry={handleUpdateExpiry}
+            onDeleteItem={handleDeleteItem}
+          />
+        ))}
 
-          const isExpiringSoon =
-            expiresAt && expiresAt <= fiveDaysFromNow && expiresAt >= today;
-
-          return (
-            <li
-              key={item.id}
-              className={`fridge__item ${
-                isExpiringSoon ? "fridge__item--expiring-soon" : ""
-              }`}
-            >
-              <div
-                className={`fridge__item-photo-container${
-                  isExpiringSoon
-                    ? " fridge__item-photo-container--expiring-soon"
-                    : ""
-                }`}
-              >
-                <img
-                  className="fridge__item-photo"
-                  src={item.image_url || "https://placehold.co/500"}
-                  alt={item.ingredient_name}
-                />
-              </div>
-              <strong className="fridge__item-name">
-                {capitalizeFirstLetter(item.ingredient_name)}
-              </strong>
-              (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
-              {formatQuantity(item.quantity)} {item.unit || ""}
-              <input
-                className="fridge__input fridge__input--quantity"
-                type="number"
-                placeholder="New Quantity"
-                value={updateValues[item.id]?.quantity || ""}
-                onChange={(e) =>
-                  setUpdateValues({
-                    ...updateValues,
-                    [item.id]: {
-                      ...updateValues[item.id],
-                      quantity: e.target.value,
-                    },
-                  })
-                }
-              />
-              <button
-                className="fridge__button fridge__button--update"
-                onClick={() => handleUpdateQuantity(item.id)}
-              >
-                Update Quantity
-              </button>
-              <input
-                className="fridge__input fridge__input--date"
-                type="date"
-                value={updateValues[item.id]?.expires_at || ""}
-                onChange={(e) =>
-                  setUpdateValues({
-                    ...updateValues,
-                    [item.id]: {
-                      ...updateValues[item.id],
-                      expires_at: e.target.value,
-                    },
-                  })
-                }
-              />
-              <button
-                className="fridge__button fridge__button--update"
-                onClick={() => handleUpdateExpiry(item.id)}
-              >
-                Update Expiry
-              </button>
-              <button
-                className="fridge__button fridge__button--delete"
-                onClick={() => handleDeleteItem(item.id)}
-              >
-                Delete
-              </button>
-            </li>
-          );
-        })}
         {Array.from({
           length:
             (itemsPerRow - (fridgeItems.length % itemsPerRow)) % itemsPerRow,
