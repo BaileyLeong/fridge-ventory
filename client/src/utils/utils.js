@@ -19,4 +19,5 @@ export const formatQuantity = (quantity) => {
 
 export const hideExpiry = (str) => {
   if (str === "no date set") return "";
+  return str;
 };

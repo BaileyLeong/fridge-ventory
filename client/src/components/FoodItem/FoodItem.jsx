@@ -2,6 +2,7 @@ import {
   formatDateForDisplay,
   capitalizeFirstLetter,
   formatQuantity,
+  hideExpiry,
 } from "../../utils/utils.js";
 import "./FoodItem.scss";
 
@@ -20,6 +21,8 @@ const FoodItem = ({
   fiveDaysFromNow.setDate(today.getDate() + 5);
   const isExpiringSoon =
     expiresAt && expiresAt <= fiveDaysFromNow && expiresAt >= today;
+  const formattedExpiry = formatDateForDisplay(item.expires_at);
+  const expiryDisplay = item.expires_at ? hideExpiry(formattedExpiry) : "";
 
   return (
     <li
@@ -42,12 +45,12 @@ const FoodItem = ({
         {capitalizeFirstLetter(item.ingredient_name)}
       </strong>
       <span>
-        (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
-        {formatQuantity(item.quantity)} {item.unit || ""}
+        Qty: {formatQuantity(item.quantity)} {item.unit || ""}
       </span>
 
       {!readOnly && (
         <>
+          <span> {expiryDisplay ? `(Expires: ${expiryDisplay})` : ""}</span>
           <input
             className="food-item__input food-item__input--quantity"
             type="number"
