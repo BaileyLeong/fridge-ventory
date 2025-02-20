@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchFridgeItems,
   addFridgeItem,
@@ -7,7 +7,7 @@ import {
   searchIngredients,
 } from "../../api/apiClient";
 import "./FridgeManagement.scss";
-import FoodItem from "../../components/FoodItem/FoodItem.jsx";
+import FoodItem from "../../components/FoodItem/FoodItem";
 
 const UNIT_OPTIONS = [
   "g",

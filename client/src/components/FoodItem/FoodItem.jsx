@@ -1,9 +1,9 @@
-import React from "react";
 import {
   formatDateForDisplay,
   capitalizeFirstLetter,
   formatQuantity,
 } from "../../utils/utils.js";
+import "./FoodItem.scss";
 
 const FoodItem = ({
   item,
@@ -17,34 +17,35 @@ const FoodItem = ({
   const today = new Date();
   const fiveDaysFromNow = new Date();
   fiveDaysFromNow.setDate(today.getDate() + 5);
-
   const isExpiringSoon =
     expiresAt && expiresAt <= fiveDaysFromNow && expiresAt >= today;
 
   return (
     <li
-      className={`fridge__item ${
-        isExpiringSoon ? "fridge__item--expiring-soon" : ""
+      className={`food-item ${
+        isExpiringSoon ? "food-item--expiring-soon" : ""
       }`}
     >
       <div
-        className={`fridge__item-photo-container${
-          isExpiringSoon ? " fridge__item-photo-container--expiring-soon" : ""
+        className={`food-item__photo-container ${
+          isExpiringSoon ? "food-item__photo-container--expiring-soon" : ""
         }`}
       >
         <img
-          className="fridge__item-photo"
+          className="food-item__photo"
           src={item.image_url || "https://placehold.co/500"}
           alt={item.ingredient_name}
         />
       </div>
-      <strong className="fridge__item-name">
+      <strong className="food-item__name">
         {capitalizeFirstLetter(item.ingredient_name)}
       </strong>
-      (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
-      {formatQuantity(item.quantity)} {item.unit || ""}
+      <span>
+        (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
+        {formatQuantity(item.quantity)} {item.unit || ""}
+      </span>
       <input
-        className="fridge__input fridge__input--quantity"
+        className="food-item__input food-item__input--quantity"
         type="number"
         placeholder="New Quantity"
         value={updateValues[item.id]?.quantity || ""}
@@ -59,13 +60,13 @@ const FoodItem = ({
         }
       />
       <button
-        className="fridge__button fridge__button--update"
+        className="food-item__button food-item__button--update"
         onClick={() => onUpdateQuantity(item.id)}
       >
         Update Quantity
       </button>
       <input
-        className="fridge__input fridge__input--date"
+        className="food-item__input food-item__input--date"
         type="date"
         value={updateValues[item.id]?.expires_at || ""}
         onChange={(e) =>
@@ -79,13 +80,13 @@ const FoodItem = ({
         }
       />
       <button
-        className="fridge__button fridge__button--update"
+        className="food-item__button food-item__button--update"
         onClick={() => onUpdateExpiry(item.id)}
       >
         Update Expiry
       </button>
       <button
-        className="fridge__button fridge__button--delete"
+        className="food-item__button food-item__button--delete"
         onClick={() => onDeleteItem(item.id)}
       >
         Delete
