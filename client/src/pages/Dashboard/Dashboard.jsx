@@ -13,7 +13,7 @@ const Dashboard = () => {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [recipes, setRecipes] = useState([]);
   const [mealPlan, setMealPlan] = useState([]);
-  const maxItems = 5;
+  const maxItems = 6;
 
   useEffect(() => {
     fetchFridgeItems()
@@ -48,16 +48,17 @@ const Dashboard = () => {
           <>
             <ul className="dashboard__grid">
               {fridgeItems.slice(0, maxItems).map((item) => (
-                <FoodItem
-                  key={item.id}
-                  item={item}
-                  readOnly={true}
-                  updateValues={{}}
-                  setUpdateValues={() => {}}
-                  onUpdateQuantity={() => {}}
-                  onUpdateExpiry={() => {}}
-                  onDeleteItem={() => {}}
-                />
+                <li key={item.id} className="dashboard__grid-item">
+                  <FoodItem
+                    item={item}
+                    readOnly={true}
+                    updateValues={{}}
+                    setUpdateValues={() => {}}
+                    onUpdateQuantity={() => {}}
+                    onUpdateExpiry={() => {}}
+                    onDeleteItem={() => {}}
+                  />
+                </li>
               ))}
             </ul>
             {fridgeItems.length > maxItems && (
@@ -77,16 +78,17 @@ const Dashboard = () => {
           <>
             <ul className="dashboard__grid">
               {expiringSoonItems.slice(0, maxItems).map((item) => (
-                <FoodItem
-                  key={item.id}
-                  item={item}
-                  readOnly={true}
-                  updateValues={{}}
-                  setUpdateValues={() => {}}
-                  onUpdateQuantity={() => {}}
-                  onUpdateExpiry={() => {}}
-                  onDeleteItem={() => {}}
-                />
+                <li key={item.id} className="dashboard__grid-item">
+                  <FoodItem
+                    item={item}
+                    readOnly={true}
+                    updateValues={{}}
+                    setUpdateValues={() => {}}
+                    onUpdateQuantity={() => {}}
+                    onUpdateExpiry={() => {}}
+                    onDeleteItem={() => {}}
+                  />
+                </li>
               ))}
             </ul>
             {expiringSoonItems.length > maxItems && (

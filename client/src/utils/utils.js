@@ -16,3 +16,7 @@ export const formatQuantity = (quantity) => {
   const num = parseFloat(quantity);
   return num.toFixed(3).replace(/\.?0+$/, "");
 };
+
+export const hideExpiry = (str) => {
+  if (str === "no date set") return "";
+};
