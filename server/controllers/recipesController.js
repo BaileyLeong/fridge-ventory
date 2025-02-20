@@ -188,7 +188,7 @@ export const addRecipe = async (req, res) => {
       id,
       name,
       category: category || "Uncategorized",
-      image_url: image_url || "https://placehold.co/100",
+      image_url: image_url || "https://placehold.co/500",
       source_url: source_url || "https://spoonacular.com",
       steps: steps || "No steps provided.",
       ready_in_minutes: ready_in_minutes || null,
