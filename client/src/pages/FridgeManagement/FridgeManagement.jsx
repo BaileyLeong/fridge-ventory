@@ -41,6 +41,24 @@ const FridgeManagement = () => {
   const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
+  const [itemsPerRow, setItemsPerRow] = useState(3);
+  const [sortBy, setSortBy] = useState("default");
+
+  useEffect(() => {
+    const updateItemsPerRow = () => {
+      if (window.innerWidth >= 1280) {
+        setItemsPerRow(3);
+      } else if (window.innerWidth >= 768) {
+        setItemsPerRow(2);
+      } else {
+        setItemsPerRow(1);
+      }
+    };
+
+    updateItemsPerRow();
+    window.addEventListener("resize", updateItemsPerRow);
+    return () => window.removeEventListener("resize", updateItemsPerRow);
+  }, []);
 
   const refreshFridgeItems = () => {
     fetchFridgeItems()
@@ -136,6 +154,23 @@ const FridgeManagement = () => {
       .catch((error) => console.error("Error deleting item:", error));
   };
 
+  const sortedFridgeItems = [...fridgeItems].sort((a, b) => {
+    if (sortBy === "expiring") {
+      const dateA = a.expires_at
+        ? new Date(a.expires_at)
+        : new Date(9999, 11, 31);
+      const dateB = b.expires_at
+        ? new Date(b.expires_at)
+        : new Date(9999, 11, 31);
+      return dateA - dateB;
+    } else if (sortBy === "newest") {
+      return b.id - a.id;
+    }
+    return 0;
+  });
+
+  console.log("sorted:", sortedFridgeItems);
+
   return (
     <div className="fridge">
       <h1 className="fridge__title">Fridge Management</h1>
@@ -230,8 +265,25 @@ const FridgeManagement = () => {
         </div>
       )}
 
+      <label
+        className="fridge__label fridge__label--sort"
+        htmlFor="sortOptions"
+      >
+        Sort by:
+      </label>
+      <select
+        id="sortOptions"
+        className="fridge__select fridge__select--sort"
+        value={sortBy}
+        onChange={(e) => setSortBy(e.target.value)}
+      >
+        <option value="default">Default</option>
+        <option value="expiring">Expiring Soon</option>
+        <option value="newest">Newest First</option>
+      </select>
+
       <ul className="fridge__list">
-        {fridgeItems.map((item) => {
+        {sortedFridgeItems.map((item) => {
           const expiresAt = item.expires_at ? new Date(item.expires_at) : null;
           const today = new Date();
           const fiveDaysFromNow = new Date();
@@ -315,14 +367,15 @@ const FridgeManagement = () => {
             </li>
           );
         })}
-        {Array.from({ length: (3 - (fridgeItems.length % 3)) % 3 }).map(
-          (_, index) => (
-            <li
-              key={`spacer-${index}`}
-              className="fridge__item fridge__item--spacer"
-            />
-          )
-        )}
+        {Array.from({
+          length:
+            (itemsPerRow - (fridgeItems.length % itemsPerRow)) % itemsPerRow,
+        }).map((_, index) => (
+          <li
+            key={`spacer-${index}`}
+            className="fridge__item fridge__item--spacer"
+          />
+        ))}
       </ul>
     </div>
   );

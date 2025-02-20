@@ -100,6 +100,19 @@
     gap: 1rem;
   }
 
+  &__label--sort {
+    font-weight: bold;
+    margin-right: auto;
+  }
+
+  &__select--sort {
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+
   &__item {
     display: flex;
     flex-direction: column;
