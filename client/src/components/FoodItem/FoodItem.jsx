@@ -12,6 +12,7 @@ const FoodItem = ({
   onUpdateQuantity,
   onUpdateExpiry,
   onDeleteItem,
+  readOnly = false,
 }) => {
   const expiresAt = item.expires_at ? new Date(item.expires_at) : null;
   const today = new Date();
@@ -44,53 +45,58 @@ const FoodItem = ({
         (Expires: {formatDateForDisplay(item.expires_at)}) | Qty:{" "}
         {formatQuantity(item.quantity)} {item.unit || ""}
       </span>
-      <input
-        className="food-item__input food-item__input--quantity"
-        type="number"
-        placeholder="New Quantity"
-        value={updateValues[item.id]?.quantity || ""}
-        onChange={(e) =>
-          setUpdateValues((prev) => ({
-            ...prev,
-            [item.id]: {
-              ...prev[item.id],
-              quantity: e.target.value,
-            },
-          }))
-        }
-      />
-      <button
-        className="food-item__button food-item__button--update"
-        onClick={() => onUpdateQuantity(item.id)}
-      >
-        Update Quantity
-      </button>
-      <input
-        className="food-item__input food-item__input--date"
-        type="date"
-        value={updateValues[item.id]?.expires_at || ""}
-        onChange={(e) =>
-          setUpdateValues((prev) => ({
-            ...prev,
-            [item.id]: {
-              ...prev[item.id],
-              expires_at: e.target.value,
-            },
-          }))
-        }
-      />
-      <button
-        className="food-item__button food-item__button--update"
-        onClick={() => onUpdateExpiry(item.id)}
-      >
-        Update Expiry
-      </button>
-      <button
-        className="food-item__button food-item__button--delete"
-        onClick={() => onDeleteItem(item.id)}
-      >
-        Delete
-      </button>
+
+      {!readOnly && (
+        <>
+          <input
+            className="food-item__input food-item__input--quantity"
+            type="number"
+            placeholder="New Quantity"
+            value={updateValues[item.id]?.quantity || ""}
+            onChange={(e) =>
+              setUpdateValues((prev) => ({
+                ...prev,
+                [item.id]: {
+                  ...prev[item.id],
+                  quantity: e.target.value,
+                },
+              }))
+            }
+          />
+          <button
+            className="food-item__button food-item__button--update"
+            onClick={() => onUpdateQuantity(item.id)}
+          >
+            Update Quantity
+          </button>
+          <input
+            className="food-item__input food-item__input--date"
+            type="date"
+            value={updateValues[item.id]?.expires_at || ""}
+            onChange={(e) =>
+              setUpdateValues((prev) => ({
+                ...prev,
+                [item.id]: {
+                  ...prev[item.id],
+                  expires_at: e.target.value,
+                },
+              }))
+            }
+          />
+          <button
+            className="food-item__button food-item__button--update"
+            onClick={() => onUpdateExpiry(item.id)}
+          >
+            Update Expiry
+          </button>
+          <button
+            className="food-item__button food-item__button--delete"
+            onClick={() => onDeleteItem(item.id)}
+          >
+            Delete
+          </button>
+        </>
+      )}
     </li>
   );
 };
