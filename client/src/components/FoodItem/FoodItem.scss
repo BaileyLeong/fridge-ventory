@@ -13,6 +13,7 @@
   margin-bottom: 0.625rem;
   background: #fafafa;
   width: 100%;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 
   @include tablet {
     flex: 1 1 calc((100% - 4rem) / 2);
