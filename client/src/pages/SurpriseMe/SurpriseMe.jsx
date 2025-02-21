@@ -203,7 +203,7 @@ const SurpriseMe = () => {
                 className="surprise__select"
                 value={
                   selectedDates[selectedRecipe.id] ||
-                  new Date().toISOString().split("T")[0]
+                  new Date().toLocaleDateString("en-US")
                 }
                 onChange={(e) =>
                   setSelectedDates({
