@@ -14,12 +14,23 @@ function EnterFridge({ onFinish }) {
 
   return (
     <section className="fridge-entry">
+      <h1
+        className={`fridge-entry__title ${
+          isZooming ? "fridge-entry__title--zooming" : ""
+        }`}
+      >
+        <mark>Fridge-Ventory</mark>
+      </h1>
       <div
         className={`fridge-entry__container ${
           isZooming ? "fridge-entry__container--zooming" : ""
         }`}
         onMouseEnter={() => setIsZooming(true)}
       >
+        <img
+          className="fridge-entry__image"
+          src="src/assets/images/chikken.png"
+        ></img>
         <div className="fridge-entry__door fridge-entry__door--left">
           <div className="fridge-entry__handle fridge-entry__handle--left"></div>
         </div>
