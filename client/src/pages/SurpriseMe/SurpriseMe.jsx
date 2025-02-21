@@ -112,8 +112,8 @@ const SurpriseMe = () => {
       recipeIngredients.forEach((ingredient) => {
         const payload = {
           name: ingredient.name,
-          quantity: ingredient.amount, // should be 113 in your example
-          unit: ingredient.unit, // should be "g"
+          quantity: ingredient.amount,
+          unit: ingredient.unit,
           completed: false,
         };
         console.log("Adding ingredient with payload:", payload);
