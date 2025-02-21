@@ -172,7 +172,7 @@ const GroceryList = () => {
             <span className="grocery__item-name">
               {item.ingredient_name || item.name || "Unknown Item"}
             </span>
-            <span>
+            <span className="grocery__item-quantity">
               Qty: {formatQuantity(item.quantity)} {item.unit}
             </span>
             <div className="grocery__checkbox-container">

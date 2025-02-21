@@ -6,93 +6,96 @@
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 
+  &__title {
+    flex-grow: 1;
+    font-size: 1.25rem;
+    margin: 0;
+    text-align: center;
+  }
+
+  &__input-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+
+  &__input {
+    flex: 1;
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    margin-right: 0.5rem;
+  }
+
+  &__button {
+    cursor: pointer;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.875rem;
+  }
+
+  &__button--add {
+    padding: 0.5rem 1rem;
+    background-color: #4caf50;
+    color: #fff;
+
+    &:hover {
+      background-color: #43a047;
+    }
+  }
+
+  &__list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+  }
+
+  &__item-name {
+    flex: 1;
+    font-size: 1rem;
+  }
+
+  &__item-quantity {
+    margin-right: 0.5rem;
+  }
+
+  &__checkbox-container {
+    display: flex;
+    align-items: center;
+    margin-right: 0.5rem;
+  }
+
+  &__checkbox {
+    margin-right: 0.25rem;
+  }
+
+  &__label {
+    font-size: 0.875rem;
+    margin-right: 0.75rem;
+  }
+
+  &__button--delete {
+    padding: 0.25rem 0.5rem;
+    background-color: #f44336;
+    color: #fff;
+
+    &:hover {
+      background-color: #e53935;
+    }
+  }
+
   .fridge__button {
     margin: 1rem 0;
-  }
-}
-
-.grocery__title {
-  flex-grow: 1;
-  font-size: 1.25rem;
-  margin: 0;
-  text-align: center;
-}
-
-.grocery__input-container {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.grocery__input {
-  flex: 1;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border: 2px solid #ccc;
-  border-radius: 4px;
-  margin-right: 0.5rem;
-}
-
-.grocery__button {
-  cursor: pointer;
-  border: none;
-  border-radius: 4px;
-  font-size: 0.875rem;
-}
-
-.grocery__button--add {
-  padding: 0.5rem 1rem;
-  background-color: #4caf50;
-  color: #fff;
-
-  &:hover {
-    background-color: #43a047;
-  }
-}
-
-.grocery__list {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
-
-.grocery__item {
-  display: flex;
-  align-items: center;
-  padding: 0.5rem;
-  margin-bottom: 0.5rem;
-  border-radius: 4px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-}
-
-.grocery__item-name {
-  flex: 1;
-  font-size: 1rem;
-}
-
-.grocery__checkbox-container {
-  display: flex;
-  align-items: center;
-  margin-right: 0.5rem;
-}
-
-.grocery__checkbox {
-  margin-right: 0.25rem;
-}
-
-.grocery__label {
-  font-size: 0.875rem;
-  margin-right: 0.75rem;
-}
-
-/* Delete button */
-.grocery__button--delete {
-  padding: 0.25rem 0.5rem;
-  background-color: #f44336;
-  color: #fff;
-
-  &:hover {
-    background-color: #e53935;
   }
 }
