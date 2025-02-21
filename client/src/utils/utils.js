@@ -21,3 +21,16 @@ export const hideExpiry = (str) => {
   if (str === "no date set") return "";
   return str;
 };
+
+export const UNIT_OPTIONS = [
+  "g",
+  "kg",
+  "ml",
+  "L",
+  "oz",
+  "lb",
+  "cup",
+  "tsp",
+  "tbsp",
+  null,
+];

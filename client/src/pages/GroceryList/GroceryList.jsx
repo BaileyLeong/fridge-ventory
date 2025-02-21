@@ -9,7 +9,7 @@ import {
   addFridgeItem,
 } from "../../api/apiClient";
 import "./GroceryList.scss";
-import { formatQuantity } from "../../utils/utils";
+import { formatQuantity, UNIT_OPTIONS } from "../../utils/utils";
 
 const GroceryList = () => {
   const [groceryList, setGroceryList] = useState([]);
@@ -108,6 +108,7 @@ const GroceryList = () => {
                 ...newItem,
                 name: newName,
                 ingredient_id: null,
+                unit: null,
               });
               handleIngredientSearch(newName);
             }}
@@ -128,15 +129,30 @@ const GroceryList = () => {
             </ul>
           )}
 
-          <input
-            className="fridge__input fridge__input--quantity"
-            type="number"
-            placeholder="Quantity"
-            value={newItem.quantity}
+          <select
+            className="fridge__input fridge__input--unit"
+            value={newItem.unit || ""}
             onChange={(e) =>
               setNewItem({
                 ...newItem,
-                quantity: Number(e.target.value),
+                unit: e.target.value === "" ? null : e.target.value,
+              })
+            }
+          >
+            {UNIT_OPTIONS.map((unit) => (
+              <option key={unit || "no-unit"} value={unit === null ? "" : unit}>
+                {unit || "No Unit"}
+              </option>
+            ))}
+          </select>
+
+          <input
+            className="fridge__input fridge__input--unit"
+            value={newItem.unit || ""}
+            onChange={(e) =>
+              setNewItem({
+                ...newItem,
+                unit: e.target.value === "" ? null : e.target.value,
               })
             }
           />

@@ -9,19 +9,7 @@ import {
 } from "../../api/apiClient";
 import "./FridgeManagement.scss";
 import FoodItem from "../../components/FoodItem/FoodItem";
-
-const UNIT_OPTIONS = [
-  "g",
-  "kg",
-  "ml",
-  "L",
-  "oz",
-  "lb",
-  "cup",
-  "tsp",
-  "tbsp",
-  null,
-];
+import { UNIT_OPTIONS } from "../../utils/utils";
 
 const initialFormState = {
   name: "",
