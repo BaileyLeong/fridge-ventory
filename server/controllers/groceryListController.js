@@ -16,6 +16,7 @@ export const getGroceryList = async (req, res) => {
         "grocery_lists.ingredient_id",
         "ingredients.name as ingredient_name",
         "grocery_lists.quantity",
+        "grocery_lists.unit",
         "grocery_lists.completed",
         "grocery_lists.created_at"
       );
@@ -49,8 +50,9 @@ export const getGroceryList = async (req, res) => {
 
 export const addItemToGroceryList = async (req, res) => {
   try {
+    console.log("Request body:", req.body);
     const user_id = req.user.id;
-    const { name, quantity = 1, completed = false } = req.body;
+    const { name, quantity = 1, unit = null, completed = false } = req.body;
 
     if (!name) {
       return res.status(400).json({ error: "Ingredient name is required" });
@@ -104,6 +106,7 @@ export const addItemToGroceryList = async (req, res) => {
       user_id,
       ingredient_id: ingredient.id,
       quantity,
+      unit,
       completed,
     });
 

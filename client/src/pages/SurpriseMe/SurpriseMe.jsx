@@ -110,12 +110,14 @@ const SurpriseMe = () => {
         return;
       }
       recipeIngredients.forEach((ingredient) => {
-        addGroceryItem({
+        const payload = {
           name: ingredient.name,
-          quantity: ingredient.amount_metric || ingredient.amount_us || 1,
-          unit: ingredient.unit_metric || ingredient.unit_us || null,
+          quantity: ingredient.amount, // should be 113 in your example
+          unit: ingredient.unit, // should be "g"
           completed: false,
-        });
+        };
+        console.log("Adding ingredient with payload:", payload);
+        addGroceryItem(payload);
       });
 
       setCurrentRecipeIndex((prevIndex) => (prevIndex + 1) % recipes.length);

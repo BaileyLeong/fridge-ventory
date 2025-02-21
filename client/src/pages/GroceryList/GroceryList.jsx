@@ -9,6 +9,7 @@ import {
   addFridgeItem,
 } from "../../api/apiClient";
 import "./GroceryList.scss";
+import { formatQuantity } from "../../utils/utils";
 
 const GroceryList = () => {
   const [groceryList, setGroceryList] = useState([]);
@@ -33,6 +34,8 @@ const GroceryList = () => {
       .then((response) => setRecipes(response.data))
       .catch((error) => console.error("Error fetching recipes:", error));
   }, []);
+
+  console.log("Grocery List updated:", groceryList);
 
   const handleIngredientSearch = async (query) => {
     if (!query || query.length < 3) {
@@ -70,6 +73,7 @@ const GroceryList = () => {
         name: trimmedName,
         ingredient_id: newItem.ingredient_id,
         quantity: newItem.quantity,
+        unit: newItem.unit,
         completed: false,
       });
       setNewItem({ name: "", ingredient_id: null, quantity: 1 });
@@ -152,6 +156,9 @@ const GroceryList = () => {
             <span className="grocery__item-name">
               {item.ingredient_name || item.name || "Unknown Item"}
             </span>
+            <span>
+              Qty: {formatQuantity(item.quantity)} {item.unit}
+            </span>
             <div className="grocery__checkbox-container">
               <input
                 className="grocery__checkbox"
@@ -172,6 +179,7 @@ const GroceryList = () => {
                       response.data
                     );
                     setGroceryList(response.data);
+                    console.log(response);
                   } catch (error) {
                     console.error("Error moving item to fridge:", error);
                   }

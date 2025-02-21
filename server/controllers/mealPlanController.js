@@ -72,7 +72,7 @@ export const addMealToPlan = async (req, res) => {
           user_id,
           ingredient_id: ingredient.ingredient_id,
           quantity: ingredient.amount_metric || 1,
-          unit: ingredient.unit_metric || null,
+          unit: ingredient.unit || null,
           completed: false,
         });
         groceryItemsAdded++;
