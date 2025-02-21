@@ -36,7 +36,7 @@ const MealPlanner = () => {
     const dates = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
       date.setDate(today.getDate() + i);
-      return date.toISOString().split("T")[0];
+      return date.toLocaleDateString("en-US");
     });
 
     setAvailableDates(dates);
