@@ -43,10 +43,16 @@ const MealPlanner = () => {
   }, []);
 
   const handleUpdateMealDate = (id, newDate, recipeId, mealType) => {
+    const localDate = new Date(newDate);
+    const utcDate = new Date(
+      localDate.getTime() + localDate.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split("T")[0];
     updateMealInPlan(id, {
       recipe_id: recipeId,
       meal_type: mealType,
-      date: newDate,
+      date: utcDate,
     })
       .then(() => {
         setSelectedDates((prev) => ({ ...prev, [id]: newDate }));

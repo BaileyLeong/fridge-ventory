@@ -47,7 +47,7 @@ const SurpriseMe = () => {
     const dates = Array.from({ length: 7 }, (_, i) => {
       const date = new Date();
       date.setDate(today.getDate() + i);
-      return date.toISOString().split("T")[0];
+      return date.toLocaleDateString("en-US");
     });
 
     setAvailableDates(dates);
@@ -64,9 +64,16 @@ const SurpriseMe = () => {
       return;
     }
 
-    const selectedDate =
+    let selectedDate =
       selectedDates[selectedRecipe.id] ||
       new Date().toISOString().split("T")[0];
+
+    const localDate = new Date(selectedDate);
+    const utcDate = new Date(
+      localDate.getTime() + localDate.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .split("T")[0];
 
     const mealExists = mealPlan.some(
       (meal) => meal.meal_date === selectedDate && meal.meal_type === "Dinner"
@@ -98,7 +105,7 @@ const SurpriseMe = () => {
       await addMealToPlan({
         recipe_id: selectedRecipe.id,
         meal_type: "Dinner",
-        date: selectedDate,
+        date: utcDate,
       });
 
       const recipeIngredients = [
@@ -203,7 +210,7 @@ const SurpriseMe = () => {
                 className="surprise__select"
                 value={
                   selectedDates[selectedRecipe.id] ||
-                  new Date().toLocaleDateString("en-US")
+                  new Date().toISOString().split("T")[0]
                 }
                 onChange={(e) =>
                   setSelectedDates({
