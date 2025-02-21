@@ -12,6 +12,58 @@
   overflow: hidden;
   flex: 1;
 
+  &__title {
+    font-style: italic;
+    font-weight: 800;
+    position: absolute;
+    top: 25%;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2.5rem;
+    color: #fff;
+    text-shadow: 0 0 10px rgb(242, 146, 196), 0 0 20px rgb(242, 146, 196),
+      0 0 40px rgb(242, 146, 196);
+    z-index: 2;
+    opacity: 1;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+    text-shadow: 0 0 10px #ffb0ff, 0 0 20px #ff66ff, 0 0 40px #ff33ff,
+      0 0 80px #cc00cc;
+
+    &::before {
+      content: "";
+      position: absolute;
+      top: 0px;
+      left: -25px;
+      width: 120%;
+      height: 120%;
+      background: rgba(141, 217, 252, 0.199);
+      z-index: -1;
+      transform: rotate(-10deg);
+      clip-path: polygon(0% 20%, 100% 0%, 90% 100%, 10% 90%);
+      display: inline-block;
+    }
+    &--zooming {
+      opacity: 0;
+      transition: opacity 2s ease-in-out;
+    }
+  }
+
+  mark {
+    color: #fff;
+    background: rgba(252, 141, 198, 0.199);
+    padding: 2px 4px;
+    display: inline-block;
+    transform: skewX(-10deg);
+  }
+
+  &__image {
+    height: 100px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    margin: 5rem auto;
+    opacity: 0.2;
+  }
+
   &__container {
     position: relative;
     width: 200px;
