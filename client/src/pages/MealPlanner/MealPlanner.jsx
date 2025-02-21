@@ -18,8 +18,12 @@ const MealPlanner = () => {
   useEffect(() => {
     fetchMealPlan()
       .then((response) => {
-        setMealPlan(response.data);
-        const initialDates = response.data.reduce((acc, meal) => {
+        const sortedMeals = response.data.sort(
+          (a, b) => new Date(a.meal_date) - new Date(b.meal_date)
+        );
+        setMealPlan(sortedMeals);
+
+        const initialDates = sortedMeals.reduce((acc, meal) => {
           acc[meal.id] = meal.meal_date;
           return acc;
         }, {});
@@ -76,62 +80,77 @@ const MealPlanner = () => {
     );
   };
 
+  const totalMeals = mealPlan.length;
+  const remainder = totalMeals % 7;
+  const spacersNeeded = remainder ? 7 - remainder : 0;
+
   return (
-    <div className="meal-planner">
+    <section className="meal-planner__container">
       <h1 className="meal-planner__title">Meal Planner</h1>
-      <ul className="meal-planner__list">
-        {mealPlan.map((meal) => (
-          <li key={meal.id} className="meal-planner__item">
-            <div className="meal-planner__info">
-              <img
-                className="meal-planner__image"
-                src={meal.image_url || "https://via.placeholder.com/150"}
-                alt={meal.name}
-              />
-              <div className="meal-planner__details">
-                <p className="meal-planner__name">{meal.name}</p>
-                <p className="meal-planner__date">
-                  Planned for:{" "}
-                  {formatDateForDisplay(
-                    selectedDates[meal.id] || meal.meal_date
-                  )}
-                </p>
-                <select
-                  className="meal-planner__select"
-                  value={selectedDates[meal.id] || meal.meal_date}
-                  onChange={(e) =>
-                    handleUpdateMealDate(
-                      meal.id,
-                      e.target.value,
-                      meal.recipe_id,
-                      meal.meal_type
-                    )
-                  }
-                >
-                  {availableDates.map((date) => (
-                    <option key={date} value={date}>
-                      {formatDateForDisplay(date)}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  className="meal-planner__button meal-planner__button--favorite"
-                  onClick={() => handleAddToFavorites(meal.recipe_id)}
-                >
-                  Add to Favorites
-                </button>
-                <button
-                  className="meal-planner__button meal-planner__button--delete"
-                  onClick={() => handleDeleteMeal(meal.id)}
-                >
-                  Delete
-                </button>
+      <div className="meal-planner">
+        <ul className="meal-planner__list">
+          {mealPlan.map((meal) => (
+            <li key={meal.id} className="meal-planner__item">
+              <div className="meal-planner__info">
+                <div className="meal-planner__image-container">
+                  <img
+                    className="meal-planner__image"
+                    src={meal.image_url || "https://via.placeholder.com/150"}
+                    alt={meal.name}
+                  />
+                </div>
+                <div className="meal-planner__details">
+                  <p className="meal-planner__name">{meal.name}</p>
+                  <p className="meal-planner__date">
+                    Planned for:{" "}
+                    {new Date(
+                      selectedDates[meal.id] || meal.meal_date
+                    ).toLocaleDateString("en-US", { weekday: "long" })}
+                  </p>
+                  <select
+                    className="meal-planner__select"
+                    value={selectedDates[meal.id] || meal.meal_date}
+                    onChange={(e) =>
+                      handleUpdateMealDate(
+                        meal.id,
+                        e.target.value,
+                        meal.recipe_id,
+                        meal.meal_type
+                      )
+                    }
+                  >
+                    {availableDates.map((date) => {
+                      const formattedDate = formatDateForDisplay(date);
+                      return (
+                        <option key={date} value={date}>
+                          {formattedDate}
+                        </option>
+                      );
+                    })}
+                  </select>
+
+                  <button
+                    className="meal-planner__button meal-planner__button--favorite"
+                    onClick={() => handleAddToFavorites(meal.recipe_id)}
+                  >
+                    Add to Favorites
+                  </button>
+                  <button
+                    className="meal-planner__button meal-planner__button--delete"
+                    onClick={() => handleDeleteMeal(meal.id)}
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
+            </li>
+          ))}
+          {Array.from({ length: spacersNeeded }).map((_, index) => (
+            <li key={`spacer-${index}`} className="meal-planner__spacer"></li>
+          ))}
+        </ul>
+      </div>
+    </section>
   );
 };
 
