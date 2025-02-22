@@ -1,4 +1,3 @@
-import React from "react";
 import { formatDateForDisplay } from "../../utils/utils.js";
 import "./MealCard.scss";
 

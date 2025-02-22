@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import MealCard from "../../components/MealCard/MealCard.jsx";
+import MealListMobile from "../../components/MealListMobile/MealListMobile.jsx";
 import {
   fetchMealPlan,
   updateMealInPlan,
@@ -7,6 +8,7 @@ import {
   fetchRecipes,
   addFavoriteRecipe,
 } from "../../api/apiClient";
+import { useIsMobile } from "../../utils/hooks.js";
 import "./MealPlanner.scss";
 
 const MealPlanner = () => {
@@ -14,6 +16,8 @@ const MealPlanner = () => {
   const [availableRecipes, setAvailableRecipes] = useState([]);
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDates, setSelectedDates] = useState({});
+
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     fetchMealPlan()
@@ -108,18 +112,30 @@ const MealPlanner = () => {
                 })}
               </h2>
               <ul className="meal-planner__list">
-                {mealsForDate.map((meal) => (
-                  <MealCard
-                    key={meal.id}
-                    meal={meal}
-                    selectedDate={selectedDates[meal.id]}
-                    availableDates={availableDates}
-                    onUpdateMealDate={handleUpdateMealDate}
-                    onDeleteMeal={handleDeleteMeal}
-                    onAddToFavorites={handleAddToFavorites}
-                    className="meal-planner__list-item"
-                  />
-                ))}
+                {mealsForDate.map((meal) =>
+                  isMobile ? (
+                    <MealListMobile
+                      key={meal.id}
+                      meal={meal}
+                      selectedDate={selectedDates[meal.id]}
+                      availableDates={availableDates}
+                      onUpdateMealDate={handleUpdateMealDate}
+                      onDeleteMeal={handleDeleteMeal}
+                      onAddToFavorites={handleAddToFavorites}
+                    />
+                  ) : (
+                    <MealCard
+                      key={meal.id}
+                      meal={meal}
+                      selectedDate={selectedDates[meal.id]}
+                      availableDates={availableDates}
+                      onUpdateMealDate={handleUpdateMealDate}
+                      onDeleteMeal={handleDeleteMeal}
+                      onAddToFavorites={handleAddToFavorites}
+                      className="meal-planner__list-item"
+                    />
+                  )
+                )}
                 {Array.from({ length: spacersNeeded }).map((_, index) => (
                   <li
                     key={`spacer-${index}`}

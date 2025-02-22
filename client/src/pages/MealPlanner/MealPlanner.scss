@@ -6,8 +6,13 @@
   padding: 0;
   display: flex;
   flex-wrap: wrap;
+  flex-direction: column;
   justify-content: center;
   gap: 10px;
+
+  @include tablet {
+    flex-direction: row;
+  }
 }
 
 .meal-planner {
