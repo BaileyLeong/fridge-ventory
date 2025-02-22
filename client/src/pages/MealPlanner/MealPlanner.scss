@@ -16,7 +16,7 @@
   flex-direction: column;
   border: 1px solid #ddd;
 
-  .meal-planner__group-title {
+  &__group-title {
     background-color: #f9f9f9;
     padding: 1rem;
     text-align: center;
@@ -24,19 +24,30 @@
     border-bottom: 1px solid #ddd;
   }
 
-  .meal-planner__group {
+  &__group {
     flex: 1;
     display: flex;
     flex-direction: column;
     padding: 1rem;
     background-color: #fff;
+  }
 
-    .meal-planner__list {
-      flex: 1 1 calc(33.333% - 1rem);
-      flex: 1;
-      border: 1px solid #eee;
-      margin: 0.5rem 0;
-      padding: 0.5rem;
-    }
+  &__list {
+    flex: 1 1 calc(33.333% - 1rem);
+    flex: 1;
+    border: 1px solid #eee;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+  }
+
+  &__title {
+    text-align: center;
+    margin: 1rem auto;
+    font-size: 2rem;
+  }
+
+  &__container {
+    max-width: 1280px;
+    margin: 0 auto;
   }
 }
