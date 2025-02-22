@@ -1,20 +1,6 @@
 @use "../../styles/partials/mixins" as *;
 @use "../../styles/partials/variables" as *;
 
-.meal-planner__list {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  flex-direction: column;
-  justify-content: center;
-  gap: 10px;
-
-  @include tablet {
-    flex-direction: row;
-  }
-}
-
 .meal-planner {
   flex: 1;
   display: flex;
@@ -38,11 +24,20 @@
   }
 
   &__list {
-    flex: 1 1 calc(33.333% - 1rem);
     flex: 1;
     border: 1px solid #eee;
     margin: 0.5rem 0;
     padding: 0.5rem;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+
+    @include tablet {
+      flex-direction: row;
+    }
   }
 
   &__title {
