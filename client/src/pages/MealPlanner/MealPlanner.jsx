@@ -1,23 +1,47 @@
 import { useEffect, useState } from "react";
+import { useIsMobile } from "../../utils/hooks.js";
 import MealCard from "../../components/MealCard/MealCard.jsx";
 import MealListMobile from "../../components/MealListMobile/MealListMobile.jsx";
+import MealPlanModal from "../../components/MealPlanModal/MealPlanModal.jsx";
 import {
   fetchMealPlan,
   updateMealInPlan,
   deleteMealFromPlan,
   fetchRecipes,
   addFavoriteRecipe,
+  generateMealPlan,
 } from "../../api/apiClient";
-import { useIsMobile } from "../../utils/hooks.js";
 import "./MealPlanner.scss";
+
+const isSameWeek = (date1, date2) => {
+  const oneDay = 24 * 60 * 60 * 1000;
+  const diffDays = Math.abs((date1 - date2) / oneDay);
+  return diffDays < 7 && date1.getDay() >= date2.getDay();
+};
 
 const MealPlanner = () => {
   const [mealPlan, setMealPlan] = useState([]);
   const [availableRecipes, setAvailableRecipes] = useState([]);
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDates, setSelectedDates] = useState({});
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    const today = new Date();
+    const todayDay = today.getDay();
+    const lastShown = localStorage.getItem("lastModalShown");
+
+    if (todayDay === 5) {
+      const lastShownDate = lastShown ? new Date(lastShown) : null;
+
+      if (!lastShownDate || !isSameWeek(today, lastShownDate)) {
+        setIsModalOpen(true);
+        localStorage.setItem("lastModalShown", today.toISOString());
+      }
+    }
+  }, []);
 
   useEffect(() => {
     fetchMealPlan()
@@ -47,6 +71,15 @@ const MealPlanner = () => {
     });
     setAvailableDates(dates);
   }, []);
+
+  const handleGenerateMealPlan = (preferences) => {
+    generateMealPlan(preferences)
+      .then((response) => {
+        setMealPlan(response.data);
+        setIsModalOpen(false);
+      })
+      .catch((error) => console.error("Error generating meal plan:", error));
+  };
 
   const handleUpdateMealDate = (id, newDate, recipeId, mealType) => {
     const localDate = new Date(newDate);
@@ -99,6 +132,13 @@ const MealPlanner = () => {
   return (
     <section className="meal-planner__container">
       <h1 className="meal-planner__title">Meal Planner</h1>
+
+      <MealPlanModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onGenerate={handleGenerateMealPlan}
+      />
+
       <div className="meal-planner">
         {sortedDates.map((date) => {
           const mealsForDate = groupedMeals[date];

@@ -62,7 +62,15 @@ export const addItemToGroceryList = async (req, res) => {
 
     if (!ingredient) {
       const response = await axios.get(
-        `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${API_KEY}`
+        "https://api.spoonacular.com/food/ingredients/search",
+        {
+          params: { query: name },
+          headers: {
+            "X-Rapidapi-Key": SPOONACULAR_API_KEY,
+            "X-Rapidapi-Host":
+              "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
+          },
+        }
       );
 
       if (response.data.results.length > 0) {

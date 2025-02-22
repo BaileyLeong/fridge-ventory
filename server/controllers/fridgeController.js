@@ -54,7 +54,15 @@ export const addFridgeItem = async (req, res) => {
 
     if (!ingredient) {
       const response = await axios.get(
-        `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${API_KEY}`
+        "https://api.spoonacular.com/food/ingredients/search",
+        {
+          params: { query: name },
+          headers: {
+            "X-Rapidapi-Key": SPOONACULAR_API_KEY,
+            "X-Rapidapi-Host":
+              "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
+          },
+        }
       );
 
       if (response.data.results.length === 0) {
@@ -78,15 +86,30 @@ export const addFridgeItem = async (req, res) => {
       ingredient_id = foundIngredient.id;
     } else {
       ingredient_id = ingredient.id;
-
-      if (!image_url) {
+    }
+    if (!image_url) {
+      try {
         const response = await axios.get(
-          `https://api.spoonacular.com/food/ingredients/${ingredient_id}/information?apiKey=${API_KEY}`
+          `https://api.spoonacular.com/food/ingredients/${ingredient_id}/information`,
+          {
+            headers: {
+              "X-Rapidapi-Key": SPOONACULAR_API_KEY,
+              "X-Rapidapi-Host":
+                "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
+            },
+          }
         );
 
-        image_url = response.data.image
-          ? `https://img.spoonacular.com/ingredients_500x500/${response.data.image}`
+        const ingredientData = response.data;
+        image_url = ingredientData.image
+          ? `https://spoonacular.com/cdn/ingredients_500x500/${ingredientData.image}`
           : "https://placehold.co/500";
+      } catch (error) {
+        console.error(
+          `Error fetching ingredient image for ID ${ingredient_id}:`,
+          error
+        );
+        image_url = "https://placehold.co/500";
       }
     }
 

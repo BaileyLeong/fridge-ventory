@@ -91,9 +91,8 @@ export const suggestRecipes = async (req, res) => {
 
     const ingredientList = ingredientNames.join(",");
     console.log("Querying Spoonacular with ingredients:", ingredientList);
-
     const response = await axios.get(
-      `https://api.spoonacular.com/recipes/complexSearch`,
+      "https://api.spoonacular.com/recipes/complexSearch",
       {
         params: {
           includeIngredients: ingredientList,
@@ -102,7 +101,11 @@ export const suggestRecipes = async (req, res) => {
           addRecipeInstructions: true,
           fillIngredients: true,
           sort: "max-used-ingredients",
-          apiKey: process.env.SPOONACULAR_API_KEY,
+        },
+        headers: {
+          "X-Rapidapi-Key": process.env.SPOONACULAR_API_KEY,
+          "X-Rapidapi-Host":
+            "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
         },
       }
     );

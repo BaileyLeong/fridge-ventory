@@ -206,3 +206,82 @@ export const deleteMealFromPlan = async (req, res) => {
     res.status(500).json({ error: "Failed to delete meal plan" });
   }
 };
+
+export const generateWeeklyMealPlan = async (req, res) => {
+  try {
+    const user_id = req.user.id;
+    const { cuisines, mealTypes } = req.body;
+
+    if (!Array.isArray(cuisines)) {
+      return res.status(400).json({ error: "Cuisines must be an array." });
+    }
+    if (!Array.isArray(mealTypes)) {
+      return res.status(400).json({ error: "Meal types must be an array." });
+    }
+
+    const user = await knex("users").where({ id: user_id }).first();
+    if (!user) {
+      return res.status(404).json({ error: "User not found." });
+    }
+
+    const dietaryRestrictions = user.dietary_restrictions || "";
+    const allergens = user.allergens || "";
+
+    const ingredientNames = await knex("fridge_items")
+      .join("ingredients", "fridge_items.ingredient_id", "ingredients.id")
+      .where("fridge_items.user_id", user_id)
+      .distinct("ingredients.name")
+      .pluck("ingredients.name");
+
+    if (ingredientNames.length === 0) {
+      return res.status(400).json({ error: "No ingredients found in fridge." });
+    }
+
+    const response = await axios.get(
+      "https://api.spoonacular.com/recipes/complexSearch",
+      {
+        params: {
+          includeIngredients: ingredientNames.join(","),
+          diet: dietaryRestrictions || undefined,
+          intolerances: allergens || undefined,
+          cuisine: cuisines.length > 0 ? cuisines.join(",") : undefined,
+          type: mealTypes.length > 0 ? mealTypes.join(",") : undefined,
+          number: 7,
+          addRecipeInformation: true,
+          sort: "max-used-ingredients",
+        },
+        headers: {
+          "X-Rapidapi-Key": process.env.SPOONACULAR_API_KEY,
+          "X-Rapidapi-Host":
+            "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
+        },
+      }
+    );
+
+    if (!response.data.results || response.data.results.length === 0) {
+      return res.status(404).json({ error: "No suitable recipes found." });
+    }
+
+    const recipes = response.data.results.map((recipe) => ({
+      id: recipe.id,
+      title: recipe.title,
+      image: recipe.image,
+      readyInMinutes: recipe.readyInMinutes,
+      servings: recipe.servings,
+      sourceUrl: recipe.sourceUrl,
+    }));
+
+    res.status(200).json(recipes);
+  } catch (error) {
+    console.error(
+      "Error generating meal plan:",
+      error.response?.data || error.message
+    );
+
+    if (error.response?.status === 429) {
+      return res.status(429).json({ error: "API rate limit exceeded." });
+    }
+
+    res.status(500).json({ error: "Failed to generate meal plan" });
+  }
+};

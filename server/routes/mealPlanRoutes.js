@@ -11,8 +11,11 @@ router
   .get(mealPlanController.getMealPlan)
   .post(mealPlanController.addMealToPlan);
 
+router.route("/generate").post(mealPlanController.generateWeeklyMealPlan);
+
 router
   .route("/:id")
   .put(mealPlanController.updateMealInPlan)
   .delete(mealPlanController.deleteMealFromPlan);
+
 export default router;

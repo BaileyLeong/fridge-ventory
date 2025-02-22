@@ -31,6 +31,8 @@ export const addMealToPlan = (meal) => apiClient.post("/meal-plan", meal);
 export const updateMealInPlan = (id, mealUpdates) =>
   apiClient.put(`/meal-plan/${id}`, mealUpdates);
 export const deleteMealFromPlan = (id) => apiClient.delete(`/meal-plan/${id}`);
+export const generateMealPlan = (cuisines = [], mealTypes = []) =>
+  apiClient.post("/meal-plan/generate", { cuisines, mealTypes });
 
 // Recipes API
 export const fetchRecipes = () => apiClient.get("/recipes");
