@@ -3,7 +3,8 @@ import configuration from "../knexfile.js";
 import axios from "axios";
 
 const knex = initKnex(configuration);
-const API_KEY = process.env.SPOONACULAR_API_KEY;
+const PRIMARY_API_KEY = process.env.SPOONACULAR_API_KEY; // General API key
+const SECONDARY_API_KEY = process.env.SPOONACULAR_SECONDARY_API_KEY; // Separate key for ingredient details
 
 export const getAllFridgeItems = async (req, res) => {
   try {
@@ -44,8 +45,11 @@ export const addFridgeItem = async (req, res) => {
 
     expires_at = expires_at || null;
     let ingredient;
-    let image_url;
+    let image_url = null;
 
+    console.log(`Adding item: name=${name}, ingredient_id=${ingredient_id}`);
+
+    // Check if ingredient exists in the database
     if (ingredient_id) {
       ingredient = await knex("ingredients").where("id", ingredient_id).first();
     } else {
@@ -53,66 +57,86 @@ export const addFridgeItem = async (req, res) => {
     }
 
     if (!ingredient) {
-      const response = await axios.get(
-        "https://api.spoonacular.com/food/ingredients/search",
-        {
-          params: { query: name },
-          headers: {
-            "X-Rapidapi-Key": SPOONACULAR_API_KEY,
-            "X-Rapidapi-Host":
-              "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
-          },
-        }
+      console.log(
+        `Ingredient not found locally, searching Spoonacular for: ${name}`
       );
 
-      if (response.data.results.length === 0) {
-        return res.status(400).json({ error: "Ingredient not found" });
-      }
-
-      const foundIngredient = response.data.results[0];
-
-      image_url = foundIngredient.image
-        ? `https://img.spoonacular.com/ingredients_500x500/${foundIngredient.image}`
-        : "https://placehold.co/500";
-
-      await knex("ingredients")
-        .insert({
-          id: foundIngredient.id,
-          name: foundIngredient.name,
-        })
-        .onConflict("id")
-        .ignore();
-
-      ingredient_id = foundIngredient.id;
-    } else {
-      ingredient_id = ingredient.id;
-    }
-    if (!image_url) {
       try {
         const response = await axios.get(
-          `https://api.spoonacular.com/food/ingredients/${ingredient_id}/information`,
+          `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${PRIMARY_API_KEY}`, // ✅ General API key
           {
-            headers: {
-              "X-Rapidapi-Key": SPOONACULAR_API_KEY,
-              "X-Rapidapi-Host":
-                "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
-            },
+            headers: { "x-api-key": PRIMARY_API_KEY }, // ✅ Correct API key for search
           }
         );
 
-        const ingredientData = response.data;
-        image_url = ingredientData.image
-          ? `https://spoonacular.com/cdn/ingredients_500x500/${ingredientData.image}`
+        console.log("Spoonacular search response:", response.data);
+
+        if (!response.data.results || response.data.results.length === 0) {
+          return res.status(400).json({ error: "Ingredient not found" });
+        }
+
+        const foundIngredient = response.data.results[0];
+        ingredient_id = foundIngredient.id;
+        image_url = foundIngredient.image
+          ? `https://img.spoonacular.com/ingredients_500x500/${foundIngredient.image}`
           : "https://placehold.co/500";
+
+        console.log(
+          `Found ingredient: ${foundIngredient.name}, ID: ${ingredient_id}, Image: ${image_url}`
+        );
+
+        await knex("ingredients")
+          .insert({
+            id: foundIngredient.id,
+            name: foundIngredient.name,
+          })
+          .onConflict("id")
+          .ignore();
+      } catch (error) {
+        console.error("Error searching Spoonacular for ingredient:", error);
+      }
+    } else {
+      ingredient_id = ingredient.id;
+      image_url = ingredient.image_url || null;
+      console.log(
+        `Ingredient found locally: ${ingredient.name}, ID: ${ingredient_id}, Image: ${image_url}`
+      );
+    }
+
+    // If no image was found, try fetching from Spoonacular ingredient info endpoint
+    if (!image_url) {
+      console.log(
+        `Fetching detailed information for ingredient ID: ${ingredient_id}`
+      );
+      try {
+        const response = await axios.get(
+          `https://api.spoonacular.com/food/ingredients/${ingredient_id}/information?apiKey=${INGREDIENTS_API_KEY}`, // ✅ Ingredient API key
+          {
+            headers: { "x-api-key": SECONDARY_API_KEY }, // ✅ Correct API key for ingredient details
+          }
+        );
+
+        console.log("Ingredient information response:", response.data);
+
+        image_url = response.data.image
+          ? `https://img.spoonacular.com/ingredients_500x500/${response.data.image}`
+          : "https://placehold.co/500"; // Default fallback
+
+        console.log(`Fetched image from Spoonacular: ${image_url}`);
       } catch (error) {
         console.error(
           `Error fetching ingredient image for ID ${ingredient_id}:`,
           error
         );
-        image_url = "https://placehold.co/500";
+        image_url = "https://placehold.co/500"; // Fallback if request fails
       }
     }
 
+    console.log(
+      `Final image URL for ingredient ID ${ingredient_id}: ${image_url}`
+    );
+
+    // Insert fridge item into the database
     const [id] = await knex("fridge_items").insert({
       user_id,
       ingredient_id,
@@ -122,11 +146,14 @@ export const addFridgeItem = async (req, res) => {
       image_url,
     });
 
+    console.log(`Fridge item added successfully with ID ${id}`);
+
+    // Return the newly created fridge item
     res.status(201).json({
       id,
       user_id,
       ingredient_id,
-      ingredient_name: ingredient.name,
+      ingredient_name: ingredient?.name || name,
       quantity,
       unit,
       expires_at,

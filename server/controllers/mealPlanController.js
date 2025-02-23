@@ -1,6 +1,7 @@
 import initKnex from "knex";
 import configuration from "../knexfile.js";
 const knex = initKnex(configuration);
+const API_KEY = process.env.SPOONACULAR_API_KEY;
 
 export const getMealPlan = async (req, res) => {
   try {
@@ -250,11 +251,7 @@ export const generateWeeklyMealPlan = async (req, res) => {
           addRecipeInformation: true,
           sort: "max-used-ingredients",
         },
-        headers: {
-          "X-Rapidapi-Key": process.env.SPOONACULAR_API_KEY,
-          "X-Rapidapi-Host":
-            "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
-        },
+        headers: { "x-api-key": PRIMARY_API_KEY },
       }
     );
 

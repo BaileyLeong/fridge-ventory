@@ -65,11 +65,7 @@ export const addItemToGroceryList = async (req, res) => {
         "https://api.spoonacular.com/food/ingredients/search",
         {
           params: { query: name },
-          headers: {
-            "X-Rapidapi-Key": SPOONACULAR_API_KEY,
-            "X-Rapidapi-Host":
-              "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
-          },
+          headers: { "x-api-key": PRIMARY_API_KEY },
         }
       );
 

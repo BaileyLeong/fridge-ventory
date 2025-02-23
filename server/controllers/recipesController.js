@@ -3,7 +3,7 @@ import configuration from "../knexfile.js";
 import axios from "axios";
 const knex = initKnex(configuration);
 
-const API_KEY = process.env.SPOONACULAR_API_KEY;
+const API_KEY = process.env.SPOONACULAR_SECONDARY_API_KEY;
 
 export const getAllRecipes = async (req, res) => {
   try {
@@ -70,12 +70,22 @@ export const getRecipeById = async (req, res) => {
   }
 };
 
+
+
 export const suggestRecipes = async (req, res) => {
   try {
     console.log("Received request at /recipes/suggest");
 
     const user_id = req.user.id;
     console.log("User ID:", user_id);
+
+    // Extract preferences from request body or set defaults
+    const {
+      dietaryRestrictions = "",
+      allergens = "",
+      cuisines = [],
+      mealTypes = [],
+    } = req.body;
 
     const ingredientNames = await knex("fridge_items")
       .join("ingredients", "fridge_items.ingredient_id", "ingredients.id")
@@ -91,22 +101,23 @@ export const suggestRecipes = async (req, res) => {
 
     const ingredientList = ingredientNames.join(",");
     console.log("Querying Spoonacular with ingredients:", ingredientList);
+
     const response = await axios.get(
       "https://api.spoonacular.com/recipes/complexSearch",
       {
         params: {
           includeIngredients: ingredientList,
+          diet: dietaryRestrictions || undefined,
+          intolerances: allergens || undefined,
+          cuisine: cuisines.length > 0 ? cuisines.join(",") : undefined,
+          type: mealTypes.length > 0 ? mealTypes.join(",") : undefined,
           number: 5,
           addRecipeInformation: true,
           addRecipeInstructions: true,
           fillIngredients: true,
           sort: "max-used-ingredients",
         },
-        headers: {
-          "X-Rapidapi-Key": process.env.SPOONACULAR_API_KEY,
-          "X-Rapidapi-Host":
-            "spoonacular-recipe-food-nutrition-v1.p.rapidapi.com",
-        },
+        headers: { "x-api-key": API_KEY },
       }
     );
 
@@ -118,6 +129,30 @@ export const suggestRecipes = async (req, res) => {
     }
 
     const formattedRecipes = response.data.results.map((recipe) => ({
+      const validDishTypes = recipe.dishTypes.filter((type) => mealTypePriority.includes(type));
+      const mealTypePriority = [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "main course",
+        "side dish",
+        "snack",
+        "appetizer",
+        "salad",
+        "soup",
+        "bread",
+        "dessert",
+        "beverage",
+        "sauce",
+        "marinade",
+        "fingerfood",
+        "drink"
+      ];
+
+  const selectedMealType = validDishTypes.length > 0
+    ? validDishTypes.sort((a, b) => mealTypePriority.indexOf(a) - mealTypePriority.indexOf(b))[0]
+    : "main course"; // Default if no match
+
       id: recipe.id,
       title: recipe.title,
       image: recipe.image,
@@ -125,6 +160,7 @@ export const suggestRecipes = async (req, res) => {
       readyInMinutes: recipe.readyInMinutes,
       servings: recipe.servings,
       likes: recipe.aggregateLikes || 0,
+      meal_type: selectedMealType,
       usedIngredients:
         recipe.usedIngredients?.map((ing) => ({
           id: ing.id,
