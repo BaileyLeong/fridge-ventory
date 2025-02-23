@@ -25,15 +25,35 @@ const MealListMobile = ({
 
   return (
     <>
-      <li
-        className="meal-list-mobile__item"
-        onClick={() => setIsDetailsOpen(true)}
-      >
-        <div className="meal-list-mobile__info">
+      <li className="meal-list-mobile__item">
+        <div
+          className="meal-list-mobile__info"
+          onClick={() => setIsDetailsOpen(true)}
+        >
           <p className="meal-list-mobile__name">{meal.name}</p>
           <p className="meal-list-mobile__date">
             Planned for: {formatDateForDisplay(selectedDate || meal.meal_date)}
           </p>
+        </div>
+        <div className="meal-list-mobile__actions">
+          <button
+            className="meal-list-mobile__action-button"
+            onClick={() => onToggleFavorite(meal.recipe_id)}
+          >
+            {isFavorited ? (
+              <Favorite className="meal-planner__icon meal-planner__icon--favorite" />
+            ) : (
+              <FavoriteBorder className="meal-planner__icon" />
+            )}
+          </button>
+
+          <button
+            className="meal-list-mobile__action-button meal-list-mobile__action-button--delete"
+            onClick={() => onDeleteMeal(meal.id)}
+            aria-label="Delete Meal"
+          >
+            <Delete className="meal-planner__icon meal-planner__icon--delete" />
+          </button>
         </div>
       </li>
       {isDetailsOpen && (
@@ -65,24 +85,6 @@ const MealListMobile = ({
                 ))}
               </select>
             </div>
-            <button
-              className="meal-list-mobile__action-button"
-              onClick={() => onToggleFavorite(meal.recipe_id)}
-            >
-              {isFavorited ? (
-                <Favorite className="meal-planner__icon meal-planner__icon--favorite" />
-              ) : (
-                <FavoriteBorder className="meal-planner__icon" />
-              )}
-            </button>
-
-            <button
-              className="meal-list-mobile__action-button meal-list-mobile__action-button--delete"
-              onClick={() => onDeleteMeal(meal.id)}
-              aria-label="Delete Meal"
-            >
-              <Delete className="meal-planner__icon meal-planner__icon--delete" />
-            </button>
           </div>
         </div>
       )}

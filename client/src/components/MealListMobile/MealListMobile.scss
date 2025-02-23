@@ -24,6 +24,11 @@
     margin: 0;
   }
 
+  &__actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
   &__modal {
     position: fixed;
     top: 0;
