@@ -1,4 +1,5 @@
 import { formatDateForDisplay } from "../../utils/utils.js";
+import { Favorite, FavoriteBorder, Delete } from "@mui/icons-material";
 import "./MealCard.scss";
 
 const MealCard = ({
