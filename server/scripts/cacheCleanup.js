@@ -7,15 +7,21 @@ const knex = initKnex(configuration);
 const clearExpiredCache = async () => {
   try {
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-    await knex("recipes").where("cached_at", "<", oneHourAgo).del();
+
+    await knex("recipes").where("cached_at", "<", oneHourAgo).update({
+      steps: null,
+      ready_in_minutes: null,
+      servings: null,
+      cached_at: null,
+    });
+
     await knex("recipe_ingredients").where("cached_at", "<", oneHourAgo).del();
-    console.log("Expired recipes and ingredients removed successfully.");
+
+    console.log("Expired API data cleared.");
   } catch (error) {
-    console.error("Error clearing cache", error);
+    console.error("Error clearing cache:", error);
   }
 };
 
 cron.schedule("*/30 * * * *", clearExpiredCache);
 console.log("Cache cleanup scheduled!");
-
-export default clearExpiredCache;
