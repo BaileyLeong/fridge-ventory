@@ -3,7 +3,7 @@ import configuration from "../knexfile.js";
 import axios from "axios";
 const knex = initKnex(configuration);
 
-const API_KEY = process.env.SPOONACULAR_SECONDARY_API_KEY;
+const API_KEY = process.env.SPOONACULAR_API_KEY;
 
 export const getAllRecipes = async (req, res) => {
   try {
@@ -70,8 +70,6 @@ export const getRecipeById = async (req, res) => {
   }
 };
 
-
-
 export const suggestRecipes = async (req, res) => {
   try {
     console.log("Received request at /recipes/suggest");
@@ -79,7 +77,6 @@ export const suggestRecipes = async (req, res) => {
     const user_id = req.user.id;
     console.log("User ID:", user_id);
 
-    // Extract preferences from request body or set defaults
     const {
       dietaryRestrictions = "",
       allergens = "",
@@ -103,21 +100,22 @@ export const suggestRecipes = async (req, res) => {
     console.log("Querying Spoonacular with ingredients:", ingredientList);
 
     const response = await axios.get(
-      "https://api.spoonacular.com/recipes/complexSearch",
+      "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/complexSearch",
       {
         params: {
+          query: "meal",
           includeIngredients: ingredientList,
           diet: dietaryRestrictions || undefined,
           intolerances: allergens || undefined,
           cuisine: cuisines.length > 0 ? cuisines.join(",") : undefined,
           type: mealTypes.length > 0 ? mealTypes.join(",") : undefined,
-          number: 5,
+          number: 2,
           addRecipeInformation: true,
           addRecipeInstructions: true,
           fillIngredients: true,
           sort: "max-used-ingredients",
         },
-        headers: { "x-api-key": API_KEY },
+        headers: { "x-rapidapi-key": API_KEY },
       }
     );
 
@@ -128,31 +126,78 @@ export const suggestRecipes = async (req, res) => {
       return res.status(404).json({ error: "No recipes found." });
     }
 
+    const mealTypePriority = [
+      "breakfast",
+      "lunch",
+      "dinner",
+      "main course",
+      "side dish",
+      "snack",
+      "appetizer",
+      "salad",
+      "soup",
+      "bread",
+      "dessert",
+      "beverage",
+      "sauce",
+      "marinade",
+      "fingerfood",
+      "drink",
+    ];
+
+    for (const recipe of response.data.results) {
+      const validDishTypes = recipe.dishTypes
+        ? recipe.dishTypes.filter((type) => mealTypePriority.includes(type))
+        : [];
+      const selectedMealType =
+        validDishTypes.length > 0
+          ? validDishTypes.sort(
+              (a, b) =>
+                mealTypePriority.indexOf(a) - mealTypePriority.indexOf(b)
+            )[0]
+          : "main course";
+
+      const existingRecipe = await knex("recipes")
+        .where("id", recipe.id)
+        .first();
+
+      if (!existingRecipe) {
+        await knex("recipes").insert({
+          id: recipe.id,
+          name: recipe.title,
+          category: selectedMealType,
+          image_url: recipe.image || "https://placehold.co/500",
+          ready_in_minutes: recipe.readyInMinutes,
+          servings: recipe.servings,
+          steps: recipe.instructions || "No instructions available.",
+          source_url: recipe.sourceUrl,
+        });
+
+        for (const ingredient of recipe.usedIngredients || []) {
+          const existingIngredient = await knex("ingredients")
+            .where("id", ingredient.id)
+            .first();
+
+          if (!existingIngredient) {
+            await knex("ingredients").insert({
+              id: ingredient.id,
+              name: ingredient.name,
+            });
+          }
+
+          await knex("recipe_ingredients").insert({
+            recipe_id: recipe.id,
+            ingredient_id: ingredient.id,
+            amount_us: ingredient.amount || null,
+            unit_us: ingredient.unit || null,
+            amount_metric: ingredient.amount || null,
+            unit_metric: ingredient.unit || null,
+          });
+        }
+      }
+    }
+
     const formattedRecipes = response.data.results.map((recipe) => ({
-      const validDishTypes = recipe.dishTypes.filter((type) => mealTypePriority.includes(type));
-      const mealTypePriority = [
-        "breakfast",
-        "lunch",
-        "dinner",
-        "main course",
-        "side dish",
-        "snack",
-        "appetizer",
-        "salad",
-        "soup",
-        "bread",
-        "dessert",
-        "beverage",
-        "sauce",
-        "marinade",
-        "fingerfood",
-        "drink"
-      ];
-
-  const selectedMealType = validDishTypes.length > 0
-    ? validDishTypes.sort((a, b) => mealTypePriority.indexOf(a) - mealTypePriority.indexOf(b))[0]
-    : "main course"; // Default if no match
-
       id: recipe.id,
       title: recipe.title,
       image: recipe.image,
@@ -160,7 +205,7 @@ export const suggestRecipes = async (req, res) => {
       readyInMinutes: recipe.readyInMinutes,
       servings: recipe.servings,
       likes: recipe.aggregateLikes || 0,
-      meal_type: selectedMealType,
+      meal_type: recipe.dishTypes ? recipe.dishTypes[0] : "main course",
       usedIngredients:
         recipe.usedIngredients?.map((ing) => ({
           id: ing.id,

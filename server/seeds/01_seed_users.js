@@ -4,14 +4,14 @@ export const seed = async function (knex) {
     {
       name: "Bailey",
       email: "bailey@example.com",
-      dietary_restrictions: null,
-      allergens: null,
+      dietary_restrictions: JSON.stringify([]),
+      allergens: JSON.stringify([]),
     },
     {
       name: "Joe",
       email: "joe@example.com",
-      dietary_restrictions: "vegetarian, gluten-free",
-      allergens: "peanuts, shellfish",
+      dietary_restrictions: JSON.stringify(["vegetarian", "gluten-free"]),
+      allergens: JSON.stringify(["peanuts", "shellfish"]),
     },
   ]);
 };

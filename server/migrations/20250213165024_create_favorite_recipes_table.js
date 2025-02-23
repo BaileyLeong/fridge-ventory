@@ -3,6 +3,7 @@ export const up = function (knex) {
     table.increments("id").primary();
     table.integer("user_id").unsigned().notNullable();
     table.integer("recipe_id").unsigned().notNullable();
+    table.timestamp("created_at").defaultTo(knex.fn.now());
 
     table
       .foreign("user_id")

@@ -7,6 +7,7 @@ import mealPlanRoutes from "./routes/mealPlanRoutes.js";
 import groceryListRoutes from "./routes/groceryListRoutes.js";
 import fridgeRoutes from "./routes/fridgeRoutes.js";
 import ingredientSearchRoutes from "./routes/ingredientSearchRoutes.js";
+import "./scripts/cacheCleanup.js";
 
 dotenv.config();
 

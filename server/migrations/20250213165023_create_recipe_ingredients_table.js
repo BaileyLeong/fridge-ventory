@@ -6,6 +6,7 @@ export const up = function (knex) {
     table.string("unit_us", 50);
     table.decimal("amount_metric", 10, 4);
     table.string("unit_metric", 50);
+    table.timestamp("cached_at").defaultTo(knex.fn.now());
 
     table.primary(["recipe_id", "ingredient_id"]);
     table

@@ -7,6 +7,7 @@ export const seed = async function (knex) {
       quantity: 500,
       unit: "g",
       completed: false,
+      image_url: "https://img.spoonacular.com/ingredients_500x500/sugar.jpg",
     }, // Sugar
   ]);
 };

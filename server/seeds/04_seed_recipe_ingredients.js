@@ -1,5 +1,7 @@
 export const seed = async function (knex) {
-  await knex("recipe_ingredients").del(); // Clear existing data
+  await knex("recipe_ingredients").del();
+
+  const cachedAt = new Date();
 
   await knex("recipe_ingredients").insert([
     // Kohlrabi Salad With Apple, Bacon, and Snow Peas
@@ -10,6 +12,7 @@ export const seed = async function (knex) {
       unit_us: "small",
       amount_metric: 1,
       unit_metric: "small",
+      cached_at: cachedAt,
     },
     {
       recipe_id: 649004,
@@ -18,6 +21,7 @@ export const seed = async function (knex) {
       unit_us: "cup",
       amount_metric: 31.25,
       unit_metric: "g",
+      cached_at: cachedAt,
     },
     {
       recipe_id: 649004,
@@ -26,6 +30,7 @@ export const seed = async function (knex) {
       unit_us: null,
       amount_metric: 10,
       unit_metric: null,
+      cached_at: cachedAt,
     },
     {
       recipe_id: 649004,
@@ -34,6 +39,7 @@ export const seed = async function (knex) {
       unit_us: "Tbsp",
       amount_metric: 1,
       unit_metric: "Tbsp",
+      cached_at: cachedAt,
     },
     {
       recipe_id: 649004,
@@ -42,6 +48,7 @@ export const seed = async function (knex) {
       unit_us: "slice",
       amount_metric: 2,
       unit_metric: "slice",
+      cached_at: cachedAt,
     },
 
     // Corned Beef And Cabbage
@@ -52,6 +59,7 @@ export const seed = async function (knex) {
       unit_us: "lb",
       amount_metric: 1.814,
       unit_metric: "kgs",
+      cached_at: cachedAt,
     },
     {
       recipe_id: 640136,
@@ -60,6 +68,7 @@ export const seed = async function (knex) {
       unit_us: null,
       amount_metric: 1,
       unit_metric: null,
+      cached_at: cachedAt,
     },
     {
       recipe_id: 640136,
@@ -68,6 +77,7 @@ export const seed = async function (knex) {
       unit_us: "lb",
       amount_metric: 907.185,
       unit_metric: "g",
+      cached_at: cachedAt,
     },
     {
       recipe_id: 640136,
@@ -76,6 +86,7 @@ export const seed = async function (knex) {
       unit_us: "large",
       amount_metric: 1,
       unit_metric: "large",
+      cached_at: cachedAt,
     },
 
     // Homemade Garlic and Basil French Fries
@@ -86,6 +97,7 @@ export const seed = async function (knex) {
       unit_us: "cup",
       amount_metric: 6,
       unit_metric: "g",
+      cached_at: cachedAt,
     },
     {
       recipe_id: 715594,
@@ -94,6 +106,7 @@ export const seed = async function (knex) {
       unit_us: null,
       amount_metric: 4,
       unit_metric: null,
+      cached_at: cachedAt,
     },
     {
       recipe_id: 715594,
@@ -102,6 +115,7 @@ export const seed = async function (knex) {
       unit_us: null,
       amount_metric: 0.25,
       unit_metric: null,
+      cached_at: cachedAt,
     },
     {
       recipe_id: 715594,
@@ -110,6 +124,7 @@ export const seed = async function (knex) {
       unit_us: "servings",
       amount_metric: 2,
       unit_metric: "servings",
+      cached_at: cachedAt,
     },
     {
       recipe_id: 715594,
@@ -118,6 +133,7 @@ export const seed = async function (knex) {
       unit_us: "servings",
       amount_metric: 2,
       unit_metric: "servings",
+      cached_at: cachedAt,
     },
   ]);
 };
