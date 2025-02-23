@@ -3,8 +3,8 @@ import configuration from "../knexfile.js";
 import axios from "axios";
 
 const knex = initKnex(configuration);
-const PRIMARY_API_KEY = process.env.SPOONACULAR_API_KEY; // General API key
-const SECONDARY_API_KEY = process.env.SPOONACULAR_SECONDARY_API_KEY; // Separate key for ingredient details
+const PRIMARY_API_KEY = process.env.SPOONACULAR_API_KEY;
+const SECONDARY_API_KEY = process.env.SPOONACULAR_SECONDARY_API_KEY;
 
 export const getAllFridgeItems = async (req, res) => {
   try {
@@ -49,7 +49,6 @@ export const addFridgeItem = async (req, res) => {
 
     console.log(`Adding item: name=${name}, ingredient_id=${ingredient_id}`);
 
-    // Check if ingredient exists in the database
     if (ingredient_id) {
       ingredient = await knex("ingredients").where("id", ingredient_id).first();
     } else {
@@ -65,7 +64,7 @@ export const addFridgeItem = async (req, res) => {
         const response = await axios.get(
           `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${PRIMARY_API_KEY}`, // ✅ General API key
           {
-            headers: { "x-api-key": PRIMARY_API_KEY }, // ✅ Correct API key for search
+            headers: { "x-api-key": PRIMARY_API_KEY },
           }
         );
 
@@ -103,16 +102,15 @@ export const addFridgeItem = async (req, res) => {
       );
     }
 
-    // If no image was found, try fetching from Spoonacular ingredient info endpoint
     if (!image_url) {
       console.log(
         `Fetching detailed information for ingredient ID: ${ingredient_id}`
       );
       try {
         const response = await axios.get(
-          `https://api.spoonacular.com/food/ingredients/${ingredient_id}/information?apiKey=${INGREDIENTS_API_KEY}`, // ✅ Ingredient API key
+          `https://api.spoonacular.com/food/ingredients/${ingredient_id}/information?apiKey=${SECONDARY_API_KEY}`,
           {
-            headers: { "x-api-key": SECONDARY_API_KEY }, // ✅ Correct API key for ingredient details
+            headers: { "x-api-key": SECONDARY_API_KEY },
           }
         );
 
@@ -120,7 +118,7 @@ export const addFridgeItem = async (req, res) => {
 
         image_url = response.data.image
           ? `https://img.spoonacular.com/ingredients_500x500/${response.data.image}`
-          : "https://placehold.co/500"; // Default fallback
+          : "https://placehold.co/500";
 
         console.log(`Fetched image from Spoonacular: ${image_url}`);
       } catch (error) {
@@ -128,7 +126,7 @@ export const addFridgeItem = async (req, res) => {
           `Error fetching ingredient image for ID ${ingredient_id}:`,
           error
         );
-        image_url = "https://placehold.co/500"; // Fallback if request fails
+        image_url = "https://placehold.co/500";
       }
     }
 
@@ -136,7 +134,6 @@ export const addFridgeItem = async (req, res) => {
       `Final image URL for ingredient ID ${ingredient_id}: ${image_url}`
     );
 
-    // Insert fridge item into the database
     const [id] = await knex("fridge_items").insert({
       user_id,
       ingredient_id,
@@ -148,7 +145,6 @@ export const addFridgeItem = async (req, res) => {
 
     console.log(`Fridge item added successfully with ID ${id}`);
 
-    // Return the newly created fridge item
     res.status(201).json({
       id,
       user_id,

@@ -1,26 +1,108 @@
 import initKnex from "knex";
+import axios from "axios";
 import configuration from "../knexfile.js";
+import dotenv from "dotenv";
+dotenv.config();
 const knex = initKnex(configuration);
+
+const SPOONACULAR_BASE_URL = process.env.SPOONACULAR_BASE_URL;
+const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
+
+const isCacheValid = (cachedAt) => {
+  if (!cachedAt) return false;
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  return new Date(cachedAt) > oneHourAgo;
+};
+
+const fetchBulkRecipesFromSpoonacular = async (recipeIds) => {
+  try {
+    const response = await axios.get(
+      `${SPOONACULAR_BASE_URL}/recipes/informationBulk`,
+      {
+        params: { ids: recipeIds.join(",") },
+        headers: { "x-rapidapi-key": SPOONACULAR_API_KEY },
+      }
+    );
+
+    return response.data.map((recipe) => ({
+      id: recipe.id,
+      name: recipe.title,
+      image_url: recipe.image,
+      source_url: recipe.sourceUrl,
+      category: recipe.dishTypes?.[0] || null,
+      ready_in_minutes: recipe.readyInMinutes,
+      servings: recipe.servings,
+      steps: recipe.instructions || null,
+      cached_at: new Date(),
+    }));
+  } catch (error) {
+    console.error("Error fetching recipes from Spoonacular:", error);
+    return [];
+  }
+};
+
+const fetchRecipeFromSpoonacular = async (recipe_id) => {
+  try {
+    const response = await axios.get(
+      `${SPOONACULAR_BASE_URL}/recipes/${recipe_id}/information`,
+      {
+        headers: { "x-rapidapi-key": SPOONACULAR_API_KEY },
+      }
+    );
+
+    const recipe = response.data;
+
+    return {
+      id: recipe.id,
+      name: recipe.title,
+      image_url: recipe.image,
+      source_url: recipe.sourceUrl,
+      category: recipe.dishTypes?.[0] || null,
+      ready_in_minutes: recipe.readyInMinutes,
+      servings: recipe.servings,
+      steps: recipe.instructions || null,
+      cached_at: new Date(),
+    };
+  } catch (error) {
+    console.error("Error fetching recipe from Spoonacular:", error);
+    return null;
+  }
+};
 
 export const getFavoriteRecipes = async (req, res) => {
   try {
     const user_id = req.user.id;
 
     const favoriteRecipes = await knex("favorite_recipes")
-      .join("recipes", "favorite_recipes.recipe_id", "recipes.id")
-      .where({ "favorite_recipes.user_id": user_id })
-      .select(
-        "recipes.id",
-        "recipes.name",
-        "recipes.category",
-        "recipes.image_url",
-        "recipes.source_url",
-        "recipes.steps",
-        "recipes.ready_in_minutes",
-        "recipes.servings"
-      );
+      .where({ user_id })
+      .select("recipe_id");
 
-    res.status(200).json(favoriteRecipes);
+    if (favoriteRecipes.length === 0) {
+      return res.status(200).json([]);
+    }
+
+    const recipeIds = favoriteRecipes.map(({ recipe_id }) => recipe_id);
+    const recipesFromDB = await knex("recipes").whereIn("id", recipeIds);
+
+    const validRecipes = recipesFromDB.filter((recipe) =>
+      isCacheValid(recipe.cached_at)
+    );
+    const expiredOrMissingRecipes = recipeIds.filter(
+      (id) => !validRecipes.some((r) => r.id === id)
+    );
+
+    let newRecipes = [];
+    if (expiredOrMissingRecipes.length > 0) {
+      newRecipes = await fetchBulkRecipesFromSpoonacular(
+        expiredOrMissingRecipes
+      );
+      if (newRecipes.length > 0) {
+        await knex("recipes").insert(newRecipes).onConflict("id").merge();
+      }
+    }
+
+    const allRecipes = [...validRecipes, ...newRecipes];
+    res.status(200).json(allRecipes);
   } catch (error) {
     console.error("Error fetching favorite recipes:", error);
     res.status(500).json({ error: "Failed to fetch favorite recipes" });
@@ -31,7 +113,14 @@ export const getRecipeById = async (req, res) => {
   try {
     const { id } = req.params;
 
-    const recipe = await knex("recipes").where({ id }).first();
+    let recipe = await knex("recipes").where({ id }).first();
+
+    if (!recipe || !isCacheValid(recipe.cached_at)) {
+      recipe = await fetchRecipeFromSpoonacular(id);
+      if (recipe) {
+        await knex("recipes").insert(recipe).onConflict("id").merge();
+      }
+    }
 
     if (!recipe) {
       return res.status(404).json({ error: "Recipe not found" });
@@ -53,9 +142,16 @@ export const addFavoriteRecipe = async (req, res) => {
       return res.status(400).json({ error: "Recipe ID is required" });
     }
 
-    const recipeExists = await knex("recipes").where({ id: recipe_id }).first();
-    if (!recipeExists) {
-      return res.status(404).json({ error: "Recipe not found in system" });
+    let recipeExists = await knex("recipes").where({ id: recipe_id }).first();
+    if (!recipeExists || !isCacheValid(recipeExists.cached_at)) {
+      recipeExists = await fetchRecipeFromSpoonacular(recipe_id);
+      if (recipeExists) {
+        await knex("recipes").insert(recipeExists).onConflict("id").merge();
+      } else {
+        return res
+          .status(404)
+          .json({ error: "Recipe not found in Spoonacular" });
+      }
     }
 
     const existingFavorite = await knex("favorite_recipes")

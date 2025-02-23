@@ -11,6 +11,9 @@ router
   .get(favoriteRecipesController.getFavoriteRecipes)
   .post(favoriteRecipesController.addFavoriteRecipe);
 
-router.route("/:id").delete(favoriteRecipesController.removeFavoriteRecipe);
+router
+  .route("/:id")
+  .get(favoriteRecipesController.getRecipeById)
+  .delete(favoriteRecipesController.removeFavoriteRecipe);
 
 export default router;
