@@ -1,11 +1,14 @@
 const requireUserId = (req, res, next) => {
-  const userId = req.headers["user-id"];
+  console.log("🔍 Headers received:", req.headers);
 
-  if (!userId || isNaN(parseInt(userId, 10))) {
-    return res.status(401).json({ error: "Invalid or missing User ID." });
+  const userId = req.headers["user-id"]; // Ensure lowercase
+  if (!userId) {
+    console.log("❌ Missing user-id header");
+    return res.status(401).json({ error: "User ID is required" });
   }
 
-  req.user = { id: parseInt(userId, 10) };
+  req.user = { id: Number(userId) };
+  console.log("✅ User authenticated:", req.user);
   next();
 };
 

@@ -73,6 +73,8 @@ export const getRecipeById = async (req, res) => {
 export const suggestRecipes = async (req, res) => {
   try {
     console.log("Received request at /recipes/suggest");
+    console.log("🔥 suggestRecipes function is being called!");
+    console.log("🔍 User ID from request:", req.user);
 
     const user_id = req.user.id;
     console.log("User ID:", user_id);
@@ -89,7 +91,7 @@ export const suggestRecipes = async (req, res) => {
       .where("fridge_items.user_id", user_id)
       .pluck("ingredients.name");
 
-    console.log("Ingredient Names:", ingredientNames);
+    console.log("📝 Ingredient Names:", ingredientNames);
 
     if (ingredientNames.length === 0) {
       console.warn("No ingredients found in fridge.");
@@ -97,19 +99,20 @@ export const suggestRecipes = async (req, res) => {
     }
 
     const ingredientList = ingredientNames.join(",");
-    console.log("Querying Spoonacular with ingredients:", ingredientList);
+    console.log("🔀 Randomly Selected Ingredients:", ingredientList);
+
+    console.log("🔍 Querying Spoonacular with ingredients:", ingredientList);
 
     const response = await axios.get(
       "https://spoonacular-recipe-food-nutrition-v1.p.rapidapi.com/recipes/complexSearch",
       {
         params: {
-          query: "meal",
           includeIngredients: ingredientList,
           diet: dietaryRestrictions || undefined,
           intolerances: allergens || undefined,
           cuisine: cuisines.length > 0 ? cuisines.join(",") : undefined,
           type: mealTypes.length > 0 ? mealTypes.join(",") : undefined,
-          number: 2,
+          number: 20,
           addRecipeInformation: true,
           addRecipeInstructions: true,
           fillIngredients: true,
@@ -119,116 +122,39 @@ export const suggestRecipes = async (req, res) => {
       }
     );
 
-    console.log("Spoonacular Response:", response.data);
+    console.log("🛠 Spoonacular Response Status:", response.status);
+    console.log("🔎 Spoonacular Response Data:", response.data);
 
     if (!response.data || response.data.results.length === 0) {
-      console.warn("No recipes found.");
       return res.status(404).json({ error: "No recipes found." });
     }
 
-    const mealTypePriority = [
-      "breakfast",
-      "lunch",
-      "dinner",
-      "main course",
-      "side dish",
-      "snack",
-      "appetizer",
-      "salad",
-      "soup",
-      "bread",
-      "dessert",
-      "beverage",
-      "sauce",
-      "marinade",
-      "fingerfood",
-      "drink",
-    ];
+    const existingRecipeIds = await knex("recipes").pluck("id");
 
-    for (const recipe of response.data.results) {
-      const validDishTypes = recipe.dishTypes
-        ? recipe.dishTypes.filter((type) => mealTypePriority.includes(type))
-        : [];
-      const selectedMealType =
-        validDishTypes.length > 0
-          ? validDishTypes.sort(
-              (a, b) =>
-                mealTypePriority.indexOf(a) - mealTypePriority.indexOf(b)
-            )[0]
-          : "main course";
+    const newRecipes = response.data.results.filter(
+      (recipe) => !existingRecipeIds.includes(recipe.id)
+    );
 
-      const existingRecipe = await knex("recipes")
-        .where("id", recipe.id)
-        .first();
-
-      if (!existingRecipe) {
-        await knex("recipes").insert({
-          id: recipe.id,
-          name: recipe.title,
-          category: selectedMealType,
-          image_url: recipe.image || "https://placehold.co/500",
-          ready_in_minutes: recipe.readyInMinutes,
-          servings: recipe.servings,
-          steps: recipe.instructions || "No instructions available.",
-          source_url: recipe.sourceUrl,
-        });
-
-        for (const ingredient of recipe.usedIngredients || []) {
-          const existingIngredient = await knex("ingredients")
-            .where("id", ingredient.id)
-            .first();
-
-          if (!existingIngredient) {
-            await knex("ingredients").insert({
-              id: ingredient.id,
-              name: ingredient.name,
-            });
-          }
-
-          await knex("recipe_ingredients").insert({
-            recipe_id: recipe.id,
-            ingredient_id: ingredient.id,
-            amount_us: ingredient.amount || null,
-            unit_us: ingredient.unit || null,
-            amount_metric: ingredient.amount || null,
-            unit_metric: ingredient.unit || null,
-          });
-        }
-      }
+    if (newRecipes.length > 0) {
+      await knex("recipes")
+        .insert(
+          newRecipes.map((recipe) => ({
+            id: recipe.id,
+            name: recipe.title,
+            category: recipe.dishTypes?.[0] || "main course",
+            image_url: recipe.image || "https://placehold.co/500",
+            ready_in_minutes: recipe.readyInMinutes,
+            servings: recipe.servings,
+            steps: recipe.instructions || "No instructions available.",
+            source_url: recipe.sourceUrl,
+            cached_at: new Date(),
+          }))
+        )
+        .onConflict("id")
+        .merge();
     }
 
-    const formattedRecipes = response.data.results.map((recipe) => ({
-      id: recipe.id,
-      title: recipe.title,
-      image: recipe.image,
-      sourceUrl: recipe.sourceUrl,
-      readyInMinutes: recipe.readyInMinutes,
-      servings: recipe.servings,
-      likes: recipe.aggregateLikes || 0,
-      meal_type: recipe.dishTypes ? recipe.dishTypes[0] : "main course",
-      usedIngredients:
-        recipe.usedIngredients?.map((ing) => ({
-          id: ing.id,
-          name: ing.name,
-          image: ing.image || null,
-          original: ing.original,
-          amount: ing.amount,
-          unit: ing.unit,
-        })) || [],
-      missedIngredients:
-        recipe.missedIngredients?.map((ing) => ({
-          id: ing.id,
-          name: ing.name,
-          image: ing.image || null,
-          original: ing.original,
-          amount: ing.amount,
-          unit: ing.unit,
-        })) || [],
-    }));
-
-    console.log("Formatted Recipes:", formattedRecipes);
-
-    res.status(200).json(formattedRecipes);
+    res.status(200).json(newRecipes);
   } catch (error) {
     console.error("Error fetching suggested recipes:", error);
     res.status(500).json({ error: "Failed to fetch recipe suggestions." });
