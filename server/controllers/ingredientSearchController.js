@@ -2,6 +2,27 @@ import initKnex from "knex";
 import configuration from "../knexfile.js";
 const knex = initKnex(configuration);
 
+import axios from "axios";
+const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
+const SPOONACULAR_BASE_URL = process.env.SPOONACULAR_BASE_URL;
+
+const fetchSpoonacularIngredients = async (query) => {
+  try {
+    const response = await axios.get(
+      `${SPOONACULAR_BASE_URL}/food/ingredients/search`,
+      {
+        params: { query },
+        headers: { "x-rapidapi-key": SPOONACULAR_API_KEY },
+      }
+    );
+
+    return response.data.results || [];
+  } catch (error) {
+    console.error("Error fetching ingredients from Spoonacular:", error);
+    return [];
+  }
+};
+
 export const searchIngredients = async (req, res) => {
   try {
     const { query } = req.query;
@@ -9,9 +30,17 @@ export const searchIngredients = async (req, res) => {
       return res.status(400).json({ error: "Query parameter is required" });
     }
 
-    const results = await knex("ingredients")
-      .where("name", "like", `%${query}%`)
+    let results = await knex("ingredients")
+      .whereRaw("LOWER(name) LIKE ?", [`%${query.toLowerCase()}%`])
+      .orderByRaw("CASE WHEN name LIKE ? THEN 1 ELSE 2 END", [`${query}%`])
       .limit(10);
+
+    if (results.length === 0) {
+      console.log(
+        `No local match found for "${query}", checking Spoonacular...`
+      );
+      results = await fetchSpoonacularIngredients(query);
+    }
 
     res.status(200).json({ results });
     console.log({ results });

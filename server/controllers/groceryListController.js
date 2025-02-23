@@ -2,7 +2,7 @@ import initKnex from "knex";
 import configuration from "../knexfile.js";
 import axios from "axios";
 const knex = initKnex(configuration);
-const API_KEY = process.env.SPOONACULAR_API_KEY;
+const API_KEY = process.env.SPOONACULAR_SECONDARY_API_KEY;
 
 export const getGroceryList = async (req, res) => {
   try {
@@ -65,7 +65,7 @@ export const addItemToGroceryList = async (req, res) => {
         "https://api.spoonacular.com/food/ingredients/search",
         {
           params: { query: name },
-          headers: { "x-api-key": PRIMARY_API_KEY },
+          headers: { "x-api-key": API_KEY },
         }
       );
 
