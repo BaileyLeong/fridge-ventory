@@ -1,7 +1,45 @@
 import initKnex from "knex";
+import axios from "axios";
 import configuration from "../knexfile.js";
+import dotenv from "dotenv";
+dotenv.config();
 const knex = initKnex(configuration);
-const API_KEY = process.env.SPOONACULAR_API_KEY;
+
+const SPOONACULAR_BASE_URL = process.env.SPOONACULAR_BASE_URL;
+const SPOONACULAR_API_KEY = process.env.SPOONACULAR_API_KEY;
+
+const isCacheValid = (cachedAt) => {
+  if (!cachedAt) return false;
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+  return new Date(cachedAt) > oneHourAgo;
+};
+
+const fetchBulkRecipesFromSpoonacular = async (recipeIds) => {
+  try {
+    const response = await axios.get(
+      `${SPOONACULAR_BASE_URL}/recipes/informationBulk`,
+      {
+        params: { ids: recipeIds.join(",") },
+        headers: { "x-rapidapi-key": SPOONACULAR_API_KEY },
+      }
+    );
+
+    return response.data.map((recipe) => ({
+      id: recipe.id,
+      name: recipe.title,
+      image_url: recipe.image,
+      source_url: recipe.sourceUrl,
+      category: recipe.dishTypes?.[0] || "main course",
+      ready_in_minutes: recipe.readyInMinutes,
+      servings: recipe.servings,
+      steps: recipe.instructions || null,
+      cached_at: new Date(),
+    }));
+  } catch (error) {
+    console.error("Error fetching recipes from Spoonacular:", error);
+    return [];
+  }
+};
 
 export const getMealPlan = async (req, res) => {
   try {
@@ -17,11 +55,42 @@ export const getMealPlan = async (req, res) => {
         "recipes.id as recipe_id",
         "recipes.name",
         "recipes.image_url",
-        "recipes.steps"
+        "recipes.source_url",
+        "recipes.steps",
+        "recipes.ready_in_minutes",
+        "recipes.servings",
+        "recipes.cached_at"
       );
 
-    res.status(200).json(plan);
+    const missingDetails = plan
+      .filter((meal) => !meal.steps || !isCacheValid(meal.cached_at))
+      .map((m) => m.recipe_id);
+
+    let fetchedRecipes = [];
+    if (missingDetails.length > 0) {
+      console.log(`Fetching missing details for recipes: ${missingDetails}`);
+
+      fetchedRecipes = await fetchBulkRecipesFromSpoonacular(missingDetails);
+
+      if (fetchedRecipes.length > 0) {
+        await knex("recipes").insert(fetchedRecipes).onConflict("id").merge();
+      }
+    }
+
+    const finalPlan = plan.map((meal) => {
+      const fetchedData = fetchedRecipes.find((r) => r.id === meal.recipe_id);
+      return {
+        ...meal,
+        steps: fetchedData?.steps || meal.steps,
+        ready_in_minutes:
+          fetchedData?.ready_in_minutes || meal.ready_in_minutes,
+        servings: fetchedData?.servings || meal.servings,
+      };
+    });
+
+    res.status(200).json(finalPlan);
   } catch (error) {
+    console.error("Error fetching meal plan:", error);
     res.status(500).json({ error: "Failed to fetch meal plan" });
   }
 };

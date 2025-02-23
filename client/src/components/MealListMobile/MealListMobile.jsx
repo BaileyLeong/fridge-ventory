@@ -38,7 +38,7 @@ const MealListMobile = ({
             >
               ×
             </button>
-            <h2>{meal.name}</h2>
+            <h2 className="meal-list-mobile__modal-title">{meal.name}</h2>
             <img
               src={meal.image_url || "https://via.placeholder.com/150"}
               alt={meal.name}
