@@ -1,16 +1,23 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Favorite, FavoriteBorder, Delete } from "@mui/icons-material";
 import { formatDateForDisplay } from "../../utils/utils.js";
 import "./MealListMobile.scss";
 
 const MealListMobile = ({
   meal,
+  favorites,
   selectedDate,
   availableDates,
   onUpdateMealDate,
   onDeleteMeal,
-  onAddToFavorites,
+  onToggleFavorite,
 }) => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  useEffect(() => {
+    setIsFavorited(favorites.some((fav) => fav.id === meal.recipe_id));
+  }, [favorites, meal.recipe_id]);
 
   const handleDateChange = (newDate) => {
     onUpdateMealDate(meal.id, newDate, meal.recipe_id, meal.meal_type);
@@ -60,15 +67,21 @@ const MealListMobile = ({
             </div>
             <button
               className="meal-list-mobile__action-button"
-              onClick={() => onAddToFavorites(meal.recipe_id)}
+              onClick={() => onToggleFavorite(meal.recipe_id)}
             >
-              Add to Favorites
+              {isFavorited ? (
+                <Favorite className="meal-planner__icon meal-planner__icon--favorite" />
+              ) : (
+                <FavoriteBorder className="meal-planner__icon" />
+              )}
             </button>
+
             <button
               className="meal-list-mobile__action-button meal-list-mobile__action-button--delete"
               onClick={() => onDeleteMeal(meal.id)}
+              aria-label="Delete Meal"
             >
-              Delete
+              <Delete className="meal-planner__icon meal-planner__icon--delete" />
             </button>
           </div>
         </div>

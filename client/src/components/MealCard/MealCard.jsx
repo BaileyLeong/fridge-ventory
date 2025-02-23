@@ -1,22 +1,29 @@
 import { formatDateForDisplay } from "../../utils/utils.js";
 import { Favorite, FavoriteBorder, Delete } from "@mui/icons-material";
 import "./MealCard.scss";
+import { useEffect, useState } from "react";
 
 const MealCard = ({
   meal,
+  favorites,
   selectedDate,
   availableDates,
   onUpdateMealDate,
   onDeleteMeal,
-  onAddToFavorites,
+  onToggleFavorite,
 }) => {
+  const [isFavorited, setIsFavorited] = useState(false);
+
+  useEffect(() => {
+    setIsFavorited(favorites.some((fav) => fav.id === meal.recipe_id));
+  }, [favorites, meal.recipe_id]);
   return (
     <li className="meal-planner__item">
       <div className="meal-planner__info">
         <div className="meal-planner__image-container">
           <img
             className="meal-planner__image"
-            src={meal.image_url || "https://via.placeholder.com/150"}
+            src={meal.image_url || "https://via.placeholder.com/500"}
             alt={meal.name}
           />
         </div>
@@ -48,16 +55,22 @@ const MealCard = ({
             })}
           </select>
           <button
-            className="meal-planner__button meal-planner__button--favorite"
-            onClick={() => onAddToFavorites(meal.recipe_id)}
+            className="meal-planner__button"
+            onClick={() => onToggleFavorite(meal.recipe_id)}
           >
-            Add to Favorites
+            {isFavorited ? (
+              <Favorite className="meal-planner__icon meal-planner__icon--favorite" />
+            ) : (
+              <FavoriteBorder className="meal-planner__icon" />
+            )}
           </button>
+
           <button
             className="meal-planner__button meal-planner__button--delete"
             onClick={() => onDeleteMeal(meal.id)}
+            aria-label="Delete Meal"
           >
-            Delete
+            <Delete className="meal-planner__icon meal-planner__icon--delete" />
           </button>
         </div>
       </div>

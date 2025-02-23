@@ -8,7 +8,9 @@ import {
   updateMealInPlan,
   deleteMealFromPlan,
   fetchRecipes,
+  fetchFavoriteRecipes,
   addFavoriteRecipe,
+  removeFavoriteRecipe,
   generateMealPlan,
 } from "../../api/apiClient";
 import "./MealPlanner.scss";
@@ -25,6 +27,7 @@ const MealPlanner = () => {
   const [availableDates, setAvailableDates] = useState([]);
   const [selectedDates, setSelectedDates] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [favorites, setFavorites] = useState([]);
 
   const isMobile = useIsMobile();
 
@@ -72,6 +75,18 @@ const MealPlanner = () => {
     setAvailableDates(dates);
   }, []);
 
+  useEffect(() => {
+    fetchFavoriteRecipes()
+      .then((response) => {
+        console.log("Fetched favorites from API:", response.data);
+        setFavorites(response.data || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching favorites:", error);
+        setFavorites([]);
+      });
+  }, []);
+
   const handleGenerateMealPlan = (preferences) => {
     generateMealPlan(preferences)
       .then((response) => {
@@ -110,10 +125,48 @@ const MealPlanner = () => {
       .catch((error) => console.error("Error deleting meal:", error));
   };
 
-  const handleAddToFavorites = (recipeId) => {
-    addFavoriteRecipe(recipeId).catch((error) =>
-      console.error("Error adding to favorites:", error)
-    );
+  const handleToggleFavorite = async (recipeId) => {
+    try {
+      console.log(`Toggling favorite for Recipe ID: ${recipeId}`);
+
+      const latestFavorites = await fetchFavoriteRecipes().then(
+        (res) => res.data || []
+      );
+
+      if (!Array.isArray(latestFavorites)) {
+        console.error(
+          "Error: Fetched favorites is not an array",
+          latestFavorites
+        );
+        return;
+      }
+
+      const isFavorited = latestFavorites.some((fav) => fav.id === recipeId);
+
+      if (isFavorited) {
+        console.log(`Removing Recipe ID: ${recipeId} from favorites`);
+        await removeFavoriteRecipe(recipeId);
+
+        setFavorites((prevFavorites) => {
+          const updatedFavorites = prevFavorites.filter(
+            (fav) => fav.id !== recipeId
+          );
+          console.log("Updated favorites after removal:", updatedFavorites);
+          return updatedFavorites;
+        });
+      } else {
+        console.log(`Adding Recipe ID: ${recipeId} to favorites`);
+        await addFavoriteRecipe(recipeId);
+
+        setFavorites((prevFavorites) => {
+          const updatedFavorites = [...prevFavorites, { id: recipeId }];
+          console.log("Updated favorites after addition:", updatedFavorites);
+          return updatedFavorites;
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+    }
   };
 
   const groupedMeals = mealPlan.reduce((groups, meal) => {
@@ -157,21 +210,23 @@ const MealPlanner = () => {
                     <MealListMobile
                       key={meal.id}
                       meal={meal}
+                      favorites={favorites}
                       selectedDate={selectedDates[meal.id]}
                       availableDates={availableDates}
                       onUpdateMealDate={handleUpdateMealDate}
                       onDeleteMeal={handleDeleteMeal}
-                      onAddToFavorites={handleAddToFavorites}
+                      onToggleFavorite={handleToggleFavorite}
                     />
                   ) : (
                     <MealCard
                       key={meal.id}
                       meal={meal}
+                      favorites={favorites}
                       selectedDate={selectedDates[meal.id]}
                       availableDates={availableDates}
                       onUpdateMealDate={handleUpdateMealDate}
                       onDeleteMeal={handleDeleteMeal}
-                      onAddToFavorites={handleAddToFavorites}
+                      onToggleFavorite={handleToggleFavorite}
                       className="meal-planner__list-item"
                     />
                   )

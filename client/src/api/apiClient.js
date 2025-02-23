@@ -44,8 +44,8 @@ export const addRecipe = (recipe) => apiClient.post("/recipes", recipe);
 export const fetchFavoriteRecipes = () => apiClient.get("/favorites");
 export const addFavoriteRecipe = (recipeId) =>
   apiClient.post("/favorites", { recipe_id: recipeId });
-export const removeFavoriteRecipe = (id) =>
-  apiClient.delete(`/favorites/${id}`);
+export const removeFavoriteRecipe = (recipeId) =>
+  apiClient.delete(`/favorites/${recipeId}`);
 
 // Ingredient Search API
 export const searchIngredients = (query) =>
