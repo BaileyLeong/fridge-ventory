@@ -168,7 +168,7 @@ export const seed = async function (knex) {
       id: 1123,
       name: "eggs",
       category: "Dairy",
-      image_url: "https://img.spoonacular.com/ingredients_500x500/eggs.jpg",
+      image_url: "https://img.spoonacular.com/ingredients_500x500/egg.jpg",
     },
   ]);
 };

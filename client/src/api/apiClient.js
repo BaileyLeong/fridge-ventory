@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const baseUrl = import.meta.env.VITE_API_URL;
-const userId = "1";
+const userId = "2";
 
 const apiClient = axios.create({
   baseURL: baseUrl,

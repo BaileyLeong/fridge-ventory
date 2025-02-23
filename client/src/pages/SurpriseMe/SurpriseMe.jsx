@@ -19,7 +19,7 @@ const SurpriseMe = () => {
   const [selectedDates, setSelectedDates] = useState({});
   const [availableDates, setAvailableDates] = useState([]);
 
-  const BASE_IMAGE_URL = "https://img.spoonacular.com/ingredients_100x100/";
+  const BASE_IMAGE_URL = "https://img.spoonacular.com/ingredients_500x500/";
 
   useEffect(() => {
     fetchMealPlan()
@@ -34,7 +34,10 @@ const SurpriseMe = () => {
       .catch((error) => console.error("Error fetching meal plan:", error));
 
     suggestRecipes()
-      .then((response) => setRecipes(response.data || []))
+      .then((response) => {
+        console.log("📥 Received recipes:", response.data);
+        setRecipes(response.data || []);
+      })
       .catch((error) =>
         console.error("Error fetching suggested recipes:", error)
       );
@@ -102,9 +105,42 @@ const SurpriseMe = () => {
         });
       }
 
+      const mealTypePriority = [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "main course",
+        "side dish",
+        "snack",
+        "appetizer",
+        "salad",
+        "soup",
+        "bread",
+        "dessert",
+        "beverage",
+        "sauce",
+        "marinade",
+        "fingerfood",
+        "drink",
+      ];
+
+      const validDishTypes = selectedRecipe.dishTypes
+        ? selectedRecipe.dishTypes.filter((type) =>
+            mealTypePriority.includes(type)
+          )
+        : [];
+
+      const selectedMealType =
+        validDishTypes.length > 0
+          ? validDishTypes.sort(
+              (a, b) =>
+                mealTypePriority.indexOf(a) - mealTypePriority.indexOf(b)
+            )[0]
+          : "main course";
+
       await addMealToPlan({
         recipe_id: selectedRecipe.id,
-        meal_type: "Dinner",
+        meal_type: selectedMealType,
         date: utcDate,
       });
 
@@ -141,6 +177,7 @@ const SurpriseMe = () => {
   };
 
   const selectedRecipe = recipes[currentRecipeIndex];
+  console.log("🔍 Recipes in state:", recipes);
 
   return (
     <div className="surprise">

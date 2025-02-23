@@ -154,7 +154,7 @@ export const suggestRecipes = async (req, res) => {
         .merge();
     }
 
-    res.status(200).json(newRecipes);
+    res.status(200).json(response.data.results);
   } catch (error) {
     console.error("Error fetching suggested recipes:", error);
     res.status(500).json({ error: "Failed to fetch recipe suggestions." });
