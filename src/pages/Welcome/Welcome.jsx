@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import EnterFridge from "../../components/EnterFridge/EnterFridge";
-import "./Welcome.scss";
+import "../Welcome/Welcome.scss";
 
 function Welcome() {
   const [fridgeEntered, setFridgeEntered] = useState(false);

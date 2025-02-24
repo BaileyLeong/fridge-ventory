@@ -3,7 +3,7 @@ import {
   fetchFavoriteRecipes,
   removeFavoriteRecipe,
 } from "../../api/apiClient";
-import "./Favorites.scss";
+import "../Favorites/Favorites.scss";
 
 const Favorites = () => {
   const [favorites, setFavorites] = useState([]);

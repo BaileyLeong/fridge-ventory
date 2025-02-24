@@ -4,7 +4,7 @@ import {
   formatQuantity,
   hideExpiry,
 } from "../../utils/utils.js";
-import "./FoodItem.scss";
+import "../FoodItem/FoodItem.scss";
 
 const FoodItem = ({
   item,

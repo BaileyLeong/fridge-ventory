@@ -10,7 +10,7 @@ import {
   fetchFridgeItems,
   updateFridgeItem,
 } from "../../api/apiClient";
-import "./GroceryList.scss";
+import "../GroceryList/GroceryList.scss";
 import { formatQuantity, UNIT_OPTIONS } from "../../utils/utils";
 
 const GroceryList = () => {

@@ -13,7 +13,7 @@ import {
   removeFavoriteRecipe,
   generateMealPlan,
 } from "../../api/apiClient";
-import "./MealPlanner.scss";
+import "../MealPlanner/MealPlanner.scss";
 
 const isSameWeek = (date1, date2) => {
   const oneDay = 24 * 60 * 60 * 1000;

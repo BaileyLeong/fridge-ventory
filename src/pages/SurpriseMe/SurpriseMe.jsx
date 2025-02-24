@@ -8,7 +8,7 @@ import {
   addMealToPlan,
   addGroceryItem,
 } from "../../api/apiClient";
-import "./SurpriseMe.scss";
+import "../SurpriseMe/SurpriseMe.scss";
 import { formatDateForDisplay } from "../../utils/utils.js";
 
 const SurpriseMe = () => {

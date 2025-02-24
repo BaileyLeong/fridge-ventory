@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { useState } from "react";
-import "./Navbar.scss";
+import "../NavBar/NavBar.scss";
 import menuIcon from "../../assets/icons/menu-icon.svg";
 
 const Navbar = () => {

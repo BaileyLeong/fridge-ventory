@@ -7,7 +7,7 @@ import {
   deleteFridgeItem,
   searchIngredients,
 } from "../../api/apiClient";
-import "./FridgeManagement.scss";
+import "../FridgeManagement/FridgeManagement.scss";
 import FoodItem from "../../components/FoodItem/FoodItem";
 import { UNIT_OPTIONS } from "../../utils/utils";
 

@@ -6,7 +6,7 @@ import {
   fetchMealPlan,
 } from "../../api/apiClient";
 import { formatDateForDisplay } from "../../utils/utils";
-import "./Dashboard.scss";
+import "../Dashboard/Dashboard.scss";
 import FoodItem from "../../components/FoodItem/FoodItem";
 
 const Dashboard = () => {

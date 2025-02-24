@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import "./EnterFridge.scss";
+import "../EnterFridge/EnterFridge.scss";
 
 function EnterFridge({ onFinish }) {
   const [isZooming, setIsZooming] = useState(false);
@@ -13,7 +13,7 @@ function EnterFridge({ onFinish }) {
   }, [isZooming, onFinish]);
 
   return (
-    <section className="fridge-entry">
+    <article className="fridge-entry">
       <h1
         className={`fridge-entry__title ${
           isZooming ? "fridge-entry__title--zooming" : ""
@@ -38,7 +38,7 @@ function EnterFridge({ onFinish }) {
           <div className="fridge-entry__handle fridge-entry__handle--right"></div>
         </div>
       </div>
-    </section>
+    </article>
   );
 }
 export default EnterFridge;

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Favorite, FavoriteBorder, Delete } from "@mui/icons-material";
 import { formatDateForDisplay } from "../../utils/utils.js";
-import "./MealListMobile.scss";
+import "../MealListMobile/MealListMobile.scss";
 
 const MealListMobile = ({
   meal,
