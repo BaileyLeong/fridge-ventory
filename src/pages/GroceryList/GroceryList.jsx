@@ -20,6 +20,7 @@ const GroceryList = () => {
     name: "",
     ingredient_id: null,
     quantity: 1,
+    unit: null,
   });
   const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -28,11 +29,17 @@ const GroceryList = () => {
   useEffect(() => {
     fetchGroceryList()
       .then((response) => setGroceryList(response.data))
-      .catch((error) => console.error("Error fetching grocery list:", error));
+      .catch((error) => {
+        console.error("Error fetching grocery list:", error);
+        setGroceryList([]);
+      });
 
     fetchRecipes()
       .then((response) => setRecipes(response.data))
-      .catch((error) => console.error("Error fetching recipes:", error));
+      .catch((error) => {
+        console.error("Error fetching recipes:", error);
+        setRecipes([]);
+      });
   }, []);
 
   const handleIngredientSearch = async (query) => {
@@ -64,7 +71,10 @@ const GroceryList = () => {
 
   const handleAddItem = async () => {
     const trimmedName = newItem.name.trim();
-    if (!trimmedName) return;
+    if (!trimmedName || !newItem.ingredient_id) {
+      alert("Please select a valid ingredient from the suggestions.");
+      return;
+    }
 
     try {
       await addGroceryItem({
@@ -74,8 +84,10 @@ const GroceryList = () => {
         unit: newItem.unit,
         completed: false,
       });
-      setNewItem({ name: "", ingredient_id: null, quantity: 1 });
+
+      setNewItem({ name: "", ingredient_id: null, quantity: 1, unit: null });
       setShowAddForm(false);
+
       const response = await fetchGroceryList();
       setGroceryList(response.data);
     } catch (error) {
@@ -106,7 +118,6 @@ const GroceryList = () => {
                 ...newItem,
                 name: newName,
                 ingredient_id: null,
-                unit: null,
               });
               handleIngredientSearch(newName);
             }}
@@ -127,6 +138,21 @@ const GroceryList = () => {
             </ul>
           )}
 
+          <input
+            className="fridge__input fridge__input--quantity"
+            type="number"
+            min="1"
+            placeholder="Quantity"
+            value={newItem.quantity}
+            onChange={(e) =>
+              setNewItem({
+                ...newItem,
+                quantity:
+                  e.target.value === "" ? 1 : parseFloat(e.target.value),
+              })
+            }
+          />
+
           <select
             className="fridge__input fridge__input--unit"
             value={newItem.unit || ""}
@@ -143,17 +169,6 @@ const GroceryList = () => {
               </option>
             ))}
           </select>
-
-          <input
-            className="fridge__input fridge__input--unit"
-            value={newItem.unit || ""}
-            onChange={(e) =>
-              setNewItem({
-                ...newItem,
-                unit: e.target.value === "" ? null : e.target.value,
-              })
-            }
-          />
 
           <button
             className="fridge__button fridge__input--add"
