@@ -26,52 +26,54 @@ const Favorites = () => {
   };
 
   return (
-    <div className="favorites">
-      <h1 className="favorites__title">Favorite Recipes</h1>
+    <section className="favorites__container">
+      <article className="favorites">
+        <h1 className="favorites__title">Favorite Recipes</h1>
 
-      {favorites.length === 0 ? (
-        <p className="favorites__message">
-          You haven't favorited any recipes yet.
-        </p>
-      ) : (
-        <ul className="favorites__list">
-          {favorites.map((recipe) => (
-            <li key={recipe.id} className="favorites__item">
-              <h2 className="favorites__item-title">{recipe.name}</h2>
-              <img
-                className="favorites__item-image"
-                src={recipe.image_url}
-                alt={recipe.name}
-              />
-              <p className="favorites__item-time">
-                Ready in {recipe.ready_in_minutes} minutes
-              </p>
-              <p className="favorites__item-servings">
-                Servings: {recipe.servings}
-              </p>
+        {favorites.length === 0 ? (
+          <p className="favorites__message">
+            You haven't favorited any recipes yet.
+          </p>
+        ) : (
+          <ul className="favorites__list">
+            {favorites.map((recipe) => (
+              <li key={recipe.id} className="favorites__item">
+                <h2 className="favorites__item-title">{recipe.name}</h2>
+                <img
+                  className="favorites__item-image"
+                  src={recipe.image_url}
+                  alt={recipe.name}
+                />
+                <p className="favorites__item-time">
+                  Ready in {recipe.ready_in_minutes} minutes
+                </p>
+                <p className="favorites__item-servings">
+                  Servings: {recipe.servings}
+                </p>
 
-              <button className="favorites__button favorites__button--view">
-                <a
-                  href={recipe.source_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="favorites__link"
+                <button className="favorites__button favorites__button--view">
+                  <a
+                    href={recipe.source_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="favorites__link"
+                  >
+                    View Full Recipe
+                  </a>
+                </button>
+
+                <button
+                  className="favorites__button favorites__button--remove"
+                  onClick={() => handleRemoveFavorite(recipe.id)}
                 >
-                  View Full Recipe
-                </a>
-              </button>
-
-              <button
-                className="favorites__button favorites__button--remove"
-                onClick={() => handleRemoveFavorite(recipe.id)}
-              >
-                Remove
-              </button>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </article>
+    </section>
   );
 };
 
