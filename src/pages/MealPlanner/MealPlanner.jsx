@@ -42,6 +42,8 @@ const MealPlanner = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [favorites, setFavorites] = useState([]);
   const [generatedMeals, setGeneratedMeals] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   const isMobile = useIsMobile();
 
@@ -61,10 +63,12 @@ const MealPlanner = () => {
   }, []);
 
   useEffect(() => {
-    fetchMealPlan()
-      .then((response) => {
-        const sortedMeals = Array.isArray(response.data)
-          ? response.data.sort(
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const mealPlanResponse = await fetchMealPlan();
+        const sortedMeals = Array.isArray(mealPlanResponse.data)
+          ? mealPlanResponse.data.sort(
               (a, b) => new Date(a.meal_date) - new Date(b.meal_date)
             )
           : [];
@@ -75,37 +79,44 @@ const MealPlanner = () => {
           return acc;
         }, {});
         setSelectedDates(initialDates);
-      })
-      .catch((error) => {
-        console.error("Error fetching meal plan:", error);
-        setMealPlan([]);
-      });
 
-    fetchRecipes()
-      .then((response) => setAvailableRecipes(response.data))
-      .catch((error) => console.error("Error fetching recipes:", error));
+        const recipesResponse = await fetchRecipes();
+        setAvailableRecipes(recipesResponse.data);
 
-    const today = new Date();
-    const dates = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(today.getDate() + i);
-      return date.toLocaleDateString("en-US");
-    });
-    setAvailableDates(dates);
+        const today = new Date();
+        const dates = Array.from({ length: 7 }, (_, i) => {
+          const date = new Date();
+          date.setDate(today.getDate() + i);
+          return date.toLocaleDateString("en-US");
+        });
+        setAvailableDates(dates);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Failed to fetch data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, []);
 
   useEffect(() => {
-    fetchFavoriteRecipes()
-      .then((response) => {
+    const fetchFavorites = async () => {
+      try {
+        const response = await fetchFavoriteRecipes();
         setFavorites(response.data || []);
-      })
-      .catch((error) => {
+      } catch (error) {
         console.error("Error fetching favorites:", error);
         setFavorites([]);
-      });
+      }
+    };
+
+    fetchFavorites();
   }, []);
 
   const handleGenerateMealPlan = async (preferences) => {
+    setLoading(true);
     try {
       const response = await generateMealPlan(preferences);
 
@@ -119,10 +130,14 @@ const MealPlanner = () => {
     } catch (error) {
       console.error("Error generating meal plan:", error);
       setGeneratedMeals([]);
+      setError("Failed to generate meal plan. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleSaveMealPlan = async (mealsWithDates) => {
+    setLoading(true);
     try {
       for (const meal of mealsWithDates) {
         const mealDate = toUTCDateString(meal.meal_date);
@@ -144,13 +159,14 @@ const MealPlanner = () => {
       setGeneratedMeals([]);
     } catch (error) {
       console.error("Error saving meal plan:", error);
-      setError(
-        "Invalid date for one or more meals. Please check the dates and try again."
-      );
+      setError("Failed to save meal plan. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdateMealDate = async (id, newDate, recipeId, mealType) => {
+    setLoading(true);
     try {
       const utcDate = toUTCDateString(newDate);
       if (!utcDate) {
@@ -170,11 +186,14 @@ const MealPlanner = () => {
       setMealPlan(updatedMealPlan.data);
     } catch (error) {
       console.error("Error updating meal date:", error);
-      setError("Failed to save the meal plan. Please try again.");
+      setError("Failed to update meal date. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDeleteMeal = async (id) => {
+    setLoading(true);
     try {
       await deleteMealFromPlan(id);
 
@@ -182,11 +201,14 @@ const MealPlanner = () => {
       setMealPlan(updatedMealPlan.data);
     } catch (error) {
       console.error("Error deleting meal:", error);
-      setError("Failed to delete the meal. Please try again.");
+      setError("Failed to delete meal. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleToggleFavorite = async (recipeId) => {
+    setLoading(true);
     try {
       const latestFavorites = await fetchFavoriteRecipes().then(
         (res) => res.data || []
@@ -204,23 +226,18 @@ const MealPlanner = () => {
 
       if (isFavorited) {
         await removeFavoriteRecipe(recipeId);
-
-        setFavorites((prevFavorites) => {
-          const updatedFavorites = prevFavorites.filter(
-            (fav) => fav.id !== recipeId
-          );
-          return updatedFavorites;
-        });
+        setFavorites((prevFavorites) =>
+          prevFavorites.filter((fav) => fav.id !== recipeId)
+        );
       } else {
         await addFavoriteRecipe(recipeId);
-
-        setFavorites((prevFavorites) => {
-          const updatedFavorites = [...prevFavorites, { id: recipeId }];
-          return updatedFavorites;
-        });
+        setFavorites((prevFavorites) => [...prevFavorites, { id: recipeId }]);
       }
     } catch (error) {
       console.error("Error toggling favorite:", error);
+      setError("Failed to toggle favorite. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -244,7 +261,8 @@ const MealPlanner = () => {
   return (
     <section className="meal-planner__container">
       <h1 className="meal-planner__title">Meal Planner</h1>
-
+      {error && <div className="error-message">{error}</div>}
+      {loading && <p>loading...</p>}
       <MealPlanModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -257,7 +275,6 @@ const MealPlanner = () => {
           onSave={handleSaveMealPlan}
         />
       )}
-
       <div className="meal-planner">
         {sortedDates.map((date) => {
           const mealsForDate = groupedMeals[date];
