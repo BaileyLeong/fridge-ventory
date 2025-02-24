@@ -2,13 +2,16 @@
 @use "../../styles/partials/variables" as *;
 
 .welcome {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
   background: #f0f0f0;
-  max-width: 1280px;
-  margin: 0 auto;
+  &__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: #f0f0f0;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
 
   &--focus {
     transition: background-color 2s ease-in-out;
