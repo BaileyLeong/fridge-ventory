@@ -21,7 +21,8 @@ export const useMealIngredients = (id) =>
 // Grocery List API
 export const fetchGroceryList = () => apiClient.get("/grocery");
 export const addGroceryItem = (item) => apiClient.post("/grocery", item);
-export const removeGroceryItem = (id) => apiClient.delete(`/grocery/${id}`);
+export const removeGroceryItem = (id, config = {}) =>
+  apiClient.delete(`/grocery/${id}`, config);
 export const markGroceryItemComplete = (id, completed) =>
   apiClient.patch(`/grocery/${id}`, { completed });
 

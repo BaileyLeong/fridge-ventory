@@ -2,6 +2,7 @@ import { formatDateForDisplay } from "../../utils/utils.js";
 import { Favorite, FavoriteBorder, Delete } from "@mui/icons-material";
 import "./MealCard.scss";
 import { useEffect, useState } from "react";
+import MealDetailsDesktop from "../MealDetailsDesktop/MealDetailsDesktop.jsx";
 
 const MealCard = ({
   meal,
@@ -13,10 +14,24 @@ const MealCard = ({
   onToggleFavorite,
 }) => {
   const [isFavorited, setIsFavorited] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     setIsFavorited(favorites.some((fav) => fav.id === meal.recipe_id));
   }, [favorites, meal.recipe_id]);
+
+  if (showDetails) {
+    return (
+      <MealDetailsDesktop
+        meal={meal}
+        onClose={() => setShowDetails(false)}
+        selectedDate={selectedDate}
+        availableDates={availableDates}
+        onUpdateMealDate={onUpdateMealDate}
+      />
+    );
+  }
+
   return (
     <li className="meal-planner__item">
       <div className="meal-planner__info">
@@ -32,28 +47,6 @@ const MealCard = ({
           <p className="meal-planner__date">
             Planned for: {formatDateForDisplay(selectedDate || meal.meal_date)}
           </p>
-
-          <select
-            className="meal-planner__select"
-            value={selectedDate || meal.meal_date}
-            onChange={(e) =>
-              onUpdateMealDate(
-                meal.id,
-                e.target.value,
-                meal.recipe_id,
-                meal.meal_type
-              )
-            }
-          >
-            {availableDates.map((date) => {
-              const formattedDate = formatDateForDisplay(date);
-              return (
-                <option key={date} value={date}>
-                  {formattedDate}
-                </option>
-              );
-            })}
-          </select>
           <button
             className="meal-planner__button"
             onClick={() => onToggleFavorite(meal.recipe_id)}
@@ -64,13 +57,18 @@ const MealCard = ({
               <FavoriteBorder className="meal-planner__icon" />
             )}
           </button>
-
           <button
             className="meal-planner__button meal-planner__button--delete"
             onClick={() => onDeleteMeal(meal.id)}
             aria-label="Delete Meal"
           >
             <Delete className="meal-planner__icon meal-planner__icon--delete" />
+          </button>
+          <button
+            className="meal-list-mobile__steps-button"
+            onClick={() => setShowDetails(!showDetails)}
+          >
+            {showDetails ? "Hide Details" : "Show Details"}
           </button>
         </div>
       </div>

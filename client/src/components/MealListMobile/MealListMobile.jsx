@@ -71,6 +71,10 @@ const MealListMobile = ({
               alt={meal.name}
               className="meal-list-mobile__image"
             />
+            <p className="meal-list-mobile__info">
+              ⏳ Ready in {meal.ready_in_minutes} minutes | 🍽 Serves{" "}
+              {meal.servings}
+            </p>
             <div className="meal-list-mobile__date-picker">
               <label htmlFor="date">Change Date:</label>
               <select
@@ -85,6 +89,14 @@ const MealListMobile = ({
                 ))}
               </select>
             </div>
+            <a
+              href={meal.source_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="meal-planner__source-link"
+            >
+              View Full Recipe
+            </a>
           </div>
         </div>
       )}

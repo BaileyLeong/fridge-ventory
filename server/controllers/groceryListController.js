@@ -127,6 +127,8 @@ export const removeItemFromGroceryList = async (req, res) => {
   try {
     const user_id = req.user.id;
     const { id } = req.params;
+    const bypassMealPlanCheck =
+      req.headers["bypass-meal-plan-check"] === "true";
 
     const groceryItem = await knex("grocery_lists")
       .where({ id, user_id })
@@ -136,25 +138,26 @@ export const removeItemFromGroceryList = async (req, res) => {
       return res.status(404).json({ error: "Item not found or unauthorized" });
     }
 
-    const isMealPlanItem = await knex("meal_plans")
-      .join(
-        "recipe_ingredients",
-        "meal_plans.recipe_id",
-        "recipe_ingredients.recipe_id"
-      )
-      .where("meal_plans.user_id", user_id)
-      .where("recipe_ingredients.ingredient_id", groceryItem.ingredient_id)
-      .first();
+    if (!bypassMealPlanCheck) {
+      const isMealPlanItem = await knex("meal_plans")
+        .join(
+          "recipe_ingredients",
+          "meal_plans.recipe_id",
+          "recipe_ingredients.recipe_id"
+        )
+        .where("meal_plans.user_id", user_id)
+        .where("recipe_ingredients.ingredient_id", groceryItem.ingredient_id)
+        .first();
 
-    if (isMealPlanItem) {
-      return res.status(400).json({
-        error:
-          "This ingredient is needed for a planned meal. Remove the meal plan first.",
-      });
+      if (isMealPlanItem) {
+        return res.status(400).json({
+          error:
+            "This ingredient is needed for a planned meal. Remove the meal plan first.",
+        });
+      }
     }
 
     await knex("grocery_lists").where({ id, user_id }).del();
-
     return res.status(200).json({ message: "Item removed successfully" });
   } catch (error) {
     console.error("Error deleting grocery item:", error);

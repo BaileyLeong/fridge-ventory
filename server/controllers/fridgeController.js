@@ -62,7 +62,7 @@ export const addFridgeItem = async (req, res) => {
 
       try {
         const response = await axios.get(
-          `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${PRIMARY_API_KEY}`, // ✅ General API key
+          `https://api.spoonacular.com/food/ingredients/search?query=${name}&apiKey=${PRIMARY_API_KEY}`,
           {
             headers: { "x-api-key": PRIMARY_API_KEY },
           }

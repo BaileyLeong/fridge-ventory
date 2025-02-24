@@ -15,6 +15,8 @@ const isCacheValid = (cachedAt) => {
 };
 
 const fetchBulkRecipesFromSpoonacular = async (recipeIds) => {
+  await new Promise((resolve) => setTimeout(resolve, 300));
+
   try {
     const response = await axios.get(
       `${SPOONACULAR_BASE_URL}/recipes/informationBulk`,
@@ -28,11 +30,11 @@ const fetchBulkRecipesFromSpoonacular = async (recipeIds) => {
       id: recipe.id,
       name: recipe.title,
       image_url: recipe.image,
-      source_url: recipe.sourceUrl,
+      source_url: recipe.spoonacularSourceUrl,
       category: recipe.dishTypes?.[0] || null,
       ready_in_minutes: recipe.readyInMinutes,
       servings: recipe.servings,
-      steps: recipe.instructions || null,
+      steps: recipe.sourceUrl || null,
       cached_at: new Date(),
     }));
   } catch (error) {
@@ -56,11 +58,11 @@ const fetchRecipeFromSpoonacular = async (recipe_id) => {
       id: recipe.id,
       name: recipe.title,
       image_url: recipe.image,
-      source_url: recipe.sourceUrl,
+      source_url: recipe.spoonacularSourceUrl,
       category: recipe.dishTypes?.[0] || null,
       ready_in_minutes: recipe.readyInMinutes,
       servings: recipe.servings,
-      steps: recipe.instructions || null,
+      steps: recipe.sourceUrl || null,
       cached_at: new Date(),
     };
   } catch (error) {
@@ -78,21 +80,53 @@ export const getFavoriteRecipes = async (req, res) => {
       .where({ user_id })
       .select("recipe_id");
 
-    console.log("📥 Fetched from DB:", favoriteRecipes);
-
     if (favoriteRecipes.length === 0) {
       return res.status(200).json([]);
     }
 
     const recipeIds = favoriteRecipes.map(({ recipe_id }) => recipe_id);
-    console.log(`📋 Extracted Recipe IDs: ${recipeIds}`);
+    console.log("Favorite Recipe IDs:", recipeIds);
 
     const recipesFromDB = await knex("recipes").whereIn("id", recipeIds);
-    console.log("📤 Recipes from DB:", recipesFromDB);
+    console.log("Cached recipes from DB:", recipesFromDB);
 
-    res.status(200).json(recipesFromDB);
+    const requiredExtraFields = [
+      "category",
+      "ready_in_minutes",
+      "servings",
+      "steps",
+    ];
+
+    const notCachedIds = recipeIds.filter(
+      (id) => !recipesFromDB.some((recipe) => recipe.id === id)
+    );
+
+    const cachedIncompleteIds = recipesFromDB
+      .filter(
+        (recipe) =>
+          !requiredExtraFields.every((field) => recipe[field] !== null)
+      )
+      .map((recipe) => recipe.id);
+
+    const missingRecipeIds = [
+      ...new Set([...notCachedIds, ...cachedIncompleteIds]),
+    ];
+    console.log("Recipe IDs missing complete details:", missingRecipeIds);
+
+    let recipesFromAPI = [];
+    if (missingRecipeIds.length > 0) {
+      recipesFromAPI = await fetchBulkRecipesFromSpoonacular(missingRecipeIds);
+      console.log("Recipes fetched from Spoonacular:", recipesFromAPI);
+
+      await knex("recipes").insert(recipesFromAPI).onConflict("id").merge();
+    }
+
+    const finalRecipes = await knex("recipes").whereIn("id", recipeIds);
+    console.log("Final combined recipes:", finalRecipes);
+
+    res.status(200).json(finalRecipes);
   } catch (error) {
-    console.error("❌ Error fetching favorite recipes:", error);
+    console.error("Error fetching favorite recipes:", error);
     res.status(500).json({ error: "Failed to fetch favorite recipes" });
   }
 };
@@ -148,7 +182,7 @@ export const addFavoriteRecipe = async (req, res) => {
 
     if (existingFavorite) {
       console.log(
-        `✅ Recipe ${recipe_id} is already favorited by user ${user_id}`
+        `Recipe ${recipe_id} is already favorited by user ${user_id}`
       );
       return res.status(200).json({ message: "Recipe already in favorites" });
     }
@@ -168,7 +202,7 @@ export const removeFavoriteRecipe = async (req, res) => {
     const { id: recipe_id } = req.params;
 
     console.log(
-      `🗑 Attempting to remove favorite - User: ${user_id}, Recipe: ${recipe_id}`
+      `Attempting to remove favorite - User: ${user_id}, Recipe: ${recipe_id}`
     );
 
     const existingFavorite = await knex("favorite_recipes")
@@ -191,7 +225,7 @@ export const removeFavoriteRecipe = async (req, res) => {
     }
 
     console.log(
-      `✅ Successfully removed favorite - User: ${user_id}, Recipe: ${recipe_id}`
+      `Successfully removed favorite - User: ${user_id}, Recipe: ${recipe_id}`
     );
     res.status(200).json({ message: "Recipe removed from favorites" });
   } catch (error) {

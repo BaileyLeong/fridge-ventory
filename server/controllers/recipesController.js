@@ -145,8 +145,8 @@ export const suggestRecipes = async (req, res) => {
             image_url: recipe.image || "https://placehold.co/500",
             ready_in_minutes: recipe.readyInMinutes,
             servings: recipe.servings,
-            steps: recipe.instructions || "No instructions available.",
-            source_url: recipe.sourceUrl,
+            steps: recipe.sourceUrl || "No instructions available.",
+            source_url: recipe.spoonacularSourceUrl,
             cached_at: new Date(),
           }))
         )
@@ -200,7 +200,7 @@ export const addRecipe = async (req, res) => {
       category: category || "Uncategorized",
       image_url: image_url || "https://placehold.co/500",
       source_url: source_url || "https://spoonacular.com",
-      steps: steps || "No steps provided.",
+      steps: recipe.sourceUrl || "No instructions available.",
       ready_in_minutes: ready_in_minutes || null,
       servings: servings || null,
     });

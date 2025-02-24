@@ -28,11 +28,11 @@ const fetchBulkRecipesFromSpoonacular = async (recipeIds) => {
       id: recipe.id,
       name: recipe.title,
       image_url: recipe.image,
-      source_url: recipe.sourceUrl,
+      source_url: recipe.spoonacularSourceUrl,
       category: recipe.dishTypes?.[0] || "main course",
       ready_in_minutes: recipe.readyInMinutes,
       servings: recipe.servings,
-      steps: recipe.instructions || null,
+      steps: recipe.sourceUrl || "No instructions available.",
       cached_at: new Date(),
     }));
   } catch (error) {
@@ -97,8 +97,19 @@ export const getMealPlan = async (req, res) => {
 
 export const addMealToPlan = async (req, res) => {
   try {
+    console.log("Received request body in addMealToPlan:", req.body);
     const { recipe_id, meal_type, date } = req.body;
     const user_id = req.user.id;
+    console.log(
+      "User ID:",
+      user_id,
+      "Recipe ID:",
+      recipe_id,
+      "Meal Type:",
+      meal_type,
+      "Date:",
+      date
+    );
 
     if (!user_id || !recipe_id || !meal_type) {
       return res.status(400).json({ error: "Required fields are missing" });
@@ -109,52 +120,163 @@ export const addMealToPlan = async (req, res) => {
         ? date
         : new Date().toISOString().split("T")[0];
 
-    const recipe = await knex("recipes").where("id", recipe_id).first();
-    if (!recipe) {
-      return res
-        .status(400)
-        .json({ error: "Recipe does not exist in the database." });
+    let recipe = await knex("recipes").where("id", recipe_id).first();
+    console.log("Fetched recipe from DB in addMealToPlan:", recipe);
+
+    const requiredExtraFields = ["category", "ready_in_minutes", "servings"];
+
+    if (
+      !recipe ||
+      recipe.steps === "No instructions available." ||
+      !requiredExtraFields.every((field) => recipe[field] !== null)
+    ) {
+      console.log(
+        "Incomplete or missing recipe data detected, querying Spoonacular for full details."
+      );
+      const response = await axios.get(
+        `${SPOONACULAR_BASE_URL}/recipes/${recipe_id}/information`,
+        {
+          headers: { "x-rapidapi-key": SPOONACULAR_API_KEY },
+        }
+      );
+      const fetchedRecipe = response.data;
+      recipe = {
+        id: fetchedRecipe.id,
+        name: fetchedRecipe.title,
+        image_url: fetchedRecipe.image,
+        source_url: fetchedRecipe.spoonacularSourceUrl,
+        category: fetchedRecipe.dishTypes?.[0] || "main course",
+        ready_in_minutes: fetchedRecipe.readyInMinutes,
+        servings: fetchedRecipe.servings,
+        steps: recipe.sourceUrl || "No instructions available.",
+        cached_at: new Date(),
+      };
+      console.log("Fetched complete recipe details:", recipe);
+      await knex("recipes").insert(recipe).onConflict("id").merge();
+    }
+    console.log("Final recipe data in addMealToPlan:", recipe);
+
+    let recipeIngredients = await knex("recipe_ingredients")
+      .where("recipe_id", recipe_id)
+      .select("ingredient_id", "amount_metric", "unit_metric");
+    console.log("Fetched recipe ingredients from DB:", recipeIngredients);
+
+    if (!recipeIngredients || recipeIngredients.length === 0) {
+      console.log(
+        "No ingredients found for recipe. Fetching extended recipe info from Spoonacular..."
+      );
+      const response = await axios.get(
+        `${SPOONACULAR_BASE_URL}/recipes/${recipe_id}/information`,
+        {
+          headers: { "x-rapidapi-key": SPOONACULAR_API_KEY },
+        }
+      );
+      const recipeInfo = response.data;
+      if (recipeInfo && recipeInfo.extendedIngredients) {
+        const extendedIngredients = recipeInfo.extendedIngredients;
+        const ingredientNames = extendedIngredients.map((ing) =>
+          ing.name.toLowerCase()
+        );
+        const existingIngredients = await knex("ingredients")
+          .whereIn(knex.raw("LOWER(name)"), ingredientNames)
+          .select("id", "name");
+        const nameToIdMap = {};
+        existingIngredients.forEach((ing) => {
+          nameToIdMap[ing.name.toLowerCase()] = ing.id;
+        });
+        const resolvedIngredients = extendedIngredients.map((ing) => {
+          const lowerName = ing.name.toLowerCase();
+          return {
+            ...ing,
+            resolvedId: nameToIdMap[lowerName] || ing.id,
+          };
+        });
+        const missingIngredients = resolvedIngredients.filter(
+          (ing) => !nameToIdMap.hasOwnProperty(ing.name.toLowerCase())
+        );
+        if (missingIngredients.length > 0) {
+          const ingredientInserts = missingIngredients.map((ing) => ({
+            id: ing.id,
+            name: ing.name,
+            category: null,
+            image_url: null,
+          }));
+          await knex("ingredients")
+            .insert(ingredientInserts)
+            .onConflict("id")
+            .ignore();
+          console.log(
+            "Inserted missing ingredients:",
+            missingIngredients.map((ing) => ing.id)
+          );
+        }
+        let ingredientRows = resolvedIngredients.map((ing) => ({
+          recipe_id: recipe_id,
+          ingredient_id: ing.resolvedId,
+          amount_us: ing.amount,
+          unit_us: ing.unit,
+          amount_metric: ing.measures?.metric?.amount || null,
+          unit_metric: ing.measures?.metric?.unitShort || null,
+          cached_at: new Date(),
+        }));
+        const uniqueRowsMap = new Map();
+        ingredientRows.forEach((row) => {
+          const key = `${row.recipe_id}-${row.ingredient_id}`;
+          if (!uniqueRowsMap.has(key)) {
+            uniqueRowsMap.set(key, row);
+          }
+        });
+        ingredientRows = Array.from(uniqueRowsMap.values());
+        await knex("recipe_ingredients")
+          .insert(ingredientRows)
+          .onConflict(["recipe_id", "ingredient_id"])
+          .ignore();
+        console.log("Inserted ingredients for recipe:", recipe_id);
+        recipeIngredients = ingredientRows;
+      }
     }
 
-    const [id] = await knex("meal_plans").insert({
+    const [mealPlanId] = await knex("meal_plans").insert({
       user_id,
       recipe_id,
       meal_type,
       meal_date: mealDate,
     });
-
-    const requiredIngredients = await knex("recipe_ingredients")
-      .where("recipe_id", recipe_id)
-      .select("ingredient_id", "amount_metric", "unit_metric");
+    console.log("Meal plan entry created with ID:", mealPlanId);
 
     let groceryItemsAdded = 0;
-    for (const ingredient of requiredIngredients) {
+    for (const ingredient of recipeIngredients) {
       const existingGroceryItem = await knex("grocery_lists")
         .where({ user_id, ingredient_id: ingredient.ingredient_id })
         .first();
-
       if (existingGroceryItem) {
         await knex("grocery_lists")
           .where({ user_id, ingredient_id: ingredient.ingredient_id })
           .increment("quantity", ingredient.amount_metric || 1);
+        console.log(
+          `Incremented grocery list quantity for ingredient ${ingredient.ingredient_id}.`
+        );
       } else {
         await knex("grocery_lists").insert({
           user_id,
           ingredient_id: ingredient.ingredient_id,
           quantity: ingredient.amount_metric || 1,
-          unit: ingredient.unit || null,
+          unit: ingredient.unit_metric || null,
           completed: false,
         });
         groceryItemsAdded++;
+        console.log(
+          `Inserted new grocery list item for ingredient ${ingredient.ingredient_id}.`
+        );
       }
     }
 
     return res.status(201).json({
-      id,
+      meal_plan_id: mealPlanId,
       user_id,
       recipe_id,
       meal_type,
-      date: mealDate,
+      meal_date: mealDate,
       groceryItemsAdded,
     });
   } catch (error) {
@@ -334,7 +456,8 @@ export const generateWeeklyMealPlan = async (req, res) => {
       image: recipe.image,
       readyInMinutes: recipe.readyInMinutes,
       servings: recipe.servings,
-      sourceUrl: recipe.sourceUrl,
+      source_url: recipe.spoonacularSourceUrl,
+      steps: recipe.sourceUrl || "No instructions available.",
     }));
 
     res.status(200).json(recipes);

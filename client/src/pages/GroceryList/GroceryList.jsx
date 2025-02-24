@@ -7,6 +7,8 @@ import {
   markGroceryItemComplete,
   searchIngredients,
   addFridgeItem,
+  fetchFridgeItems,
+  updateFridgeItem,
 } from "../../api/apiClient";
 import "./GroceryList.scss";
 import { formatQuantity, UNIT_OPTIONS } from "../../utils/utils";
@@ -14,13 +16,11 @@ import { formatQuantity, UNIT_OPTIONS } from "../../utils/utils";
 const GroceryList = () => {
   const [groceryList, setGroceryList] = useState([]);
   const [recipes, setRecipes] = useState([]);
-
   const [newItem, setNewItem] = useState({
     name: "",
     ingredient_id: null,
     quantity: 1,
   });
-
   const [ingredientSuggestions, setIngredientSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -34,8 +34,6 @@ const GroceryList = () => {
       .then((response) => setRecipes(response.data))
       .catch((error) => console.error("Error fetching recipes:", error));
   }, []);
-
-  console.log("Grocery List updated:", groceryList);
 
   const handleIngredientSearch = async (query) => {
     if (!query || query.length < 3) {
@@ -185,9 +183,28 @@ const GroceryList = () => {
                     console.log("Marking grocery item complete...");
                     await markGroceryItemComplete(item.id, true);
                     console.log("Adding item to fridge...");
-                    await addFridgeItem(item);
+
+                    const fridgeResponse = await fetchFridgeItems();
+                    const existingFridgeItem = fridgeResponse.data.find(
+                      (fi) => fi.ingredient_id === item.ingredient_id
+                    );
+
+                    if (existingFridgeItem) {
+                      const newQuantity =
+                        parseFloat(existingFridgeItem.quantity) +
+                        parseFloat(item.quantity);
+                      console.log("Updating existing fridge item...");
+                      await updateFridgeItem(existingFridgeItem.id, {
+                        quantity: newQuantity,
+                      });
+                    } else {
+                      console.log("Adding new fridge item...");
+                      await addFridgeItem(item);
+                    }
                     console.log("Removing grocery item...");
-                    await removeGroceryItem(item.id);
+                    await removeGroceryItem(item.id, {
+                      headers: { "bypass-meal-plan-check": "true" },
+                    });
                     console.log("Fetching updated grocery list...");
                     const response = await fetchGroceryList();
                     console.log(
@@ -195,7 +212,6 @@ const GroceryList = () => {
                       response.data
                     );
                     setGroceryList(response.data);
-                    console.log(response);
                   } catch (error) {
                     console.error("Error moving item to fridge:", error);
                   }
