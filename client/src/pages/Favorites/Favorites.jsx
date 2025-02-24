@@ -11,7 +11,6 @@ const Favorites = () => {
   useEffect(() => {
     fetchFavoriteRecipes()
       .then((response) => {
-        console.log("Fetched favorite recipes:", response.data);
         setFavorites(response.data);
       })
       .catch((error) => console.error("Error fetching favorites:", error));

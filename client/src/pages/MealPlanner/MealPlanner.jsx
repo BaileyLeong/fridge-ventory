@@ -78,7 +78,6 @@ const MealPlanner = () => {
   useEffect(() => {
     fetchFavoriteRecipes()
       .then((response) => {
-        console.log("Fetched favorites from API:", response.data);
         setFavorites(response.data || []);
       })
       .catch((error) => {
@@ -127,8 +126,6 @@ const MealPlanner = () => {
 
   const handleToggleFavorite = async (recipeId) => {
     try {
-      console.log(`Toggling favorite for Recipe ID: ${recipeId}`);
-
       const latestFavorites = await fetchFavoriteRecipes().then(
         (res) => res.data || []
       );
@@ -144,23 +141,19 @@ const MealPlanner = () => {
       const isFavorited = latestFavorites.some((fav) => fav.id === recipeId);
 
       if (isFavorited) {
-        console.log(`Removing Recipe ID: ${recipeId} from favorites`);
         await removeFavoriteRecipe(recipeId);
 
         setFavorites((prevFavorites) => {
           const updatedFavorites = prevFavorites.filter(
             (fav) => fav.id !== recipeId
           );
-          console.log("Updated favorites after removal:", updatedFavorites);
           return updatedFavorites;
         });
       } else {
-        console.log(`Adding Recipe ID: ${recipeId} to favorites`);
         await addFavoriteRecipe(recipeId);
 
         setFavorites((prevFavorites) => {
           const updatedFavorites = [...prevFavorites, { id: recipeId }];
-          console.log("Updated favorites after addition:", updatedFavorites);
           return updatedFavorites;
         });
       }

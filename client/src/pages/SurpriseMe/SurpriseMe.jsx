@@ -35,7 +35,6 @@ const SurpriseMe = () => {
 
     suggestRecipes()
       .then((response) => {
-        console.log("📥 Received recipes:", response.data);
         setRecipes(response.data || []);
       })
       .catch((error) =>
@@ -159,7 +158,6 @@ const SurpriseMe = () => {
           unit: ingredient.unit,
           completed: false,
         };
-        console.log("Adding ingredient with payload:", payload);
         addGroceryItem(payload);
       });
 
@@ -177,7 +175,6 @@ const SurpriseMe = () => {
   };
 
   const selectedRecipe = recipes[currentRecipeIndex];
-  console.log("🔍 Recipes in state:", recipes);
 
   return (
     <div className="surprise">

@@ -8,8 +8,6 @@ const MealDetailsDesktop = ({
   availableDates,
   onUpdateMealDate,
 }) => {
-  console.log("Steps Data:", meal.steps);
-
   return (
     <div className="meal-planner__item">
       <div className="meal-planner__info">

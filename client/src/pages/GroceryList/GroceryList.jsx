@@ -180,9 +180,7 @@ const GroceryList = () => {
                 checked={item.completed}
                 onChange={async () => {
                   try {
-                    console.log("Marking grocery item complete...");
                     await markGroceryItemComplete(item.id, true);
-                    console.log("Adding item to fridge...");
 
                     const fridgeResponse = await fetchFridgeItems();
                     const existingFridgeItem = fridgeResponse.data.find(
@@ -193,24 +191,16 @@ const GroceryList = () => {
                       const newQuantity =
                         parseFloat(existingFridgeItem.quantity) +
                         parseFloat(item.quantity);
-                      console.log("Updating existing fridge item...");
                       await updateFridgeItem(existingFridgeItem.id, {
                         quantity: newQuantity,
                       });
                     } else {
-                      console.log("Adding new fridge item...");
                       await addFridgeItem(item);
                     }
-                    console.log("Removing grocery item...");
                     await removeGroceryItem(item.id, {
                       headers: { "bypass-meal-plan-check": "true" },
                     });
-                    console.log("Fetching updated grocery list...");
                     const response = await fetchGroceryList();
-                    console.log(
-                      "Updated grocery list received:",
-                      response.data
-                    );
                     setGroceryList(response.data);
                   } catch (error) {
                     console.error("Error moving item to fridge:", error);
