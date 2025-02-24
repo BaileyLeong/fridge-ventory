@@ -1,0 +1,11 @@
+@use "mixins" as *;
+@use "variables" as *;
+@use "fonts" as *;
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}

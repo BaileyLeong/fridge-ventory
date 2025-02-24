@@ -157,13 +157,10 @@ All endpoints under `/api/fridge` require a valid user ID.
 
 - **GET `/api/fridge`**  
   Retrieves the current user’s fridge items.
-  
 - **POST `/api/fridge`**  
   Adds a new fridge item to the user’s inventory.
-  
 - **PATCH `/api/fridge/:id`**  
   Updates an existing fridge item (e.g., changes in quantity, expiry date, or other details).
-  
 - **DELETE `/api/fridge/:id`**  
   Removes a fridge item.
 
@@ -172,13 +169,13 @@ All endpoints under `/api/fridge` require a valid user ID.
 #### Recipes (Public)
 
 - **GET `/api/recipes`**  
-  Fetches recipe suggestions based on available ingredients.  
+  Fetches recipe suggestions based on available ingredients.
 
 - **GET `/api/recipes/:id`**  
   Retrieves details for a specific recipe.
 
 - **GET `/api/recipes/suggest`**  
-  Provides recipe suggestions based on the user’s fridge items.  
+  Provides recipe suggestions based on the user’s fridge items.
 
 #### Favorite Recipes (User‑Specific)
 
@@ -186,10 +183,8 @@ All favorite recipe endpoints require a valid user ID.
 
 - **GET `/api/favorites`**  
   Retrieves the user’s favorite recipes.
-  
 - **POST `/api/favorites`**  
   Adds a recipe to the user’s favorites.
-  
 - **DELETE `/api/favorites/:id`**  
   Removes a recipe from favorites.
 
@@ -199,13 +194,10 @@ All endpoints under `/api/meal-plan` require a valid user ID.
 
 - **GET `/api/meal-plan`**  
   Retrieves the current meal plan for the user.
-  
 - **POST `/api/meal-plan`**  
   Creates a new meal plan entry and automatically generates missing grocery items based on the recipe's ingredients.
-  
 - **PUT `/api/meal-plan/:id`**  
   Updates a specific meal plan entry.
-  
 - **DELETE `/api/meal-plan/:id`**  
   Deletes a meal plan entry.
 
@@ -215,18 +207,16 @@ All endpoints under `/api/grocery-list` require a valid user ID.
 
 - **GET `/api/grocery-list`**  
   Retrieves the user’s grocery list. Each item is flagged as either:
-  - `manual: true` (added manually), or  
+
+  - `manual: true` (added manually), or
   - `manual: false` (generated automatically via meal planning).
 
 - **POST `/api/grocery-list`**  
-  Adds a new grocery list item (manual addition). 
-  
+  Adds a new grocery list item (manual addition).
 - **PATCH `/api/grocery-list/:id`**  
   Updates an existing grocery list item.
-  
 - **DELETE `/api/grocery-list/:id`**  
   Removes a grocery list item.
-  
 - **PATCH `/api/grocery-list/:id/complete`**  
   Toggles the completion status of a grocery list item.
 
