@@ -16,6 +16,7 @@ import {
 } from "../../api/apiClient";
 import "../MealPlanner/MealPlanner.scss";
 import MealSelectionList from "../../components/MealSelectionList/MealSelectionList.jsx";
+import { BarLoader } from "react-spinners";
 
 const isSameWeek = (date1, date2) => {
   const oneDay = 24 * 60 * 60 * 1000;
@@ -262,69 +263,92 @@ const MealPlanner = () => {
     <section className="meal-planner__container">
       <h1 className="meal-planner__title">Meal Planner</h1>
       {error && <div className="error-message">{error}</div>}
-      {loading && <p>loading...</p>}
+
       <MealPlanModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onGenerate={handleGenerateMealPlan}
       />
-      {generatedMeals.length > 0 && (
-        <MealSelectionList
-          generatedMeals={generatedMeals}
-          availableDates={availableDates}
-          onSave={handleSaveMealPlan}
-        />
+
+      {loading ? (
+        <div className="meal-planner__loading">
+          <BarLoader
+            color="#ffa2e8"
+            cssOverride={{
+              borderColor: "#000000",
+              boxShadow: "0 0 10px #ff66ff, 0 0 20px #cc00cc, 0 0 40px #00eaff",
+              margin: "2rem auto",
+            }}
+            height={15}
+            loading
+            width={250}
+            aria-label="Loading Spinner"
+            data-testid="loader"
+          />
+          <p className="meal-planner__loading-text">loading...</p>
+        </div>
+      ) : (
+        <>
+          {generatedMeals.length > 0 && (
+            <MealSelectionList
+              generatedMeals={generatedMeals}
+              availableDates={availableDates}
+              onSave={handleSaveMealPlan}
+            />
+          )}
+
+          <div className="meal-planner">
+            {sortedDates.map((date) => {
+              const mealsForDate = groupedMeals[date];
+              const remainder = mealsForDate.length % 3;
+              const spacersNeeded = remainder ? 3 - remainder : 0;
+              return (
+                <div key={date} className="meal-planner__group">
+                  <h2 className="meal-planner__group-title">
+                    {new Date(date).toLocaleDateString("en-US", {
+                      weekday: "long",
+                    })}
+                  </h2>
+                  <ul className="meal-planner__list">
+                    {mealsForDate.map((meal) =>
+                      isMobile ? (
+                        <MealListMobile
+                          key={meal.id}
+                          meal={meal}
+                          favorites={favorites}
+                          selectedDate={selectedDates[meal.id]}
+                          availableDates={availableDates}
+                          onUpdateMealDate={handleUpdateMealDate}
+                          onDeleteMeal={handleDeleteMeal}
+                          onToggleFavorite={handleToggleFavorite}
+                        />
+                      ) : (
+                        <MealCard
+                          key={meal.id}
+                          meal={meal}
+                          favorites={favorites}
+                          selectedDate={selectedDates[meal.id]}
+                          availableDates={availableDates}
+                          onUpdateMealDate={handleUpdateMealDate}
+                          onDeleteMeal={handleDeleteMeal}
+                          onToggleFavorite={handleToggleFavorite}
+                          className="meal-planner__list-item"
+                        />
+                      )
+                    )}
+                    {Array.from({ length: spacersNeeded }).map((_, index) => (
+                      <li
+                        key={`spacer-${index}`}
+                        className="meal-planner__spacer"
+                      ></li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
+        </>
       )}
-      <div className="meal-planner">
-        {sortedDates.map((date) => {
-          const mealsForDate = groupedMeals[date];
-          const remainder = mealsForDate.length % 3;
-          const spacersNeeded = remainder ? 3 - remainder : 0;
-          return (
-            <div key={date} className="meal-planner__group">
-              <h2 className="meal-planner__group-title">
-                {new Date(date).toLocaleDateString("en-US", {
-                  weekday: "long",
-                })}
-              </h2>
-              <ul className="meal-planner__list">
-                {mealsForDate.map((meal) =>
-                  isMobile ? (
-                    <MealListMobile
-                      key={meal.id}
-                      meal={meal}
-                      favorites={favorites}
-                      selectedDate={selectedDates[meal.id]}
-                      availableDates={availableDates}
-                      onUpdateMealDate={handleUpdateMealDate}
-                      onDeleteMeal={handleDeleteMeal}
-                      onToggleFavorite={handleToggleFavorite}
-                    />
-                  ) : (
-                    <MealCard
-                      key={meal.id}
-                      meal={meal}
-                      favorites={favorites}
-                      selectedDate={selectedDates[meal.id]}
-                      availableDates={availableDates}
-                      onUpdateMealDate={handleUpdateMealDate}
-                      onDeleteMeal={handleDeleteMeal}
-                      onToggleFavorite={handleToggleFavorite}
-                      className="meal-planner__list-item"
-                    />
-                  )
-                )}
-                {Array.from({ length: spacersNeeded }).map((_, index) => (
-                  <li
-                    key={`spacer-${index}`}
-                    className="meal-planner__spacer"
-                  ></li>
-                ))}
-              </ul>
-            </div>
-          );
-        })}
-      </div>
     </section>
   );
 };
