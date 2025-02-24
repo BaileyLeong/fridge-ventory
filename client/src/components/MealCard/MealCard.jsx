@@ -47,29 +47,31 @@ const MealCard = ({
           <p className="meal-planner__date">
             Planned for: {formatDateForDisplay(selectedDate || meal.meal_date)}
           </p>
-          <button
-            className="meal-planner__button"
-            onClick={() => onToggleFavorite(meal.recipe_id)}
-          >
-            {isFavorited ? (
-              <Favorite className="meal-planner__icon meal-planner__icon--favorite" />
-            ) : (
-              <FavoriteBorder className="meal-planner__icon" />
-            )}
-          </button>
-          <button
-            className="meal-planner__button meal-planner__button--delete"
-            onClick={() => onDeleteMeal(meal.id)}
-            aria-label="Delete Meal"
-          >
-            <Delete className="meal-planner__icon meal-planner__icon--delete" />
-          </button>
-          <button
-            className="meal-list-mobile__steps-button"
-            onClick={() => setShowDetails(!showDetails)}
-          >
-            {showDetails ? "Hide Details" : "Show Details"}
-          </button>
+          <div className="meal-planner__actions">
+            <button
+              className="meal-planner__button meal-planner__button--favorite"
+              onClick={() => onToggleFavorite(meal.recipe_id)}
+            >
+              {isFavorited ? (
+                <Favorite className="meal-planner__icon meal-planner__icon--favorite" />
+              ) : (
+                <FavoriteBorder className="meal-planner__icon" />
+              )}
+            </button>
+            <button
+              className="meal-planner__button meal-planner__button--delete"
+              onClick={() => onDeleteMeal(meal.id)}
+              aria-label="Delete Meal"
+            >
+              <Delete className="meal-planner__icon meal-planner__icon--delete" />
+            </button>
+            <button
+              className="meal-planner__button meal-planner__button--details"
+              onClick={() => setShowDetails(!showDetails)}
+            >
+              {showDetails ? "Hide Details" : "Show Details"}
+            </button>
+          </div>
         </div>
       </div>
     </li>
