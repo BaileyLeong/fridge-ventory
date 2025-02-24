@@ -4,14 +4,20 @@
 .navbar {
   background: #333;
   padding: 2.5rem;
-  display: flex;
-  justify-content: flex-start;
-  gap: 1.5rem;
-  align-items: center;
-  position: relative;
 
-  @include tablet {
-    justify-content: space-between;
+  &__container {
+    max-width: 1280px;
+    margin: 0;
+    display: flex;
+    justify-content: flex-start;
+    gap: 1.5rem;
+    align-items: center;
+    position: relative;
+
+    @include tablet {
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
   }
 
   &__toggle {
