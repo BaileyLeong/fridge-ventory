@@ -1,0 +1,150 @@
+@use "../../styles/partials/mixins" as *;
+@use "../../styles/partials/variables" as *;
+
+.surprise {
+  max-width: 1280px;
+  margin: 0 auto;
+
+  &__container {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  &__title {
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  &__card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 1rem;
+    min-width: 474px;
+
+    @include tablet {
+      max-width: 50%;
+    }
+  }
+
+  &__image {
+    width: 100%;
+    height: 250px;
+    object-fit: cover;
+  }
+
+  &__content {
+    padding: 15px;
+    text-align: center;
+  }
+
+  &__recipe-title {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  &__likes {
+    font-size: 1rem;
+    color: #e91e63;
+    margin-bottom: 1rem;
+  }
+
+  &__subheading {
+    font-size: 1.2rem;
+    margin-top: 1rem;
+    text-align: left;
+  }
+
+  &__ingredient-list {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+  }
+
+  &__ingredient {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  &__ingredient-image {
+    width: 50px;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  &__ingredient-text {
+    font-size: 1rem;
+    color: #333;
+  }
+
+  &__message {
+    text-align: center;
+    color: #888;
+    font-style: italic;
+    padding: 1rem;
+  }
+
+  &__date {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 15px;
+  }
+
+  &__label {
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  &__select {
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+  }
+
+  &__buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+
+  &__button {
+    flex: 1;
+    padding: 1rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    text-align: center;
+
+    &--add {
+      background: #4caf50;
+      color: white;
+
+      &:hover {
+        background: #45a049;
+      }
+    }
+
+    &--skip {
+      background: #f44336;
+      color: white;
+
+      &:hover {
+        background: #d32f2f;
+      }
+    }
+  }
+}
