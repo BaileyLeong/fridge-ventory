@@ -4,6 +4,7 @@
 .navbar {
   background: #333;
   padding: 2.5rem;
+  position: relative;
 
   &__container {
     max-width: 1280px;
@@ -12,7 +13,6 @@
     justify-content: flex-start;
     gap: 1.5rem;
     align-items: center;
-    position: relative;
 
     @include tablet {
       justify-content: space-between;
@@ -56,7 +56,7 @@
 
     &--open {
       display: flex;
-      background-color: #333333c1;
+      background-color: #2e2e2e;
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 
       @include tablet {
@@ -73,7 +73,7 @@
 
   &__link {
     text-decoration: none;
-    color: white;
+    color: $light-text;
     font-size: 1rem;
     padding: 0.625rem 1rem;
     border-radius: 6px;
@@ -83,21 +83,20 @@
     box-sizing: border-box;
 
     &:hover {
-      background: rgba(255, 255, 255, 0.2);
+      box-shadow: $box-glow;
     }
 
     &--special {
-      background: black;
       font-weight: bold;
 
       &:hover {
-        background: grey;
+        text-shadow: $shadow-glow;
       }
     }
   }
 
   .active {
-    background: #555;
+    background: rgba(255, 255, 255, 0.148);
     font-weight: bold;
   }
 
