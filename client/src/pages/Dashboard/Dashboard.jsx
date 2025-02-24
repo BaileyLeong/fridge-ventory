@@ -135,18 +135,22 @@ const Dashboard = () => {
         </section>
         <section className="dashboard__section dashboard__section--recipes">
           <h2 className="dashboard__heading">Recently Added Recipes</h2>
-          <ul className="dashboard__list dashboard__list--recipes">
-            {recipes.slice(0, 5).map((recipe) => (
-              <li key={recipe.id} className="dashboard__list-item">
-                <h3 className="dashboard__recipe-name">{recipe.name}</h3>
-                <img
-                  className="dashboard__recipe-image"
-                  src={recipe.image || recipe.image_url}
-                  alt={recipe.name}
-                />
-              </li>
-            ))}
-          </ul>
+          {recipes.length > 0 ? (
+            <ul className="dashboard__list dashboard__list--recipes">
+              {recipes.slice(0, 5).map((recipe) => (
+                <li key={recipe.id} className="dashboard__list-item">
+                  <h3 className="dashboard__recipe-name">{recipe.name}</h3>
+                  <img
+                    className="dashboard__recipe-image"
+                    src={recipe.image || recipe.image_url}
+                    alt={recipe.name}
+                  />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="dashboard__fallback">No recipes added yet.</p>
+          )}
         </section>
       </article>
     </section>
