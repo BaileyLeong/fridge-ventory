@@ -92,6 +92,7 @@
 
   &__recipe-name {
     font-weight: bold;
+    margin: 0 auto 0.5rem;
   }
 
   &__recipe-image {
@@ -101,7 +102,6 @@
     border-radius: 6px;
   }
 
-  // update food item color for JUST dashboard page
   .food-item--expiring-soon {
     border: 1px solid #ddd;
     background: #fafafa;
