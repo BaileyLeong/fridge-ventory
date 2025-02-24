@@ -6,6 +6,7 @@ import MealPlanModal from "../../components/MealPlanModal/MealPlanModal.jsx";
 import {
   fetchMealPlan,
   updateMealInPlan,
+  addMealToPlan,
   deleteMealFromPlan,
   fetchRecipes,
   fetchFavoriteRecipes,
@@ -14,11 +15,23 @@ import {
   generateMealPlan,
 } from "../../api/apiClient";
 import "../MealPlanner/MealPlanner.scss";
+import MealSelectionList from "../../components/MealSelectionList/MealSelectionList.jsx";
 
 const isSameWeek = (date1, date2) => {
   const oneDay = 24 * 60 * 60 * 1000;
   const diffDays = Math.abs((date1 - date2) / oneDay);
   return diffDays < 7 && date1.getDay() >= date2.getDay();
+};
+
+const toUTCDateString = (dateString) => {
+  const localDate = new Date(dateString);
+  if (isNaN(localDate.getTime())) {
+    console.error("Invalid date string:", dateString);
+    return "";
+  }
+  return new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000)
+    .toISOString()
+    .split("T")[0];
 };
 
 const MealPlanner = () => {
@@ -28,6 +41,7 @@ const MealPlanner = () => {
   const [selectedDates, setSelectedDates] = useState({});
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [favorites, setFavorites] = useState([]);
+  const [generatedMeals, setGeneratedMeals] = useState([]);
 
   const isMobile = useIsMobile();
 
@@ -36,7 +50,7 @@ const MealPlanner = () => {
     const todayDay = today.getDay();
     const lastShown = localStorage.getItem("lastModalShown");
 
-    if (todayDay === 5) {
+    if (todayDay === 1) {
       const lastShownDate = lastShown ? new Date(lastShown) : null;
 
       if (!lastShownDate || !isSameWeek(today, lastShownDate)) {
@@ -49,9 +63,11 @@ const MealPlanner = () => {
   useEffect(() => {
     fetchMealPlan()
       .then((response) => {
-        const sortedMeals = response.data.sort(
-          (a, b) => new Date(a.meal_date) - new Date(b.meal_date)
-        );
+        const sortedMeals = Array.isArray(response.data)
+          ? response.data.sort(
+              (a, b) => new Date(a.meal_date) - new Date(b.meal_date)
+            )
+          : [];
         setMealPlan(sortedMeals);
 
         const initialDates = sortedMeals.reduce((acc, meal) => {
@@ -60,7 +76,10 @@ const MealPlanner = () => {
         }, {});
         setSelectedDates(initialDates);
       })
-      .catch((error) => console.error("Error fetching meal plan:", error));
+      .catch((error) => {
+        console.error("Error fetching meal plan:", error);
+        setMealPlan([]);
+      });
 
     fetchRecipes()
       .then((response) => setAvailableRecipes(response.data))
@@ -86,42 +105,85 @@ const MealPlanner = () => {
       });
   }, []);
 
-  const handleGenerateMealPlan = (preferences) => {
-    generateMealPlan(preferences)
-      .then((response) => {
-        setMealPlan(response.data);
-        setIsModalOpen(false);
-      })
-      .catch((error) => console.error("Error generating meal plan:", error));
+  const handleGenerateMealPlan = async (preferences) => {
+    try {
+      const response = await generateMealPlan(preferences);
+
+      const { data } = response;
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        console.error("Error: Received empty meal plan response");
+        setGeneratedMeals([]);
+        return;
+      }
+      setGeneratedMeals(data);
+    } catch (error) {
+      console.error("Error generating meal plan:", error);
+      setGeneratedMeals([]);
+    }
   };
 
-  const handleUpdateMealDate = (id, newDate, recipeId, mealType) => {
-    const localDate = new Date(newDate);
-    const utcDate = new Date(
-      localDate.getTime() + localDate.getTimezoneOffset() * 60000
-    )
-      .toISOString()
-      .split("T")[0];
+  const handleSaveMealPlan = async (mealsWithDates) => {
+    try {
+      for (const meal of mealsWithDates) {
+        const mealDate = toUTCDateString(meal.meal_date);
+        if (!mealDate) {
+          console.error("Invalid date for meal:", meal);
+          continue;
+        }
 
-    updateMealInPlan(id, {
-      recipe_id: recipeId,
-      meal_type: mealType,
-      date: utcDate,
-    })
-      .then(() => {
-        setSelectedDates((prev) => ({ ...prev, [id]: newDate }));
-        return fetchMealPlan();
-      })
-      .then((response) => setMealPlan(response.data))
-      .catch((error) => console.error("Error updating meal date:", error));
+        await addMealToPlan({
+          recipe_id: meal.recipe_id,
+          meal_type: meal.meal_type,
+          source_url: meal.source_url,
+          date: mealDate,
+        });
+      }
+
+      const updatedMealPlan = await fetchMealPlan();
+      setMealPlan(updatedMealPlan.data);
+      setGeneratedMeals([]);
+    } catch (error) {
+      console.error("Error saving meal plan:", error);
+      setError(
+        "Invalid date for one or more meals. Please check the dates and try again."
+      );
+    }
   };
 
-  const handleDeleteMeal = (id) => {
-    deleteMealFromPlan(id)
-      .then(() =>
-        fetchMealPlan().then((response) => setMealPlan(response.data))
-      )
-      .catch((error) => console.error("Error deleting meal:", error));
+  const handleUpdateMealDate = async (id, newDate, recipeId, mealType) => {
+    try {
+      const utcDate = toUTCDateString(newDate);
+      if (!utcDate) {
+        console.error("Invalid date for update:", newDate);
+        return;
+      }
+
+      await updateMealInPlan(id, {
+        recipe_id: recipeId,
+        meal_type: mealType,
+        date: utcDate,
+      });
+
+      setSelectedDates((prev) => ({ ...prev, [id]: utcDate }));
+
+      const updatedMealPlan = await fetchMealPlan();
+      setMealPlan(updatedMealPlan.data);
+    } catch (error) {
+      console.error("Error updating meal date:", error);
+      setError("Failed to save the meal plan. Please try again.");
+    }
+  };
+
+  const handleDeleteMeal = async (id) => {
+    try {
+      await deleteMealFromPlan(id);
+
+      const updatedMealPlan = await fetchMealPlan();
+      setMealPlan(updatedMealPlan.data);
+    } catch (error) {
+      console.error("Error deleting meal:", error);
+      setError("Failed to delete the meal. Please try again.");
+    }
   };
 
   const handleToggleFavorite = async (recipeId) => {
@@ -162,8 +224,12 @@ const MealPlanner = () => {
     }
   };
 
-  const groupedMeals = mealPlan.reduce((groups, meal) => {
-    const dateKey = selectedDates[meal.id] || meal.meal_date;
+  const safeMealPlan = Array.isArray(mealPlan) ? mealPlan : [];
+
+  const groupedMeals = safeMealPlan.reduce((groups, meal) => {
+    const dateKey = selectedDates[meal.id]
+      ? toUTCDateString(selectedDates[meal.id])
+      : toUTCDateString(meal.meal_date);
     if (!groups[dateKey]) {
       groups[dateKey] = [];
     }
@@ -184,6 +250,13 @@ const MealPlanner = () => {
         onClose={() => setIsModalOpen(false)}
         onGenerate={handleGenerateMealPlan}
       />
+      {generatedMeals.length > 0 && (
+        <MealSelectionList
+          generatedMeals={generatedMeals}
+          availableDates={availableDates}
+          onSave={handleSaveMealPlan}
+        />
+      )}
 
       <div className="meal-planner">
         {sortedDates.map((date) => {

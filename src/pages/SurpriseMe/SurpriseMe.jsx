@@ -96,7 +96,7 @@ const SurpriseMe = () => {
           id: selectedRecipe.id,
           name: selectedRecipe.title,
           category: selectedRecipe.dishTypes?.[0] || "Uncategorized",
-          image_url: selectedRecipe.image || "https://via.placeholder.com/150",
+          image_url: selectedRecipe.image || "https://via.placeholder.com/500",
           source_url: selectedRecipe.sourceUrl || "https://spoonacular.com",
           steps: selectedRecipe.instructions || "No steps provided.",
           ready_in_minutes: selectedRecipe.readyInMinutes || 30,
