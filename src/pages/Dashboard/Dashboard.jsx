@@ -25,8 +25,13 @@ const Dashboard = () => {
       .catch((error) => console.error("Error fetching recipes:", error));
 
     fetchMealPlan()
-      .then((response) => setMealPlan(response.data))
-      .catch((error) => console.error("Error fetching meal plan:", error));
+      .then((response) => {
+        setMealPlan(Array.isArray(response.data) ? response.data : []);
+      })
+      .catch((error) => {
+        console.error("Error fetching meal plan:", error);
+        setMealPlan([]);
+      });
   }, []);
 
   const expiringSoonItems = fridgeItems.filter((item) => {
@@ -118,24 +123,26 @@ const Dashboard = () => {
         </section>
         <section className="dashboard__section dashboard__section--meal-plan">
           <h2 className="dashboard__heading">Meal Plan Highlights</h2>
-          <ul className="dashboard__list dashboard__list--meal-plan">
-            {mealPlan.slice(0, 5).map((meal) => (
-              <li key={meal.id} className="dashboard__list-item">
-                <h3 className="dashboard__recipe-name">
-                  {formatDateForDisplay(meal.meal_date)}
-                </h3>
-                <img
-                  className="dashboard__recipe-image"
-                  src={meal.image || meal.image_url}
-                  alt={meal.name}
-                />
-              </li>
-            ))}
-          </ul>
+          {Array.isArray(mealPlan) && mealPlan.length > 0 && (
+            <ul className="dashboard__list dashboard__list--meal-plan">
+              {mealPlan.slice(0, 5).map((meal) => (
+                <li key={meal.id} className="dashboard__list-item">
+                  <h3 className="dashboard__recipe-name">
+                    {formatDateForDisplay(meal.meal_date)}
+                  </h3>
+                  <img
+                    className="dashboard__recipe-image"
+                    src={meal.image || meal.image_url}
+                    alt={meal.name}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
         </section>
         <section className="dashboard__section dashboard__section--recipes">
           <h2 className="dashboard__heading">Recently Added Recipes</h2>
-          {recipes.length > 0 ? (
+          {Array.isArray(recipes) && recipes.length > 0 ? (
             <ul className="dashboard__list dashboard__list--recipes">
               {recipes.slice(0, 5).map((recipe) => (
                 <li key={recipe.id} className="dashboard__list-item">
