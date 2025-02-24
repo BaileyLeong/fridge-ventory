@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "../EnterFridge/EnterFridge.scss";
+import chikken from "../../assets/images/chikken.png";
 
 function EnterFridge({ onFinish }) {
   const [isZooming, setIsZooming] = useState(false);
@@ -27,10 +28,7 @@ function EnterFridge({ onFinish }) {
         }`}
         onMouseEnter={() => setIsZooming(true)}
       >
-        <img
-          className="fridge-entry__image"
-          src="src/assets/images/chikken.png"
-        ></img>
+        <img className="fridge-entry__image" src={chikken}></img>
         <div className="fridge-entry__door fridge-entry__door--left">
           <div className="fridge-entry__handle fridge-entry__handle--left"></div>
         </div>
