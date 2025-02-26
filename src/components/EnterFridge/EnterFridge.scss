@@ -18,7 +18,7 @@
     top: 25%;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 2.5rem;
+    font-size: 1.65rem;
     color: #fff;
     text-shadow: 0 0 10px rgb(242, 146, 196), 0 0 20px rgb(242, 146, 196),
       0 0 40px rgb(242, 146, 196);
@@ -27,6 +27,10 @@
     box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
     text-shadow: 0 0 10px #ffb0ff, 0 0 20px #ff66ff, 0 0 40px #ff33ff,
       0 0 80px #cc00cc;
+
+    @include tablet {
+      font-size: 2.5rem;
+    }
 
     &::before {
       content: "";
