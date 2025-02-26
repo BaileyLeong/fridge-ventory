@@ -17,7 +17,9 @@ const Navbar = () => {
         <button className="navbar__toggle" onClick={toggleMenu}>
           <img src={menuIcon} alt="menu icon" />
         </button>
-        <h1 className="navbar__title">Fridge-Ventory</h1>
+        <NavLink to="/">
+          <h1 className="navbar__title">Fridge-Ventory</h1>
+        </NavLink>
 
         <ul className={`navbar__list ${menuOpen ? "navbar__list--open" : ""}`}>
           <li className="navbar__item">
