@@ -16,6 +16,10 @@
     @include tablet {
       padding: 2rem;
     }
+
+    @include desktop {
+      margin: 2rem auto;
+    }
   }
 
   &__title {
