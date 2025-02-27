@@ -31,6 +31,10 @@ const FoodItem = ({
       className={`food-item ${
         isExpiringSoon ? "food-item--expiring-soon" : ""
       }`}
+      onClick={(e) => {
+        e.stopPropagation();
+        setShowDetails((prev) => !prev);
+      }}
     >
       {!showDetails && (
         <div
@@ -56,15 +60,6 @@ const FoodItem = ({
           <span className="food-item__expiry">
             {expiryDisplay ? `(Expires: ${expiryDisplay})` : ""}
           </span>
-          <button
-            className="food-item__button food-item__button--toggle"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowDetails((prev) => !prev);
-            }}
-          >
-            {showDetails ? "Hide Details" : "Show Details"}
-          </button>
 
           <div className="food-item__actions">
             {showDetails && (
