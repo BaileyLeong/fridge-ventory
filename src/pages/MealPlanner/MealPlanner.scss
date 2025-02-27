@@ -50,4 +50,14 @@
     max-width: 1280px;
     margin: 0 auto;
   }
+
+  &__close-button {
+    box-shadow: none;
+  }
+
+  &__source-link {
+    font-weight: 700;
+    text-decoration: underline !important;
+    color: blue !important;
+  }
 }
