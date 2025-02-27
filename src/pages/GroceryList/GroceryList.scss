@@ -46,16 +46,6 @@
     font-size: 0.875rem;
   }
 
-  &__button--add {
-    padding: 0.5rem 1rem;
-    background-color: #4caf50;
-    color: #fff;
-
-    &:hover {
-      background-color: #43a047;
-    }
-  }
-
   &__list {
     list-style-type: none;
     margin: 0;
@@ -68,11 +58,12 @@
     align-items: center;
     padding: 0.5rem;
     margin-bottom: 0.5rem;
-    border-radius: 4px;
+    border-radius: 6px;
     background-color: #fff;
     border: 1px solid #ddd;
     font-size: 0.75rem;
     white-space: wrap;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
     @include tablet {
       padding: 1rem;
