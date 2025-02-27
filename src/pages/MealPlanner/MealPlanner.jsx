@@ -53,7 +53,7 @@ const MealPlanner = () => {
     const todayDay = today.getDay();
     const lastShown = localStorage.getItem("lastModalShown");
 
-    if (todayDay === 1) {
+    if (todayDay === 4) {
       const lastShownDate = lastShown ? new Date(lastShown) : null;
 
       if (!lastShownDate || !isSameWeek(today, lastShownDate)) {

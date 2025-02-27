@@ -9,6 +9,7 @@ import Favorites from "./pages/Favorites/Favorites";
 import GroceryList from "./pages/GroceryList/GroceryList";
 import SurpriseMe from "./pages/SurpriseMe/SurpriseMe";
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage";
+import Footer from "./components/Footer/Footer";
 import "./App.scss";
 
 function App() {
@@ -34,6 +35,7 @@ function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </main>
+      {showNavbar && <Footer />}
     </>
   );
 }

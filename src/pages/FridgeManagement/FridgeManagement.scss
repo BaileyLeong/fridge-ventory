@@ -11,6 +11,11 @@
     font-size: 1.8rem;
     text-align: center;
     margin-bottom: 1.25rem;
+    font-weight: 700;
+
+    @include tablet {
+      font-size: 2.25rem;
+    }
   }
 
   &__input {
@@ -20,7 +25,8 @@
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 1rem;
-
+    color: #333;
+    background-color: #fafafa;
     &--quantity,
     &--date {
       max-width: 200px;
@@ -30,8 +36,10 @@
   &__input-container {
     padding: 1rem;
     border: 1px solid;
-    border-radius: 8px;
+    border-top: none;
+    border-radius: 0px 0px 8px 8px;
     margin: 0 auto;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
   }
 
   &__button {
@@ -39,14 +47,14 @@
     padding: 0.625rem;
     border: none;
     border-radius: 6px;
-    background: #4caf50;
+    background-color: #8c7a99;
     color: white;
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.2s ease;
 
     &:hover {
-      background: #45a049;
+      background: #9588a6;
     }
 
     &--update {
@@ -102,15 +110,16 @@
 
   &__label--sort {
     font-weight: bold;
-    margin-right: auto;
+    margin-right: 1rem;
   }
 
   &__select--sort {
-    margin-top: 0.5rem;
+    margin-top: 1.5rem;
     padding: 0.75rem;
     border: 1px solid #ccc;
     border-radius: 4px;
     cursor: pointer;
+    color: #333;
   }
 
   &__item {

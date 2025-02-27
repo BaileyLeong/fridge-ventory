@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: space-between;
   gap: 0.5rem;
   padding: 1rem;
   border: 1px solid #ddd;
@@ -14,6 +15,20 @@
   background: #fafafa;
   width: 100%;
   box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transform: scale(0.95);
+  perspective: 1000px;
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease-in-out;
+
+  &:hover {
+    @include tablet {
+      transform: scale(1);
+    }
+    @include desktop {
+      transform: scale(1.05);
+    }
+  }
 
   @include tablet {
     flex: 1 1 calc((100% - 4rem) / 2);
@@ -23,7 +38,7 @@
   }
 
   &--expiring-soon {
-    background-color: #ffebcc;
+    background-color: #f7d6ae;
     border: 1px solid #ff9800;
   }
 
@@ -39,8 +54,8 @@
     background-color: #fafafa;
 
     &--expiring-soon {
-      background-color: #ffebcc;
-      box-shadow: inset 0 0 0 20px #ffebcc;
+      background-color: #f7d6ae;
+      box-shadow: inset 0 0 0 20px #f7d6ae;
     }
   }
 
@@ -57,6 +72,19 @@
     font-weight: bold;
   }
 
+  &__quantity {
+    margin-bottom: 0.5rem;
+
+    @include tablet {
+      margin-bottom: 1rem;
+    }
+  }
+
+  &__expiry {
+    margin-top: -1rem;
+    margin-bottom: 3rem;
+  }
+
   &__input {
     width: 100%;
     padding: 0.625rem;
@@ -67,7 +95,27 @@
 
     &--quantity,
     &--date {
-      max-width: 200px;
+      color: #333;
+      background-color: #fafafa;
+
+      @include tablet {
+        max-width: 200px;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    @include tablet {
+      justify-content: space-between;
+      gap: 1.5rem;
+    }
+
+    @include desktop {
+      margin-bottom: 4.5rem;
     }
   }
 
@@ -76,31 +124,47 @@
     padding: 0.625rem;
     border: none;
     border-radius: 6px;
-    background: #4caf50;
-    color: white;
+    background: #f0f0f0;
+    color: #333;
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.2s ease;
     margin-bottom: 0.625rem;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
 
     &:hover {
-      background: #45a049;
+      background: #e0e0e0;
     }
 
     &--update {
-      background: #007bff;
-
+      @include tablet {
+        min-width: 20%;
+        max-width: 30%;
+      }
       &:hover {
-        background: #0062cc;
+        background: #c4d7ed;
       }
     }
 
     &--delete {
-      background: #f44336;
+      background: #ffebee;
+      color: #c62828;
 
       &:hover {
         background: #d32f2f;
+        color: white;
       }
+    }
+  }
+
+  &__details--spacer {
+    display: none;
+    @include tablet {
+      display: block;
+      padding: 5rem;
+    }
+    @include desktop {
+      padding: 3rem;
     }
   }
 }

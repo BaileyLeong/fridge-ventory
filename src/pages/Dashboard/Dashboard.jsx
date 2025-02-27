@@ -48,81 +48,10 @@ const Dashboard = () => {
       <article className="dashboard__container">
         <h1 className="dashboard__title">Dashboard</h1>
 
-        <section className="dashboard__section dashboard__section--fridge">
-          <h2 className="dashboard__heading">Fridge Inventory</h2>
-          {fridgeItems.length === 0 ? (
-            <p className="dashboard__message">No items in your fridge yet.</p>
-          ) : (
-            <>
-              <ul className="dashboard__grid">
-                {fridgeItems.slice(0, maxItems).map((item) => (
-                  <li key={item.id} className="dashboard__grid-item">
-                    <FoodItem
-                      item={item}
-                      readOnly={true}
-                      updateValues={{}}
-                      setUpdateValues={() => {}}
-                      onUpdateQuantity={() => {}}
-                      onUpdateExpiry={() => {}}
-                      onDeleteItem={() => {}}
-                    />
-                  </li>
-                ))}
-                {Array.from({
-                  length:
-                    (itemsPerRow -
-                      (fridgeItems.slice(0, maxItems).length % itemsPerRow)) %
-                    itemsPerRow,
-                }).map((_, index) => (
-                  <li
-                    key={`spacer-${index}`}
-                    className="dashboard__grid-item dashboard__grid-item--spacer"
-                  />
-                ))}
-              </ul>
-              {fridgeItems.length > maxItems && (
-                <Link to="/fridge" className="dashboard__view-more">
-                  View More
-                </Link>
-              )}
-            </>
-          )}
-        </section>
-
-        <section className="dashboard__section dashboard__section--expiring">
-          <h2 className="dashboard__heading">Expiring Soon</h2>
-          {expiringSoonItems.length === 0 ? (
-            <p className="dashboard__message">No items expiring soon.</p>
-          ) : (
-            <>
-              <ul className="dashboard__grid">
-                {expiringSoonItems.slice(0, maxItems).map((item) => (
-                  <li key={item.id} className="dashboard__grid-item">
-                    <FoodItem
-                      item={item}
-                      readOnly={true}
-                      updateValues={{}}
-                      setUpdateValues={() => {}}
-                      onUpdateQuantity={() => {}}
-                      onUpdateExpiry={() => {}}
-                      onDeleteItem={() => {}}
-                    />
-                  </li>
-                ))}
-              </ul>
-              {expiringSoonItems.length > maxItems && (
-                <Link
-                  to="/fridge?sort=expiring"
-                  className="dashboard__view-more"
-                >
-                  View More
-                </Link>
-              )}
-            </>
-          )}
-        </section>
         <section className="dashboard__section dashboard__section--meal-plan">
-          <h2 className="dashboard__heading">Meal Plan Highlights</h2>
+          <h2 className="dashboard__heading">
+            <Link to="/meal-planner"> Meal Plan Highlights </Link>
+          </h2>
           {Array.isArray(mealPlan) && mealPlan.length > 0 && (
             <ul className="dashboard__list dashboard__list--meal-plan">
               {mealPlan.slice(0, 5).map((meal) => (
@@ -138,6 +67,79 @@ const Dashboard = () => {
                 </li>
               ))}
             </ul>
+          )}
+        </section>
+        <section className="dashboard__section dashboard__section--fridge">
+          <h2 className="dashboard__heading">Fridge Inventory</h2>
+          {fridgeItems.length === 0 ? (
+            <p className="dashboard__message">No items in your fridge yet.</p>
+          ) : (
+            <>
+              <div className="dashboard__grid">
+                {fridgeItems.slice(0, maxItems).map((item) => (
+                  <ul key={item.id} className="dashboard__grid-item">
+                    <FoodItem
+                      item={item}
+                      readOnly={true}
+                      updateValues={{}}
+                      setUpdateValues={() => {}}
+                      onUpdateQuantity={() => {}}
+                      onUpdateExpiry={() => {}}
+                      onDeleteItem={() => {}}
+                    />
+                  </ul>
+                ))}
+                {Array.from({
+                  length:
+                    (itemsPerRow -
+                      (fridgeItems.slice(0, maxItems).length % itemsPerRow)) %
+                    itemsPerRow,
+                }).map((_, index) => (
+                  <li
+                    key={`spacer-${index}`}
+                    className="dashboard__grid-item dashboard__grid-item--spacer"
+                  />
+                ))}
+              </div>
+              {fridgeItems.length > maxItems && (
+                <Link to="/fridge" className="dashboard__view-more">
+                  View More
+                </Link>
+              )}
+            </>
+          )}
+        </section>
+
+        <section className="dashboard__section dashboard__section--expiring">
+          <h2 className="dashboard__heading">Expiring Soon</h2>
+          {expiringSoonItems.length === 0 ? (
+            <p className="dashboard__message">No items expiring soon.</p>
+          ) : (
+            <>
+              <div className="dashboard__grid">
+                {expiringSoonItems.slice(0, maxItems).map((item) => (
+                  <ul key={item.id} className="dashboard__grid-item">
+                    <FoodItem
+                      item={item}
+                      readOnly={true}
+                      updateValues={{}}
+                      setUpdateValues={() => {}}
+                      onUpdateQuantity={() => {}}
+                      onUpdateExpiry={() => {}}
+                      onDeleteItem={() => {}}
+                    />
+                  </ul>
+                ))}
+              </div>
+              {expiringSoonItems.length > maxItems && (
+                <Link
+                  to="/fridge?sort=expiring"
+                  className="dashboard__view-more"
+                >
+                  View More
+                </Link>
+              )}
+            </>
           )}
         </section>
         <section className="dashboard__section dashboard__section--recipes">

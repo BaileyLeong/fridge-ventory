@@ -24,13 +24,13 @@
     margin: 0 auto;
     width: 88%;
     opacity: 1;
-    transition: opacity 2sease-in-out;
+    transition: opacity 2s ease-in-out;
     max-width: 468px;
     flex-direction: column;
     justify-content: center;
     padding: 4rem 0;
     align-self: stretch;
-    gap: 10rem;
+    gap: 14rem;
 
     &--focus {
       opacity: 0.2;
@@ -38,6 +38,7 @@
 
     @include tablet {
       width: 66%;
+      gap: 10rem;
     }
   }
 
@@ -53,10 +54,20 @@
     font-size: 2.2rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
+
+    @include tablet {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
   }
 
   &__hero-description {
     font-style: italic;
+    font-size: 1rem;
+
+    @include tablet {
+      font-size: 1.25rem;
+    }
   }
 
   &__nav {
