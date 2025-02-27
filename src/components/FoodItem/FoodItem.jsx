@@ -5,6 +5,7 @@ import {
   hideExpiry,
 } from "../../utils/utils.js";
 import "../FoodItem/FoodItem.scss";
+import { useState } from "react";
 
 const FoodItem = ({
   item,
@@ -23,6 +24,7 @@ const FoodItem = ({
     expiresAt && expiresAt <= fiveDaysFromNow && expiresAt >= today;
   const formattedExpiry = formatDateForDisplay(item.expires_at);
   const expiryDisplay = item.expires_at ? hideExpiry(formattedExpiry) : "";
+  const [showDetails, setShowDetails] = useState(false);
 
   return (
     <li
@@ -30,68 +32,88 @@ const FoodItem = ({
         isExpiringSoon ? "food-item--expiring-soon" : ""
       }`}
     >
-      <div
-        className={`food-item__photo-container ${
-          isExpiringSoon ? "food-item__photo-container--expiring-soon" : ""
-        }`}
-      >
-        <img
-          className="food-item__photo"
-          src={item.image_url || "https://placehold.co/500"}
-          alt={item.ingredient_name}
-        />
-      </div>
+      {!showDetails && (
+        <div
+          className={`food-item__photo-container ${
+            isExpiringSoon ? "food-item__photo-container--expiring-soon" : ""
+          }`}
+        >
+          <img
+            className="food-item__photo"
+            src={item.image_url || "https://placehold.co/500"}
+            alt={item.ingredient_name}
+          />
+        </div>
+      )}
       <strong className="food-item__name">
         {capitalizeFirstLetter(item.ingredient_name)}
       </strong>
-      <span>
+      <span className="food-item__quantity">
         Qty: {formatQuantity(item.quantity)} {item.unit || ""}
       </span>
-
       {!readOnly && (
         <>
-          <span> {expiryDisplay ? `(Expires: ${expiryDisplay})` : ""}</span>
-          <input
-            className="food-item__input food-item__input--quantity"
-            type="number"
-            placeholder="New Quantity"
-            value={updateValues[item.id]?.quantity || ""}
-            onChange={(e) =>
-              setUpdateValues((prev) => ({
-                ...prev,
-                [item.id]: {
-                  ...prev[item.id],
-                  quantity: e.target.value,
-                },
-              }))
-            }
-          />
+          <span className="food-item__expiry">
+            {expiryDisplay ? `(Expires: ${expiryDisplay})` : ""}
+          </span>
           <button
-            className="food-item__button food-item__button--update"
-            onClick={() => onUpdateQuantity(item.id)}
+            className="food-item__button food-item__button--toggle"
+            onClick={(e) => {
+              e.stopPropagation();
+              setShowDetails((prev) => !prev);
+            }}
           >
-            Update Quantity
+            {showDetails ? "Hide Details" : "Show Details"}
           </button>
-          <input
-            className="food-item__input food-item__input--date"
-            type="date"
-            value={updateValues[item.id]?.expires_at || ""}
-            onChange={(e) =>
-              setUpdateValues((prev) => ({
-                ...prev,
-                [item.id]: {
-                  ...prev[item.id],
-                  expires_at: e.target.value,
-                },
-              }))
-            }
-          />
-          <button
-            className="food-item__button food-item__button--update"
-            onClick={() => onUpdateExpiry(item.id)}
-          >
-            Update Expiry
-          </button>
+
+          <div className="food-item__actions">
+            {showDetails && (
+              <>
+                <input
+                  className="food-item__input food-item__input--quantity"
+                  type="number"
+                  placeholder="New Quantity"
+                  value={updateValues[item.id]?.quantity || ""}
+                  onChange={(e) =>
+                    setUpdateValues((prev) => ({
+                      ...prev,
+                      [item.id]: {
+                        ...prev[item.id],
+                        quantity: e.target.value,
+                      },
+                    }))
+                  }
+                />
+                <button
+                  className="food-item__button food-item__button--update"
+                  onClick={() => onUpdateQuantity(item.id)}
+                >
+                  Update Quantity
+                </button>
+                <input
+                  className="food-item__input food-item__input--date"
+                  type="date"
+                  value={updateValues[item.id]?.expires_at || ""}
+                  onChange={(e) =>
+                    setUpdateValues((prev) => ({
+                      ...prev,
+                      [item.id]: {
+                        ...prev[item.id],
+                        expires_at: e.target.value,
+                      },
+                    }))
+                  }
+                />
+                <button
+                  className="food-item__button food-item__button--update"
+                  onClick={() => onUpdateExpiry(item.id)}
+                >
+                  Update Expiry
+                </button>
+                <span className="food-item__details--spacer"></span>
+              </>
+            )}
+          </div>
           <button
             className="food-item__button food-item__button--delete"
             onClick={() => onDeleteItem(item.id)}

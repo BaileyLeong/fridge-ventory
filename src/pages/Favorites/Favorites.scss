@@ -83,17 +83,17 @@
 
     &--view {
       &:hover {
-        background: #1976d2;
-        color: white;
+        background: #e0e0e0;
       }
     }
 
     &--remove {
-      background: #f44336;
-      color: white;
+      background: #ffebee;
+      color: #c62828;
 
       &:hover {
         background: #d32f2f;
+        color: white;
       }
     }
   }
