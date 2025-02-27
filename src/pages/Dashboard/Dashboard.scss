@@ -87,6 +87,10 @@
       align-items: center;
       gap: 0.5rem;
       text-align: center;
+
+      @include tablet {
+        justify-content: space-between;
+      }
     }
 
     @include tablet {
