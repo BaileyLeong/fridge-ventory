@@ -61,9 +61,32 @@ const FoodItem = ({
             {expiryDisplay ? `(Expires: ${expiryDisplay})` : ""}
           </span>
 
-          <div className="food-item__actions">
+          <div
+            className="food-item__actions"
+            onClick={(e) => e.stopPropagation()}
+          >
             {showDetails && (
               <>
+                <input
+                  className="food-item__input food-item__input--date"
+                  type="date"
+                  value={updateValues[item.id]?.expires_at || ""}
+                  onChange={(e) =>
+                    setUpdateValues((prev) => ({
+                      ...prev,
+                      [item.id]: {
+                        ...prev[item.id],
+                        expires_at: e.target.value,
+                      },
+                    }))
+                  }
+                />
+                <button
+                  className="food-item__button food-item__button--update"
+                  onClick={() => onUpdateExpiry(item.id)}
+                >
+                  Update Expiry
+                </button>
                 <input
                   className="food-item__input food-item__input--quantity"
                   type="number"
@@ -84,26 +107,6 @@ const FoodItem = ({
                   onClick={() => onUpdateQuantity(item.id)}
                 >
                   Update Quantity
-                </button>
-                <input
-                  className="food-item__input food-item__input--date"
-                  type="date"
-                  value={updateValues[item.id]?.expires_at || ""}
-                  onChange={(e) =>
-                    setUpdateValues((prev) => ({
-                      ...prev,
-                      [item.id]: {
-                        ...prev[item.id],
-                        expires_at: e.target.value,
-                      },
-                    }))
-                  }
-                />
-                <button
-                  className="food-item__button food-item__button--update"
-                  onClick={() => onUpdateExpiry(item.id)}
-                >
-                  Update Expiry
                 </button>
                 <span className="food-item__details--spacer"></span>
               </>
