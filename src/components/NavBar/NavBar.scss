@@ -37,6 +37,10 @@
     @include tablet {
       margin-right: 0;
     }
+
+    @include desktop {
+      font-size: 1.5rem;
+    }
   }
 
   &__list {
