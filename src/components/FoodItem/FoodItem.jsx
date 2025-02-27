@@ -61,16 +61,14 @@ const FoodItem = ({
             {expiryDisplay ? `(Expires: ${expiryDisplay})` : ""}
           </span>
 
-          <div
-            className="food-item__actions"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="food-item__actions">
             {showDetails && (
               <>
                 <input
                   className="food-item__input food-item__input--date"
                   type="date"
                   value={updateValues[item.id]?.expires_at || ""}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={(e) =>
                     setUpdateValues((prev) => ({
                       ...prev,
@@ -92,6 +90,7 @@ const FoodItem = ({
                   type="number"
                   placeholder="New Quantity"
                   value={updateValues[item.id]?.quantity || ""}
+                  onClick={(e) => e.stopPropagation()}
                   onChange={(e) =>
                     setUpdateValues((prev) => ({
                       ...prev,
