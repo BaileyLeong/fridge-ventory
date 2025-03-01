@@ -1,5 +1,9 @@
 # **Fridge-Ventory**
 
+[Click here to view the Server Repo](https://github.com/BaileyLeong/fridge-ventory-server)
+
+https://github.com/user-attachments/assets/671b24e6-9bf9-49e2-b736-0aa633123835
+
 ## Overview
 
 Fridge-Ventory is a web application designed to help individuals and households manage their food inventory, track expiry dates, and discover recipes based on the ingredients they have on hand. By streamlining meal planning and grocery shopping, and adding a playful, gamified twist to recipe selection—the app aims to reduce food waste and make cooking at home more engaging.
