@@ -17,6 +17,7 @@ import {
 import "../MealPlanner/MealPlanner.scss";
 import MealSelectionList from "../../components/MealSelectionList/MealSelectionList.jsx";
 import { BarLoader } from "react-spinners";
+import { formatWeekday } from "../../utils/utils.js";
 
 const isSameWeek = (date1, date2) => {
   const oneDay = 24 * 60 * 60 * 1000;
@@ -86,9 +87,12 @@ const MealPlanner = () => {
 
         const today = new Date();
         const dates = Array.from({ length: 7 }, (_, i) => {
-          const date = new Date();
-          date.setDate(today.getDate() + i);
-          return date.toLocaleDateString("en-US");
+          const d = new Date(today);
+          d.setDate(today.getDate() + i);
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, "0");
+          const day = String(d.getDate()).padStart(2, "0");
+          return `${y}-${m}-${day}`;
         });
         setAvailableDates(dates);
       } catch (error) {
@@ -305,9 +309,7 @@ const MealPlanner = () => {
               return (
                 <div key={date} className="meal-planner__group">
                   <h2 className="meal-planner__group-title">
-                    {new Date(date).toLocaleDateString("en-US", {
-                      weekday: "long",
-                    })}
+                    {formatWeekday(date)}
                   </h2>
                   <ul className="meal-planner__list">
                     {mealsForDate.map((meal) =>

@@ -47,9 +47,12 @@ const SurpriseMe = () => {
 
     const today = new Date();
     const dates = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(today.getDate() + i);
-      return date.toLocaleDateString("en-US");
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+      return `${y}-${m}-${day}`;
     });
 
     setAvailableDates(dates);
