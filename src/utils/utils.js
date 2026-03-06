@@ -1,10 +1,36 @@
 export const formatDateForDisplay = (dateString) => {
   if (!dateString) return "No date set";
+  // Parse YYYY-MM-DD as local date so it doesn't shift to previous day in timezones behind UTC
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(dateString).trim())) {
+    const [y, m, d] = dateString.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    }
+  }
   return new Date(dateString).toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+};
+
+/** Parses YYYY-MM-DD as local date and returns long weekday name (e.g. "Monday"). */
+export const formatWeekday = (dateString) => {
+  if (!dateString) return "";
+  const s = String(dateString).trim();
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+    const [y, m, d] = s.split("-").map(Number);
+    const date = new Date(y, m - 1, d);
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString("en-US", { weekday: "long" });
+    }
+  }
+  return new Date(dateString).toLocaleDateString("en-US", { weekday: "long" });
 };
 
 export const capitalizeFirstLetter = (str) => {
