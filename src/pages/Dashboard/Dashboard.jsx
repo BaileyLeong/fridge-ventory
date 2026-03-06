@@ -130,6 +130,18 @@ const Dashboard = () => {
                     />
                   </ul>
                 ))}
+                {Array.from({
+                  length:
+                    (itemsPerRow -
+                      (expiringSoonItems.slice(0, maxItems).length %
+                        itemsPerRow)) %
+                    itemsPerRow,
+                }).map((_, index) => (
+                  <li
+                    key={`spacer-expiring-${index}`}
+                    className="dashboard__grid-item dashboard__grid-item--spacer"
+                  />
+                ))}
               </div>
               {expiringSoonItems.length > maxItems && (
                 <Link
